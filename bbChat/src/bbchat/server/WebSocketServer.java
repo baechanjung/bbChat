@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -18,7 +17,6 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 @ServerEndpoint(value = "/websocket/manager")
 public class WebSocketServer {
@@ -35,12 +33,10 @@ public class WebSocketServer {
 		}
 	}
 	
-	
 	@OnOpen
 	public void onOpen(Session userSession) {
 		sessionUsers.add(userSession);
 	}
-
 	
 	@OnClose
 	public void onClose(Session userSession){
