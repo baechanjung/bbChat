@@ -43,7 +43,8 @@ public class WebSocketServer {
 		
 		// 활성중인 채팅방중 사용자의 채팅방을 찾는다. 
 		for( Map.Entry<String,Object> key : rooms.entrySet() ){
-			 //System.out.println( String.format("키 : %s", key.getKey() ) );
+			 
+			//System.out.println( String.format("키 : %s", key.getKey() ) );
 			 
 			 int 	exist  		= rooms.get(key.getKey()).toString().indexOf(userSession.getId());
 			 
