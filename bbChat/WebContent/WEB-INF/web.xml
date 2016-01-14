@@ -38,22 +38,42 @@
     </servlet-mapping>
     	
    	<servlet> 
-        <servlet-name>bizMeet</servlet-name>
+        <servlet-name>BizMeet</servlet-name>
         <servlet-class>bbchat.com.BizGateway</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>bizMeet</servlet-name>
+        <servlet-name>BizMeet</servlet-name>
         <url-pattern>/bizmeet/*</url-pattern>
-    </servlet-mapping>	
+    </servlet-mapping>
+    
+    
+   	<servlet> 
+        <servlet-name>WeAuth</servlet-name>
+        <servlet-class>bbchat.com.WeAuth</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>WeAuth</servlet-name>
+        <url-pattern>/auth</url-pattern>
+    </servlet-mapping>    
 
-<filter>
-    <filter-name>setCharacterEncodingFilter</filter-name>
-    <filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
-    <init-param>
-        <param-name>encoding</param-name>
-        <param-value>UTF-8</param-value>
-    </init-param>
-</filter>
+	<filter>
+	    <filter-name>setCharacterEncodingFilter</filter-name>
+	    <filter-class>org.apache.catalina.filters.SetCharacterEncodingFilter</filter-class>
+	    <init-param>
+	        <param-name>encoding</param-name>
+	        <param-value>UTF-8</param-value>
+	    </init-param>
+	</filter>
+
+
+    <error-page>
+    	<error-code>500</error-code>
+    	<location>/bbChat/view/bb_error.jsp</location> 
+    </error-page>
+    <error-page>
+    	<error-code>404</error-code>
+    	<location>/bbChat/view/bb_error.jsp</location>
+    </error-page>
 
 
 <welcome-file-list>
