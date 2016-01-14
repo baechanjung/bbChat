@@ -1,0 +1,18 @@
+@charset "utf-8";
+
+.bblayer {display:none; position:fixed; _position:absolute; top:0; left:0; width:100%; height:100%; z-index:9999;}
+/*.bblayer .bg {position:absolute; top:0; left:0; width:100%; height:100%; background:#000; opacity:.5; filter:alpha(opacity=50);}*/
+.bblayer .bg {position:absolute; top:0; left:0; width:100%; height:100%; background:#fff; opacity:0.5; filter:alpha(opacity=50);}
+.bblayer .bbpop-layer {display:block;}
+/*.bbpop-layer {display:none; position: relative; top: 50%; left: 50%; width: 410px; height:auto;  background-color:#fff; z-index: 10; border-radius : 0px; box-shadow: 0px 0px 10px 1px black;  }*/
+.bbpop-layer {display:none; position: relative; top: 50%; left: 50%; width: 410px; height:auto;  background-color:#fff; z-index: 10; border-radius : 0px; box-shadow: 0 4px 16px rgba(0,0,0,.2);border:1px solid rgba(0,0,0,.333);}
+.bbpop-load  {position: absolute; top: 50%; left: 50%; width: 410px; height:auto;  background-color:#fff; background-image: url(../img/loading.gif); background-repeat:no-repeat; background-position:50% 50%; z-index: 10; border-radius : 0px; }
+.bbpop-layer .pop-container {padding: 0px 0px;}
+.bbpop-layer p.ctxt {color: #666; line-height: 25px;}
+.bbpop-layer .btn-r  {width: 100%; margin:10px 0 20px; padding-top: 10px; text-align:center;}
+.bbpop-layer .header-layer {width: 100%; border-bottom: 1px solid #e2e3e7; text-align:left; height:40px;}
+.bbpop-layer .header-layer h3{float:left;padding:0 0 0 12px;font-family:NanumGothic;font-size:18px;color:#4a4d54 !important;font-weight:600;line-height:40px;}
+.bbpop-layer .header-layer .btn_popclose{display:block;width:16px;height:15px;position:absolute;top:0;right:0;margin-top: 3px;margin-right: 20px;}
+.bbpop-layer .footer-layer {position: absolute;bottom: 0;width: 100%;height: 45px;text-align:center; border-top: 1px solid #e2e3e7; }
+a.cbtn-y {display:inline-block;width:100px;padding:0;margin-top:7px;font-family:NanumGothic;font-size:16px;font-weight:600;line-height:30px;text-align:center;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;-ms-border-radius:3px;border-radius:3px;color:#4a4d54 !important;background-color:#ffeb00;}
+a.cbtn-d {display:inline-block;width:100px;padding:0;margin-top:7px;font-family:NanumGothic;font-size:16px;font-weight:600;line-height:30px;text-align:center;-webkit-border-radius:3px;-moz-border-radius:3px;-o-border-radius:3px;-ms-border-radius:3px;border-radius:3px;color:#f9fafb;background-color:#9fa8b9;}
