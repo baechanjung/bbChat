@@ -16,7 +16,7 @@ if("404".equals( strErrCode )){
 	if (exception instanceof BbChatException){
 		BbChatException e =  (BbChatException)exception;
 		strErrTitle  = "bizplay APP인증 처리 중 오류가 발생하였습니다.";
-		strErrMsg    = e.getMessage();
+		strErrMsg    = e.getMessage(); 
 	}else{
 		strErrTitle  = "처리중 정의되지 않은 오류가 발생하였습니다.";
 		strErrMsg    = "시스템관리자에게 해당 오류 내용을 전달 하였습니다.<br/>";
