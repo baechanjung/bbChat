@@ -29,7 +29,9 @@ if(session != null){
 <link rel="stylesheet" href="/bbChat/css/animate.css">
 <script type="text/javascript" src="/bbChat/js/lib/jquery-1.8.3.js"></script>
 <style>
-
+	/* @web font */
+	@font-face{font-family:'NanumGothic';font-style:normal;font-weight:normal;src:local("※"),url(/bbChat/font/NanumGothic.eot);src:url(/bbChat/font/NanumGothic.eot?#iefix) format('embedded-opentype'),url(/bbChat/font/NanumGothic.woff2) format('woff2'),url(/bbChat/font/NanumGothic.woff) format('woff'),url(/bbChat/font/NanumGothic.ttf) format('truetype');}
+	
 	/*========================BASE========================*/
 	html, body {
 		height: 100%;
