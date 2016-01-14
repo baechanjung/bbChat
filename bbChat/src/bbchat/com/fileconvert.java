@@ -64,13 +64,6 @@ public class fileconvert extends HttpServlet  {
 		PrintWriter out = response.getWriter();
 		
 		
-		
-	    GraphicsEnvironment ee = GraphicsEnvironment.getLocalGraphicsEnvironment();
-	    Font[] fonts = ee.getAllFonts(); // Get the fonts
-	    for (Font f : fonts) {
-	      System.out.println("font === "+f.getFontName());
-	    }
-		
 		try {
 			//디스크상의 실제 경로 얻기
 			String contextRootPath = this.getServletContext().getRealPath("/");
@@ -78,8 +71,6 @@ public class fileconvert extends HttpServlet  {
 			//1. 메모리나 파일로 업로드 파일 보관하는 FileItem의 Factory설정
 			DiskFileItemFactory diskFactory = new DiskFileItemFactory(); 
 			//임시 저장폴더
-			
-			System.out.println("contextRootPath !!!!=== " + contextRootPath);
 			
 			diskFactory.setRepository(new File(contextRootPath + "/file/temp"));
 			
