@@ -2,10 +2,13 @@
 
 //Fallbacks for vendor-specific variables until the spec is finalized.
 
-var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-var URL 		   = window.URL || window.webkitURL || window.msURL || window.oURL;
-var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-
+var PeerConnection 			= window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+var URL 		   			= window.URL || window.webkitURL || window.msURL || window.oURL;
+var getUserMedia1  			= navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+if(window.mozRTCPeerConnection){
+	var RTCSessionDescription 	= window.mozRTCSessionDescription || window.webkitRTCSessionDescription || window.RTCSessionDescription;
+	var RTCIceCandidate 		= window.mozRTCIceCandidate || window.webkitRTCIceCandidate || window.RTCIceCandidate;
+}
 (function() {
 
 	var rtc;
@@ -44,14 +47,25 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 	};
 
 	// Holds the STUN/ICE server to use for PeerConnections.
-	rtc.SERVER = {iceServers:[
-	                           {   url:"stun:stun.l.google.com:19302"}
-	                          ,{   url:"turn:numb.viagenie.ca:3478"
-	                        	  ,username:"lbjj1983@naver.com" 
-	                        	  ,credential:"qwer1234!" 
-	                          	}
-	                          ]
-	};
+    if (window.mozRTCPeerConnection) {
+    	rtc.SERVER = {iceServers:[
+    	                          {   url:"stun:23.21.150.121"}
+    	                          ,{   url:"turn:numb.viagenie.ca:3478"
+    	                        	  ,username:"lbjj1983@naver.com" 
+    	                        		  ,credential:"qwer1234!" 
+    	                          }
+    	                          ]
+    	};
+    }else{
+    	rtc.SERVER = {iceServers:[
+    	                          {   url:"stun:stun.l.google.com:19302"}
+    	                          ,{   url:"turn:numb.viagenie.ca:3478"
+    	                        	  ,username:"lbjj1983@naver.com" 
+    	                        		  ,credential:"qwer1234!" 
+    	                          }
+    	                          ]
+    	};
+    }
 
 	// Reference to the lone PeerConnection instance.
 	rtc.peerConnections = {};
@@ -60,9 +74,6 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 	rtc.connections = [];
 	// Stream-related variables.
 	rtc.streams = [];
-	rtc.numStreams = 0;
-	rtc.initializedStreams = 0;
-
 
 	// Reference to the data channels
 	rtc.dataChannels = {};
@@ -82,9 +93,10 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 	/**
 	 * Connects to the websocket server.
 	 */
-	rtc.connect = function(server, room, user) {
+	rtc.connect = function(server, room, user, gb) {
+		
 		room = room || ""; // by default, join a room called the blank string
-		rtc._socket = new WebSocket('ws://112.187.199.159:8080/websocket/manager'/*server*/); 
+		rtc._socket = new WebSocket('ws://112.187.199.159:8080/websocket/bbchat'/*server*/); 
 
 		
 		rtc._socket.onopen = function() {
@@ -94,6 +106,7 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 				"data":{
 					 "room": room
 					,"user": user
+					,"gb"  : gb
 				}
 			}));
 
@@ -110,6 +123,11 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 			rtc._socket.onclose = function(data) {
 				delete rtc.peerConnections[rtc._socket.id]; 
 			};
+			
+			rtc.on('empty_room', function(data) {
+				alert("현재 존재하지 않는 회의실 입니다.");
+				location.href="/bizMeet/main";
+			});
 
 			rtc.on('get_peers', function(data) {
 				rtc.connections = data.connections;
@@ -151,6 +169,7 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 
 
 	rtc.sendOffers = function() {
+		
 		for (var i = 0, len = rtc.connections.length; i < len; i++) {
 			var socketId = rtc.connections[i];
 			rtc.sendOffer(socketId);
@@ -207,8 +226,10 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 	};
 
 	rtc.sendOffer = function(socketId) {
+		
 		var pc = rtc.peerConnections[socketId];
 		pc.createOffer( function(session_description) {
+			
 			pc.setLocalDescription(session_description);
 			rtc._socket.send(JSON.stringify({
 				"eventName": "send_offer",
@@ -217,13 +238,15 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 					"sdp"     : session_description
 				}
 			}));
-		});
+		},function(e){alert(e);});
 	};
 
 
 	rtc.receiveOffer = function(socketId, sdp) {
 		var pc = rtc.peerConnections[socketId];
-		pc.setRemoteDescription(new RTCSessionDescription(sdp));
+		
+		pc.setRemoteDescription( new RTCSessionDescription( sdp ));
+		
 		rtc.sendAnswer(socketId);
 	};
 
@@ -239,7 +262,7 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 				}
 			}));
 			var offer = pc.remoteDescription;
-		});
+		},function(e){alert(e);});
 	};
 
 
@@ -256,15 +279,20 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 		onFail    = onFail || function() {};
 		
 		options = {
-				video: !!opt.video,
+				video: {
+				    mandatory: {
+                        maxWidth  : 400,
+                        maxHeight : 300,
+                        minWidth  : 400,
+                        minHeight : 300
+				    }
+				},
 				audio: !!opt.audio
 		};
 		
 		if (getUserMedia1) {
-			rtc.numStreams++;
 			getUserMedia1.call(navigator, options, function(stream) {
 				rtc.streams.push(stream);
-				rtc.initializedStreams++;
 				onSuccess(stream);
 			}, function() {
 				alert("Could not connect stream.");
@@ -341,7 +369,6 @@ var getUserMedia1  = navigator.getUserMedia || navigator.webkitGetUserMedia || n
 		};
 
 		channel.onclose = function(event) {
-			alert('123');
 			delete rtc.dataChannels[id];
 			console.log('data stream close ' + id);
 			rtc.fire('data stream close', channel);

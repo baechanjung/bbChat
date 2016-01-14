@@ -115,12 +115,13 @@ function initFileConvert(){
 	});
 
 	rtc.on("imgChange",function(){
-		var data    = convert.recv.apply(this, arguments);
-		var canvas  = document.getElementById("canvasDraw");
-		var	context = canvas.getContext("2d");
 		
+		var data    = convert.recv.apply(this, arguments);
+
 		$("#canvasDraw").show();
 		/*
+		var	context = canvas.getContext("2d");
+		
 		var image 	= new Image();
 		image.src = "/" + data.PATH;
 		image.onload = function(){
@@ -128,7 +129,24 @@ function initFileConvert(){
 		};
 		*/
 		$("#canvasImg" ).attr("src"  ,data.PATH);
-		$("#canvasDraw").attr("width",$("#canvasDraw").attr("width"));
+		
+		imgIndex = Number(data.IDX);
+		
+		if( imgIndex == imgSize-1){
+			$("#next").hide();
+		}else{
+			$("#next").show();
+		}
+		
+		if( imgIndex == 0 ){
+			$("#pre").hide();
+		}else{
+			$("#pre").show();
+		}
+		
+		$("#filePage"   ).find("span:eq(0)").html(imgIndex + 1);
+		
+		//$("#canvasDraw").attr("width",$("#canvasDraw").attr("width"));
 		
 	});
 
@@ -148,16 +166,18 @@ function initFileConvert(){
 
 function initSlide(size){
 	$("#slideList").lightSlider({
-		vertical:true
+		 vertical : true
 		,item:6
 		,slideMove:6
 		,enableTouch:false
 		,enableDrag:false
+		,verticalHeight:880
 	});
 }
 
 function changeFile(o){
-	var allowImgType = ['ppt'];
+	
+	var allowImgType = ['ppt','pptx','pdf'];
 
 	var fileExt  = o.files[0]["name"].substring(o.files[0]["name"].lastIndexOf(".")+1);
 	var imgCheck = false;
@@ -168,15 +188,14 @@ function changeFile(o){
 		}
 	}
 	if(imgCheck == false){
-		alert("현재 ppt 파일 업로드만 가능 합니다.");
+		alert("현재 ppt,pptx,pdf 파일만 가능 합니다.");
 		return;
 	}
-
+	
 	showLoding();
 
-	
 	websocketConvert.send(JSON.stringify({
-		"eventName" : "showLoding",
+		"eventName" : "show_Loding",
 		"data" : {
 			"ROOM"       : roomNm
 		}
@@ -184,7 +203,7 @@ function changeFile(o){
 	
 	var fd  = new FormData();
 	var xhr = new XMLHttpRequest();
-	fd.append('uploadingFile', o.files[0]          );
+	fd.append('uploadingFile', o.files[0]);
 
 	xhr.open("POST","/fileconvert");
 	
@@ -195,7 +214,7 @@ function changeFile(o){
 		hideLoding();
 		
 		websocketConvert.send(JSON.stringify({
-			"eventName" : "hideLoding",
+			"eventName" : "hide_Loding",
 			"data" : {
 				"ROOM"       : roomNm
 			}
@@ -204,13 +223,13 @@ function changeFile(o){
 		if(xhr.readyState == 4 && xhr.status == 200){
 			//console.log(xhr.responseText);
 			var jsonObj = JSON.parse(xhr.responseText);
-			console.log(jsonObj);
 
 			if(jsonObj["RES_CD"] == "0000"){
 				
 				if( jsonObj["SIZE"] > 0 ){
 
 					imgListLoad(jsonObj);
+					$("#canvasDraw").show();
 					
 					websocketConvert.send(JSON.stringify({
 						"eventName" : "fileConvertSend",
@@ -220,7 +239,6 @@ function changeFile(o){
 						  ,	"FILE_NM"    : jsonObj["FILE_NM"]
 						}
 					}));
-					
 				}
 			}
 
@@ -230,31 +248,25 @@ function changeFile(o){
 }
 
 function imgListLoad( jsonObj ){
-	$("#menu-toc").find("center").html("<ul id=\"slideList\"></ul>");
+
+	$("#fileShareUl").html("<ul id=\"slideList\"></ul>");
 	imgPath = [];
-	for(var i = 0; i < jsonObj["SIZE"] ; i++){
-		$("#slideList").append("<li><img style='height: 100px;width: 150px' src='/"+jsonObj["FILE_NM"]+"_"+i+".jpg ' /></li>");
+	for(var i = 1; i < Number(jsonObj["SIZE"]) + 1 ; i++){
 		
-		imgPath[i] = jsonObj["FILE_NM"]+"_"+i+".jpg ";
+		$("#slideList").append("<li><div style=\"padding-top: 9px;text-align:center;\"><div style=\"margin-left: 11%;\" align=\"left\">"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".jpg ' 		 style=\"width: 150px;height: 100px; cursor: pointer; border:2px solid black;\"></div></li>");
 		
-		if( i == 0){
-			var mainW = window.innerWidth  - 470;
-			var mainH = window.innerHeight - 310;
-			$("#canvasDraw"    ).show();
-			//initDraw();
-		   	$("#canvasImg").attr("src"   ,"/" + jsonObj["FILE_NM"]+"_0.jpg");
-		   	$("#canvasImg").show();
-		   	$("#share-screen").hide();
-		   	//$("#you"      ).hide();
-		   	$("#userListArea").show();
-		   	subdivideVideos();
-		   	moveVideos();
+		
+		imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".jpg ";
+		
+		if( i == 1){
+		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".jpg");
 		}
+		
 		$("#slideList").find("li:last").data("imgIndex", i );
 		$("#slideList").find("li:last").bind("click",function(){
-			imgIndex = $(this).data("imgIndex");
+			imgIndex = $(this).data("imgIndex") - 1;
 			
-			if( imgIndex == imgSize-1){
+			if( imgIndex  == imgSize-1){
 				$("#pre" ).show();
 				$("#next").hide();
 			}else if( imgIndex == 0 ){
@@ -267,23 +279,47 @@ function imgListLoad( jsonObj ){
 			
 		   	$("#canvasImg").attr("src"   , $(this).find("img").attr("src") );
 		   	
+		   	$("#filePage" ).find("span:eq(0)").html(imgIndex + 1);
+		   	
+		   	
 		   	websocketConvert.send(JSON.stringify({
 		   		"eventName" : "imgListClick",
 		   		"data" : {
 		   				"ROOM"       : roomNm
 		   			,	"PATH"       : $(this).find("img").attr("src")
+		   			,	"IDX"        : String(imgIndex)
 		   		}
 		   	}));
+		   	
 		});
 		
 		
 		
 	}
+
+	
+	$("#fileShareArea"  ).css("height", window.innerHeight - 60 + "px");
+	//$("#mainArea"		).hide();
+	$("#fileShareArea"	).show();
+	subdivideVideos();
+	
 	
 	imgSize = jsonObj["SIZE"];
-	$("#next" ).show();
-	$("#exit" ).show();
+	
+	if($("#chatbox").is(":hidden")){
+		$("#exit"	).css( "right" , "10px" );
+	}else{
+		$("#exit"	).css( "right" , "410px" );
+	}
+	
+	$("#filePage"   ).find("span:eq(0)").html("1");
+	$("#filePage"   ).find("span:eq(1)").html(" / " + jsonObj["SIZE"]);
+	$("#next" 		).show();
+	$("#filePage"   ).show();
+	$("#exit" 	    ).show();
+
 	initSlide( jsonObj["SIZE"] );
+	
 }
 
 
@@ -300,20 +336,23 @@ function preBtn() {
 		$("#pre").hide();
 	}
 	
+	$("#filePage"   ).find("span:eq(0)").html(imgIndex + 1);
+	
 	$("#canvasImg" ).attr("src"   , imgPath[imgIndex] );
 	$("#canvasDraw").attr("width" , $("#canvasDraw").attr("width"));
-   	websocketConvert.send(JSON.stringify({
+   
+	websocketConvert.send(JSON.stringify({
    		"eventName" : "imgListClick",
    		"data" : {
    				"ROOM"       : roomNm
    			,	"PATH"       : imgPath[imgIndex]
+			,	"IDX"        : String(imgIndex)
    		}
    	}));
 	
 }
 
 function nextBtn() {
-	
 	imgIndex++;
 	
 	if( imgIndex == imgSize-1){
@@ -322,34 +361,25 @@ function nextBtn() {
 	
 	$("#pre").show();
 	
+	$("#filePage"   ).find("span:eq(0)").html(imgIndex + 1);
+	
 	$("#canvasImg" ).attr("src"   , imgPath[imgIndex] );
 	$("#canvasDraw").attr("width" , $("#canvasDraw").attr("width"));
-   	websocketConvert.send(JSON.stringify({
+   	
+	websocketConvert.send(JSON.stringify({
    		"eventName" : "imgListClick",
    		"data" : {
    				"ROOM"       : roomNm
    			,	"PATH"       : imgPath[imgIndex]
+			,	"IDX"        : String(imgIndex)	
    		}
    	}));
-	
 }
 
 
 function showLoding(){
-	var scrollLeft = document.body.scrollLeft || document.documentElement.scrollLeft;
-	var scrollTop  = document.body.scrollTop  || document.documentElement.scrollTop;
-	var left = (scrollLeft + (document.documentElement.clientWidth  - 400) / 2);
-	var top  = ((scrollTop  + (document.documentElement.clientHeight - 300) / 2)-150);
-	if(document.body.scrollHeight < document.documentElement.clientHeight){
-		document.getElementById("ProcessLayer"        ).style.height  = document.documentElement.clientHeight+"px";	
-	}else{
-		document.getElementById("ProcessLayer"        ).style.height  = document.body.scrollHeight+"px";
-	}
-	document.getElementById("ProcessLayer").style.width   = document.body.clientWidth +"px";
 	document.getElementById("ProcessLayer").style.display = "block";	
 	document.getElementById("ProcessBox"  ).style.display = "block";
-//	document.getElementById("ProcessBox"  ).style.top     = top+"px";
-	document.getElementById("ProcessBox"  ).style.left    = left+"px";
 }
 
 function hideLoding (){
@@ -361,7 +391,6 @@ function hideLoding (){
 
 // 배열로 변경 후 주석 해제 각각의 소켓에대한 draw 오브젝트를 가지고잇는다
 var eventObject = {
-		mode  : 0,
 		click : false,
 		x     : 0,
 		y     : 0
@@ -374,17 +403,18 @@ var picture = {
 
 function initDraw() {
 	var draw;
-	console.log('initializing websocket draw');
+
 	draw = websocketDraw;
 	
-	$("#canvasDraw").css("cursor","url(/pen_cursor.png), auto");
+	//$("#canvasDraw").css("cursor","url(/pen_cursor.png), auto");
 	
-	//var input = document.getElementById("canvasDraw");
-	//var room  = window.location.hash.slice(1);
 	var room = roomNm;
-	var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+	
+//	var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+	var color = "red";
 
 	
+	/*
 	$("#canvasDraw").bind('contextmenu', function(e) {
 		if( eventObject.mode == "0" ){
 			alert('지우개 모드!!');
@@ -397,16 +427,16 @@ function initDraw() {
 			eventObject.mode = "0";
 			return false;
 		}
-		
 	});
+	*/
 	
 	$("#canvasDraw").bind('mousedown', function(e) {
 		eventObject.click = true;
 		var offset, type, x, y;
 		type = e.handleObj.type;
 		offset = $(this).offset();
-		eventObject.x = e.offsetX;// - offset.left;
-		eventObject.y = e.offsetY;// - offset.top;
+		eventObject.x = e.offsetX;
+		eventObject.y = e.offsetY;
 		
 		draw.send(JSON.stringify({
 			"eventName": "mousedown",
@@ -419,10 +449,14 @@ function initDraw() {
 				'click': true
 			}
 		}));
-		
 	});
+	
 	$("#canvasDraw").bind('mouseup'  , function(e) {
 		eventObject.click = false;
+		
+		picture.canvas  = document.getElementById("canvasDraw");
+		picture.context = picture.canvas.getContext("2d");		
+		picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
 		
 		draw.send(JSON.stringify({
 			"eventName": "mouseup",
@@ -432,6 +466,7 @@ function initDraw() {
 			}
 		}));
 	});
+	
 	$("#canvasDraw").bind('mousemove', function(e) {
 		if (eventObject.click) {
 			var offset, type, x, y;
@@ -440,11 +475,7 @@ function initDraw() {
 			x = e.offsetX;// - offset.left;
 			y = e.offsetY;// - offset.top;
 			
-			if( eventObject.mode == "1" ){
-				cleardrawing(x,y);
-			}else{
-				drawing(x, y ,color);
-			}
+			drawing(x, y ,color);
 			
 			draw.send(JSON.stringify({
 				"eventName": "drawClick",
@@ -452,7 +483,6 @@ function initDraw() {
 					"room" : room,
 					'x'    : x,
 					'y'    : y,
-					'mode' : eventObject.mode,
 					'color': color,
 					'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
 					'sendY': $("#canvasDraw"   ).attr ("height").replace("px","")
@@ -473,11 +503,7 @@ function initDraw() {
 		x = x * ( oX / sX );
 		y = y * ( oY / sY );
 		
-		if(data.mode == "1"){
-			cleardrawing(x,y);
-		}else{
-			drawing(x, y, data.color);
-		}
+		drawing2(x, y, data.color);
 	});
 	
 	rtc.on('mDown', function() {
@@ -498,10 +524,14 @@ function initDraw() {
 	rtc.on('mUp', function() {
 		var data = draw.recv.apply(this, arguments);
 		eventObject.click = data.click;
+		
+		picture.canvas  = document.getElementById("canvasDraw");
+		picture.context = picture.canvas.getContext("2d");		
+		picture.context.clearRect(eventObject.x -3 , eventObject.y -3, 20, 20);
 	});
 	/*
 	rtc.on('imgChange', function() {
-		alert('???');
+		alert('??');
 		var data = draw.recv.apply(this, arguments);
 		imgChange(data.path);
 	});
@@ -509,6 +539,15 @@ function initDraw() {
 }
 
 function closePT(){
+	
+	
+	$("#fileShareArea"	).hide();
+	$("#next" 			).hide();
+	$("#filePage"   	).hide();
+	$("#exit" 	    	).hide();
+	$("#ifile"          ).val("");
+	
+	/*
 	$("#exit"	  	 ).hide();
 	$("#pre" 	  	 ).hide();
 	$("#next"	  	 ).hide();
@@ -520,6 +559,7 @@ function closePT(){
 	$("#screen-share-video").remove();
 	$("#menu-toc" 	 ).find("center").html("<ul id=\"slideList\"></ul>");
 	$("#mainArea" 	 ).find("video").show();
+	*/
 	subdivideVideos();
 }
 
@@ -528,12 +568,27 @@ function drawing(x, y, color){
 	picture.canvas  = document.getElementById("canvasDraw");
 	picture.context = picture.canvas.getContext("2d");
 	picture.context.beginPath();
-	picture.context.moveTo(eventObject.x , eventObject.y );
+	//picture.context.moveTo(eventObject.x , eventObject.y );
+	picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
 	eventObject.x = x;
 	eventObject.y = y;
-	picture.context.lineTo(x, y );
+	picture.context.fillRect(x , y , 15, 15);
+	//picture.context.lineTo(x, y );
 	picture.context.strokeStyle = color;
-	picture.context.lineWidth = 5;
+	picture.context.lineWidth = 1;
+	picture.context.globalAlpha = 0.3;
+	picture.context.stroke();
+}
+function drawing2(x, y, color){
+	picture.canvas  = document.getElementById("canvasDraw");
+	picture.context = picture.canvas.getContext("2d");
+	picture.context.beginPath();
+	picture.context.clearRect(eventObject.x -3, eventObject.y -3, 20, 20);
+	eventObject.x = x;
+	eventObject.y = y;
+	picture.context.fillRect(x , y, 15, 15);
+	picture.context.strokeStyle = color;
+	picture.context.lineWidth = 10;
 	picture.context.globalAlpha = 0.3;
 	picture.context.stroke();
 }
@@ -560,6 +615,23 @@ function imgChange(path){
 }
 
 function init() {
+	if( $("#roomNm").val() == "" ){
+		alert("잘못된 접근 경로 입니다.");
+		location.href="/bizMeet/main";
+		return;
+	}
+
+	if( $("#userNm").val() == "" ){
+		var btnlist = [
+		               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
+		];
+		
+		openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y"});
+		
+		openIframeLoad();
+		return;
+	}
+	
 	if(PeerConnection) {
 		//미디어 스트림 생성
 		rtc.createStream({
@@ -569,15 +641,10 @@ function init() {
 			document.getElementById('you').src = URL.createObjectURL(stream);
 			videos.push(document.getElementById('you'));
 			
-			var request = new Request();
-			/*
-			roomNm    = request.getParameter('roomNm');
-			userNm    = request.getParameter('userNm');
-			*/
-			roomNm = document.getElementById('roomNm').value;
-			userNm = document.getElementById('userNm').value;
+			roomNm    = decodeURI($("#roomNm").val());
+			userNm    = decodeURI($("#userNm").val());
 			
-			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm); // 시스널주소
+			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm, $("#joinGb").val()); // 시스널주소
 
 			rtc.on('add remote stream', function(stream, socketId) {
 				console.log("ADDING REMOTE STREAM...");
@@ -593,11 +660,10 @@ function init() {
 				subdivideVideos();
 			});
 			
-			initChat();        // 채팅 설정
-//			initDraw();      // canvas 설정
-//			Page.init();       // 슬라이드 설정
-			subdivideVideos(); // 비디오 크기 설정 
-//			initFileConvert(); // 파일 변환 설정
+			initChat();        	// 채팅 설정
+			initDraw();      	// canvas 설정
+			subdivideVideos(); 	// 비디오 크기 설정 
+			initFileConvert(); 	// 파일 변환 설정
 			
 			
 			subdivideVideos();
@@ -609,12 +675,6 @@ function init() {
 
 	
 }
-
-window.onresize = function(event) {
-	subdivideVideos();
-	moveVideos();
-};
-
 
 function getNumPerRow() {
 	var len = videos.length;
@@ -633,177 +693,48 @@ function getNumPerRow() {
 }
 
 function subdivideVideos() {
-	var mainW = window.innerWidth;
-	var mainH = window.innerHeight - $(".navbar").height();
-	var userW = mainW;
-	var msgH  = mainH;
-	if($("#presentaionCnotainer").attr("class").indexOf("slideRight") > -1 ){
-		mainW = mainW - 240;
-		userW = userW - 240;
-	}
-	if($("#userListArea").is(":visible") ){
-		mainH = mainH - 200;
-	}
-	if($("#chatbox").is(":visible") ){
-		mainW = mainW - 400;
-		userW = userW - 420;
-	}
-
-	$("#userListArea").css("width"  ,userW - 50 );
-	/*
-	$("#mainArea"    ).css("width"  ,mainW);
-	$("#mainArea"    ).css("height" ,mainH);
-	$("#you"		 ).attr("width" ,mainW - 50 );
-	$("#you"		 ).attr("height",mainH - 50 );
-	
-	
-	$("#messages"    ).css("height" ,msgH  - 150);
-	
-   	*/
-	$("#canvasImg"   ).css ("width" ,mainW - 50);
-	$("#canvasImg"   ).css ("height",mainH - 50);
-	$("#canvasDraw"  ).attr("width" ,mainW - 50);
-	$("#canvasDraw"  ).attr("height",mainH - 50);
-
-	$("#messages"    ).css ("height",mainH - 110);
-
-	if( !$("#userListArea").is(":visible")){
-		switch (videos.length) {
-		case 1:
-			$("#you"		 ).attr("width" ,mainW - 90 );
-			$("#you"		 ).attr("height",mainH - 90 );
-			$("#you"		 ).attr("style"  ,"position:absolute;top:"+($(".navbar").height()+10)+"px;left:10px;" );
-			break;
-		case 2:
-			/*
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( $(video).attr("id") == "you" ){
-					$("#you"		 ).attr("width" ,"200" );
-					$("#you"		 ).attr("height","200" );
-					$("#you"		 ).attr("style","position:absolute;top:"+(mainH-184)+"px;left:"+(mainW-245)+"px;" );
-				}else{
-					$(video).attr("width"  ,"90%" );
-					$(video).attr("height" ,"" );
-					$(video).attr("style"  ,"position:absolute;" );
-				}
+	var right   = 10;
+	var chatChk = true;
+	if( $("#fileShareArea").is(":hidden")){
+		for(var i = 0, len = videos.length; i < len; i++) {
+			var video = videos[i];
+			if( !$("#chatbox").is(":hidden") && chatChk){
+				right   = 400;
+				chatChk = false;
 			}
-			*/
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( mainW / 2 > 480){
-					$(video).attr("width"  ,mainW / 2 + "px");
-					$(video).attr("height" ,"" );
-					$(video).attr("style"  ,"position:absolute;left:"+(i*mainW*0.5)+"px;top:"+mainH*0.2+"px;" );
-				}else{
-					$(video).attr("width"  ,"" );
-					$(video).attr("height" ,mainH / 2 +"px" );
-					$(video).attr("style"  ,"position:absolute;top:"+(i*mainH*0.5+$(".navbar").height())+"px;left:"+(mainW*0.15)+"px;" );
-				}
+			if( i > 1){
+				right += 160;
 			}
-			break;
-		case 3:
-			/*
-			var z = 0;
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( $(video).attr("id") == "you" ){
-					$("#you"		 ).attr("width" ,"200" );
-					$("#you"		 ).attr("height","200" );
-					$("#you"		 ).attr("style","position:absolute;top:"+(mainH - 184)+"px;left:"+(mainW-245)+"px;" );
-				}else{
-					$(video).attr("width"  ,"50%" );
-					$(video).attr("height" ,"" );
-					$(video).attr("style"  ,"position:absolute;" );
-					video.style.left = z * mainW / 2 + "px";
-					video.style.top  = mainH * 0.1 + "px";
-					z++;
-				}
+			if( $(video).attr("id") != "you" ){
+				$(video).attr("width"  ,"150px;" );
+				$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;" );
+			}else if( $(video).attr("id") == "you" ){
+				$(video).attr("style"  ,"width: 100%; height: 100%;" );
 			}
-			*/
-			var w = 0;
-			var h = 0;
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( i == 2){
-					w = 2;
-					h = 1;
-				}
-				$(video).attr("width"  ,mainW / 2 + "px");
-				$(video).attr("height" ,mainH / 2 + "px" );
-				$(video).attr("style"  ,"position:absolute;left:"+((i-w)*mainW*0.5)+"px;top:"+(h*mainH*0.5+$(".navbar").height())+"px;" );
-			}
-			break;
-		case 4:
-			/*
-			var w = 0;
-			var h = 1;
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( $(video).attr("id") == "you" ){
-					$("#you"		 ).attr("width" ,"200" );
-					$("#you"		 ).attr("height","200" );
-					$("#you"		 ).attr("style","position:absolute;top:"+(mainH - 184)+"px;left:"+(mainW-245)+"px;" );
-				}else{
-					$(video).attr("width"  ,"" );
-					$(video).attr("height" ,"45%" );
-					$(video).attr("style"  ,"position:absolute;" );
-					if( w < 2){
-						video.style.left = (w * mainW / 2 + mainW * 0.1)  + "px";
-						video.style.top  = "60px";
-						w++;
-					}else{
-						w = 0;
-						h++;
-						video.style.left = (w * mainW / 2 + mainW * 0.1)   + "px";
-						video.style.top  = (mainH / 2 + 30) + "px";
-					}
-				}
-			}
-			*/
-			
-			var w = 0;
-			var h = 0;
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( i == 2){
-					w = 2;
-					h = 1;
-				}
-				$(video).attr("width"  ,mainW / 2 + "px");
-				$(video).attr("height" ,mainH / 2 + "px" );
-				$(video).attr("style"  ,"position:absolute;left:"+((i-w)*mainW*0.5)+"px;top:"+(h*mainH*0.5+$(".navbar").height())+"px;" );
+		}
+	}else{
+		for(var i = 0, len = videos.length; i < len; i++) {
+			var video = videos[i];
+			if( !$("#chatbox").is(":hidden") && chatChk){
+				right   = 410;
+				chatChk = false;
 			}
 			
-			break;
-		case 5:
-			var w = 0;
-			var h = 0;
-			for(var i = 0, len = videos.length; i < len; i++) {
-				var video = videos[i];
-				if( $(video).attr("id") == "you" ){
-					$("#you"		 ).attr("width" ,"200" );
-					$("#you"		 ).attr("height","200" );
-					$("#you"		 ).attr("style","position:absolute;top:"+(mainH - 184)+"px;left:"+(mainW-245)+"px;" );
-				}else{
-					$(video).attr("width"  ,"32%" );
-					$(video).attr("height" ,"" );
-					$(video).attr("style"  ,"position:absolute;" );
-					if( w < 2){
-					}else{
-						w = 0;
-						h = 1;
-					}
-					video.style.left = ( mainW * 0.36 / 2 ) + ( mainW * 0.36 * w )  + "px";
-					video.style.top  = ( mainH / 2 * h ) + 60 + "px";
-					w++;
-				}
+			if( i > 0){
+				right += 160;
 			}
 			
-			break;
-	}
+			$(video).attr("width"   ,"150px;" );
+			$(video).attr("height"  ,"150px;" );
+			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;" );
+		}
+		
 	}
 	
+	if( $("#canvasDraw").is(":visible")){
+		$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
+		$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
+	}
 	
 	
 }
@@ -857,13 +788,13 @@ function addToChat(msg, color, user) {
 		    msgTag += "        <img src=\"http://placehold.it/50/55C1E7/fff\" alt=\"User Avatar\" class=\"img-circle\" />   ";
 		    msgTag += "    </span>                                                                                    ";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div class=\"header\">                                                                   ";
-		    msgTag += "            <strong class=\"primary-font\">"+user+"</strong>                     ";
+		    msgTag += "        <div>                                                                   ";
+		    msgTag += "            <strong style=\"color:white;\" class=\"primary-font\">"+user+"</strong>                     ";
 		    msgTag += "			   <small class=\"pull-right text-muted\">								";
 		    msgTag += "			   <i class=\"fa fa-clock-o fa-fw\"></i> " +getToDay()+ " 					";
 		    msgTag += " 		   </small>																";
 		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p>                                                                                    ";
+		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
 		    msgTag += "            "+ msg+"                                                         ";
 		    msgTag += "        </p>                                                                                   ";
 		    msgTag += "    </div>                                                                                     ";
@@ -875,12 +806,12 @@ function addToChat(msg, color, user) {
 		    msgTag += "        <img src=\"http://placehold.it/50/FA6F57/fff\" alt=\"User Avatar\" class=\"img-circle\" />   ";
 		    msgTag += "    </span>                                                                                    ";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div class=\"header\">                                                                   ";
+		    msgTag += "        <div>                                                                   ";
 		    msgTag += "		   <small class=\"text-muted\"> ";
 		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
-		    msgTag += "            <strong class=\"pull-right primary-font\">"+userNm+"</strong>                     ";
+		    msgTag += "            <strong style=\"color:white;\" class=\"pull-right primary-font\">"+userNm+"</strong>                     ";
 		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p>                                                                                    ";
+		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
 		    msgTag += "            "+ msg+"                                                         ";
 		    msgTag += "        </p>                                                                                   ";
 		    msgTag += "    </div>                                                                                     ";
@@ -890,11 +821,11 @@ function addToChat(msg, color, user) {
 		if(color == "ENTER"){
 	        msgTag += "<li class=\"right clearfix\">                                                                    ";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div class=\"header\">                                                                   ";
+		    msgTag += "        <div>                                                                   ";
 		    msgTag += "		   <small class=\"text-muted\"> ";
 		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
 		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p>                                                                                    ";
+		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
 		    msgTag += "            "+ msg+"                                                         ";
 		    msgTag += "        </p>                                                                                   ";
 		    msgTag += "    </div>                                                                                     ";
@@ -902,11 +833,11 @@ function addToChat(msg, color, user) {
 		}else if(color == "EXIT"){
 	        msgTag += "<li class=\"right clearfix\">                                                                    ";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div class=\"header\">                                                                   ";
+		    msgTag += "        <div>                                                                   ";
 		    msgTag += "		   <small class=\"text-muted\"> ";
 		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
 		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p>                                                                                    ";
+		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
 		    msgTag += "            "+ msg+"                                                         ";
 		    msgTag += "        </p>                                                                                   ";
 		    msgTag += "    </div>                                                                                     ";
