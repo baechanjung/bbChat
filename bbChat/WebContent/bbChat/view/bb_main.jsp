@@ -38,7 +38,7 @@ if(session != null){
 	body {
 		margin: 0;
 		padding: 0;
-		font-family: "돋움", Dotum, "굴림", Gulim, Arial, sans-serif;
+		font-family: NanumGothic,'나눔고딕',dotum,'돋움',sans-serif;
 		font-size: 12px;
 		color: #666;
 	    height: 100%;
