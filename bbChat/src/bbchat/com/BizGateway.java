@@ -20,7 +20,7 @@ public class BizGateway extends HttpServlet  {
 
 		request.setCharacterEncoding("UTF-8");
 		
-		String 			  uriPattern = request.getRequestURI().replaceAll("/", "").replaceAll("bizMeet", "");
+		String 			  uriPattern = request.getRequestURI().replaceAll("/", "").replaceAll("bizmeet", "");
 		
 		ServletContext 	  sc 		 = getServletContext();
 		RequestDispatcher rd 		 = null;

@@ -27,7 +27,7 @@ $(function($){
 	
 	$("#inviteBtn").click(function(){
 		var btnlist = [];
-		$("#invite_url").val("roomNm="+roomNm);
+		$("#invite_url").val("room="+roomNm);
 		openLayer({href: "/bbChat/view/bb_invite.jsp", header : "초대하기" , btn : btnlist , width: 600, height: 190, target : window , frm:$("#frm") , loading : "Y"});
 		
 		openIframeLoad();

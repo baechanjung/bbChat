@@ -31,7 +31,7 @@ function ClipUrl(){
 		<!-- alert -->
 		<div id="box1" class="box">
 			<div class="single" style="text-align: left; padding: 0;">
-				<p>https://www.brobb.co.kr/bizMeet/room?<%=request.getParameter("invite_url") %></p>
+				<p>https://www.brobb.co.kr/bizmeet/main?<%=request.getParameter("invite_url") %></p>
 			</div>
 			<a style="cursor: pointer;" onclick="ClipUrl();" >URL 복사하기</a>
 		</div>

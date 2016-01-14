@@ -43,7 +43,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>bizMeet</servlet-name>
-        <url-pattern>/bizMeet/*</url-pattern>
+        <url-pattern>/bizmeet/*</url-pattern>
     </servlet-mapping>	
 
 <filter>
