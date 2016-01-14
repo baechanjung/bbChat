@@ -77,11 +77,11 @@ function callinit(data){
 		<div id="fileShareUl" style="position: absolute; top: 0px;left: 0px;bottom: 0px;width: 240px;border-right: 5px solid #c0d0d9;overflow: hidden;overflow-x: hidden;overflow-y: auto; background-color: rgb(158,191,228);">
 		</div>
 		<div style="position: absolute;top: 0px;bottom: 0px;left: 0px;right: 0px;text-align: center;overflow: hidden; background-color: rgb(131,175,226); margin-left: 241px;">
-			<div onclick="preBtn  ()" id="pre" style="display: none;background-image:url('../img/controls.png'); background-position: 0 0; left: 10px; width: 32px;height: 32px; margin-top: 15px; margin-left: 250px; position: fixed;cursor: pointer;"></div>
+			<div onclick="preBtn  ()" id="pre" style="display: none;background-image:url('/bbChat/img/controls.png'); background-position: 0 0; left: 10px; width: 32px;height: 32px; margin-top: 15px; margin-left: 250px; position: fixed;cursor: pointer;"></div>
 			<div id="filePage" style="display: none;position: absolute;color: white;margin-top: 20px;margin-left: 80px;font-size: larger; ">
 				<span></span><span></span>
 			</div> 
-			<div onclick="nextBtn ()"  id="next" style="display: none;position: fixed; background-image:url('../img/controls.png'); background-position: -32px 0; width: 32px;height: 32px;    margin-top: 15px; margin-left: 150px; cursor: pointer;"></div>
+			<div onclick="nextBtn ()"  id="next" style="display: none;position: fixed; background-image:url('/bbChat/img/controls.png'); background-position: -32px 0; width: 32px;height: 32px;    margin-top: 15px; margin-left: 150px; cursor: pointer;"></div>
 			<div onclick="exitBtn  ()" id="exit" style="display: none;width: 30px;height: 30px; margin-top: 17px; position: fixed;cursor: pointer; right: 10px;">
 				<img title="문서공유종료" src="/bbChat/img/icon/icon-close.png" width="30px;">
 			</div>
