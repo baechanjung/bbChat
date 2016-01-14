@@ -1,3 +1,3 @@
 <script>
-location.href = "/bizMeet/main";
+location.href = "/bizmeet/main";
 </script>
