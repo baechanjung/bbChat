@@ -71,7 +71,7 @@
     	<location>/bbChat/view/bb_error.jsp</location> 
     </error-page>
     <error-page>
-    	<error-code>404</error-code>
+    	<error-code>404</error-code> 
     	<location>/bbChat/view/bb_error.jsp</location>
     </error-page>
 
