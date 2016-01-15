@@ -15,6 +15,7 @@
 <script type="text/javascript" src="/bbChat/js/webRtc/webrtc.io.js"></script>
 <script type="text/javascript" src="/bbChat/js/webRtc/script.js"></script>
 <script type="text/javascript" src="/bbChat/js/webRtc/bb_room.js"></script>
+<script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
 <script type="text/javascript">
 function callinit(data){
 	$("#userNm").val(data["USER_NM"]);
@@ -34,8 +35,8 @@ function callinit(data){
 <input type="hidden"	id="joinGb"		name="joinGb"	value="<%=StringUtil.null2void( request.getParameter("joinGb")  , "J"  )%>" />
 
 	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; ">
-		<div class="header_inner">
-			<div class="join" style="position:fixed; width: 600px;right: 30px;">
+		<div class="header_inner" style="text-align: center;">
+			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
 					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<li id="shareBtn" ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
@@ -43,8 +44,11 @@ function callinit(data){
 					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite.png" 	 	style="width: 70px;height: 60px; margin-top:-5px;margin-left:-5px;cursor: pointer;"> </li>
 					<li id="exitBtn"  ><img title="회의종료" src="/bbChat/img/icon/icon-exit.png" 		 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 				</ul>
-				<div id="retroclockbox_xs" style="margin-top: 13px;"></div>
 			</div>
+		</div>
+		<div id="retroclockbox_xs" style="margin-top: -50px;margin-left: 30px;"></div>
+		<div id="urlCopy_container" style="position:absolute; top:20px;right: 10px;">
+			<b><font id="urlCopy" data-clipboard-text="https://www.brobb.co.kr/bizmeet/main?room=<%=StringUtil.null2void( request.getParameter("roomNm")  , ""   )%>" color="#FFFFFF" size="4">URL <%=StringUtil.null2void( request.getParameter("roomNm")  , ""   )%></font></b>
 		</div>
 	</div>
 
