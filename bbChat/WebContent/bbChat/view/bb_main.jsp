@@ -111,7 +111,7 @@ if(session != null){
 	}
 
 	.button1:hover {
-		background-color: #4CAF50;
+		background-color: #B04EF0;
 		color: white;
 	}
 	/*========================BUTTON========================*/
@@ -137,7 +137,7 @@ if(session != null){
 	  width:0;
 	  bottom:1px; 
 	  position:absolute;
-	  background:#4CAF50; 
+	  background:#B04EF0; 
 	  transition:0.2s ease all; 
 	  -moz-transition:0.2s ease all; 
 	  -webkit-transition:0.2s ease all;
