@@ -11,18 +11,16 @@
 <meta name="author" content="Codrops" />
 <title>biz Meeting</title>
 <%@ include file="/bbChat/inc/inc_0001_01.jsp" %>
+<script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
 <script type="text/javascript">
-function ClipUrl(){
-	var address = $(".single").find("p").html();
-	var IE=(document.all)?true:false;
-	if (IE) {
-		if(confirm("초대하기 주소를 클립보드에 복사하시겠습니까?"))
-			window.clipboardData.setData("Text", address);
-	} else {
-		temp = prompt("초대하기 주소입니다. Ctrl+C를 눌러 클립보드로 복사하세요", address);
-	}
- 
-}
+$(function(){
+	ZeroClipboard.config({
+		swfPath: '/bbChat/js/ZeroClipboard.swf',
+		forceHandCursor: true
+	});
+	var clipboard = new ZeroClipboard($('#urlCopy'));
+	clipboard.on('aftercopy', function(event) { alert('접속 URL이 복사되었습니다. \n'+event.data['text/plain']); });
+});
 </script>
 </head>
 <body>
@@ -33,7 +31,7 @@ function ClipUrl(){
 			<div class="single" style="text-align: left; padding: 0;">
 				<p>https://www.brobb.co.kr/bizmeet/main?<%=request.getParameter("invite_url") %></p>
 			</div>
-			<a style="cursor: pointer;" onclick="ClipUrl();" >URL 복사하기</a>
+			<a id="urlCopy" data-clipboard-text="https://www.brobb.co.kr/bizmeet/main?<%=request.getParameter("invite_url")%>">URL 복사하기</a>
 		</div>
 	</div>
 	

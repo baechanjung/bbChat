@@ -1,10 +1,12 @@
 $(function($){
 	
+	initClipBoard();
+	
 	$("#retroclockbox_xs").flipcountdown({
 		size:"sm"
 	});
-	$("#chatbox" ).find(".chat-panel").css("height", window.innerHeight - 70 + "px");
-	$("#messages").parent().css("height", window.innerHeight - 163 + "px");
+	$("#chatbox" ).find(".chat-panel").css("height", window.innerHeight - 60 + "px");
+	$("#messages").parent().css("height", window.innerHeight - 174 + "px");
 	
 	$("#cuyBtn").click(function(){
 		if($("#chatbox").is(":hidden")){
@@ -60,7 +62,7 @@ $(function($){
 	});
 	
 	$("#exitBtn").click(function(){
-		location.href = "/bizMeet/main";
+		location.href = "/bizmeet/main";
 	});
 	
 	$("#exit").live("click",function(){
@@ -77,9 +79,19 @@ $(function($){
 	// 브라우져 크기 조정
 	window.onresize = function(event) {
 		$("#fileShareArea"  ).css("height", window.innerHeight - 60 + "px");
-		$("#chatbox" 		).find(".chat-panel").css("height", window.innerHeight - 70 + "px");
-		$("#messages"		).parent().css("height", window.innerHeight - 163 + "px");
+		$("#chatbox" 		).find(".chat-panel").css("height", window.innerHeight - 60 + "px");
+		$("#messages"		).parent().css("height", window.innerHeight - 174 + "px");
 		subdivideVideos();
 	};
 	
+	
+	function initClipBoard(){
+		ZeroClipboard.config({
+			swfPath: '/bbChat/js/ZeroClipboard.swf',
+			forceHandCursor: true
+		});
+		var clipboard = new ZeroClipboard($('#urlCopy'));
+		clipboard.on('aftercopy', function(event) { alert('접속 URL이 복사되었습니다. \n'+event.data['text/plain']); });
+		
+	}
 })

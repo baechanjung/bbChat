@@ -15,6 +15,7 @@
 <script type="text/javascript" src="/bbChat/js/webRtc/webrtc.io.js"></script>
 <script type="text/javascript" src="/bbChat/js/webRtc/script.js"></script>
 <script type="text/javascript" src="/bbChat/js/webRtc/bb_room.js"></script>
+<script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
 <script type="text/javascript">
 function callinit(data){
 	$("#userNm").val(data["USER_NM"]);
@@ -29,42 +30,46 @@ function callinit(data){
 <form id="frm" method="post">
 	<input type="hidden" id="invite_url" name="invite_url"	value=""/>
 </form>
-<input type="hidden"	id="roomNm"		name="roomNm"	value="<%=StringUtil.null2void( request.getParameter("roomNm")  , ""   )%>" />
-<input type="hidden"	id="userNm"		name="userNm"	value="<%=StringUtil.null2void( request.getParameter("userNm")  , ""   )%>" />
-<input type="hidden"	id="joinGb"		name="joinGb"	value="<%=StringUtil.null2void( request.getParameter("joinGb")  , "J"  )%>" />
+<input type="hidden"	id="roomNm"			name="roomNm"		value="<%=StringUtil.null2void( request.getParameter("roomNm")  	, ""   )%>" />
+<input type="hidden"	id="userNm"			name="userNm"		value="<%=StringUtil.null2void( request.getParameter("userNm")  	, ""   )%>" />
+<input type="hidden"	id="userImgPath"	name="userImgPath"	value="<%=StringUtil.null2void( request.getParameter("userImgPath") , ""   )%>" />
+<input type="hidden"	id="joinGb"			name="joinGb"		value="<%=StringUtil.null2void( request.getParameter("joinGb")  	, "J"  )%>" />
 
 	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; ">
-		<div class="header_inner">
-			<div class="join" style="position:fixed; width: 600px;right: 30px;">
+		<div class="header_inner" style="text-align: center;">
+			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
-					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="shareBtn" ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="hideBtn"  ><img title="숨기기"   src="/bbChat/img/icon/icon-pip-hide.png"	style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite.png" 	 	style="width: 70px;height: 60px; margin-top:-5px;margin-left:-5px;cursor: pointer;"> </li>
-					<li id="exitBtn"  ><img title="회의종료" src="/bbChat/img/icon/icon-exit.png" 		 style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="shareBtn" ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="hideBtn"  ><img title="숨기기"   src="/bbChat/img/icon/icon-pip-hide1.png"	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="exitBtn"  ><img title="회의종료" src="/bbChat/img/icon/icon-exit1.png" 		 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 				</ul>
-				<div id="retroclockbox_xs" style="margin-top: 13px;"></div>
 			</div>
+		</div>
+		<div id="retroclockbox_xs" style="margin-top: -50px;margin-left: 10px;"></div>
+		<div id="urlCopy_container" style="position:absolute; top:20px;right: 10px;">
+			<b><font id="urlCopy" data-clipboard-text="https://www.brobb.co.kr/bizmeet/main?room=<%=StringUtil.null2void( request.getParameter("roomNm")  , ""   )%>" color="#FFFFFF" size="4">URL <%=StringUtil.null2void( request.getParameter("roomNm")  , ""   )%></font></b>
 		</div>
 	</div>
 
 
-	<div id="chatbox" style="padding-top: 5px; right: 0px; position:fixed; top:55px; height: 100%; z-index:130; display: none;" >
-		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;">
-			<div class="panel-heading" style="color:rgb(255,255,255);background-color:#322542">
-				<i class="fa fa-comments fa-fw"></i> Chat
+	<div id="chatbox" style="right: 0px; position:fixed; top:60px; height: 100%; z-index:130; display: none;" >
+		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;border-radius:0px;">
+			<div class="panel-heading" style="color:rgb(255,255,255);background-color:black;border-bottom:1px solid #322542;border-radius:0px;">
+				<i class="fa fa-comments fa-fw"></i> <img src="/bbChat/img/icon/message31.png" width="30" height="30"/> Message
 			</div>
 			<!-- /.panel-heading -->
-			<div style="height: 86%; background-color: rgba(50,37,66,0.7);">
-				<ul class="chat" id="messages" style="background-color: rgba(50,37,66,0.7);">
+			<div style="height: 87%; background-color: rgba(0,0,0,0.7);border-radius:0px;">
+				<ul class="chat" id="messages" style="background-color: rgba(0,0,0,0.7);">
 				</ul>
 			</div>
 			<!-- /.panel-body -->
-			<div class="panel-footer" style="background-color:#322542;">
+			<div class="panel-footer" style="background-color:black;border-top:1px solid #322542;border-radius:0px;">
 				<div class="input-group">
-					<input id="chatinput" type="text" style="height: 30px;" class="form-control input-sm" placeholder="Type your message here..." /> 
+					<input id="chatinput" type="text" style="padding:20px;font-size: 16px;" class="form-control input-sm" placeholder="Type your message here..." /> 
 					<span class="input-group-btn">
-						<button class="btn btn-warning btn-sm" id="btn-chat">Send</button>
+						<button class="btn btn-warning btn-sm" id="btn-chat" style="padding:11px;background-color:#B04EF0;border-color:#B04EF0;">Send</button>
 					</span>
 				</div>
 			</div>
@@ -82,7 +87,7 @@ function callinit(data){
 				<span></span><span></span>
 			</div> 
 			<div onclick="nextBtn ()"  id="next" style="display: none;position: fixed; background-image:url('/bbChat/img/controls.png'); background-position: -32px 0; width: 32px;height: 32px;    margin-top: 15px; margin-left: 150px; cursor: pointer;"></div>
-			<div onclick="exitBtn  ()" id="exit" style="display: none;width: 30px;height: 30px; margin-top: 17px; position: fixed;cursor: pointer; right: 10px;">
+			<div id="exit" style="display: none;width: 30px;height: 30px; margin-top: 17px; position: fixed;cursor: pointer; right: 10px;">
 				<img title="문서공유종료" src="/bbChat/img/icon/icon-close.png" width="30px;">
 			</div>
 		</div>

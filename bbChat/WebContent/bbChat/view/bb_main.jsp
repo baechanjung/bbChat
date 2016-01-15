@@ -254,7 +254,7 @@ function fnNext( o , eleId ){
 		$('#frm'    ).attr('action','/bizmeet/room');
 		$('#joinGb' ).val ("S"	 );
 		$('#roomNm' ).val (rand());
-		$('#userNm' ).val (encodeURI($('#USER_NM').val()));
+		$('#userNm' ).val (encodeURI($('#userNm').val()));
 		document.getElementById("frm").submit();
 	}
 	/*회의참여*/

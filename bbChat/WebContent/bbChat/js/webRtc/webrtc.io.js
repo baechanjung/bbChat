@@ -93,7 +93,7 @@ if(window.mozRTCPeerConnection){
 	/**
 	 * Connects to the websocket server.
 	 */
-	rtc.connect = function(server, room, user, gb) {
+	rtc.connect = function(server, room, user, img, gb) {
 		
 		room = room || ""; // by default, join a room called the blank string
 		rtc._socket = new WebSocket('ws://112.187.199.159:8080/websocket/bbchat'/*server*/); 
@@ -104,9 +104,10 @@ if(window.mozRTCPeerConnection){
 			rtc._socket.send(JSON.stringify({ 	
 				"eventName": "join_room",
 				"data":{
-					 "room": room
-					,"user": user
-					,"gb"  : gb
+					 "room" : room
+					,"user" : user
+					,"gb"   : gb
+					,"img"  : img
 				}
 			}));
 
@@ -126,7 +127,7 @@ if(window.mozRTCPeerConnection){
 			
 			rtc.on('empty_room', function(data) {
 				alert("현재 존재하지 않는 회의실 입니다.");
-				location.href="/bizMeet/main";
+				location.href="/bizmeet/main";
 			});
 
 			rtc.on('get_peers', function(data) {
