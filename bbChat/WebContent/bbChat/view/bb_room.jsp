@@ -53,22 +53,22 @@ function callinit(data){
 	</div>
 
 
-	<div id="chatbox" style="padding-top: 5px; right: 0px; position:fixed; top:55px; height: 100%; z-index:130; display: none;" >
-		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;">
-			<div class="panel-heading" style="color:rgb(255,255,255);background-color:#322542">
-				<i class="fa fa-comments fa-fw"></i> Chat
+	<div id="chatbox" style="right: 0px; position:fixed; top:60px; height: 100%; z-index:130; display: none;" >
+		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;border-radius:0px;">
+			<div class="panel-heading" style="color:rgb(255,255,255);background-color:black;border-bottom:1px solid #322542;border-radius:0px;">
+				<i class="fa fa-comments fa-fw"></i> <img src="/bbChat/img/icon/message.png" width="30" height="30"/> Message
 			</div>
 			<!-- /.panel-heading -->
-			<div style="height: 86%; background-color: rgba(50,37,66,0.7);">
-				<ul class="chat" id="messages" style="background-color: rgba(50,37,66,0.7);">
+			<div style="height: 87%; background-color: rgba(0,0,0,0.7);border-radius:0px;">
+				<ul class="chat" id="messages" style="background-color: rgba(0,0,0,0.7);">
 				</ul>
 			</div>
 			<!-- /.panel-body -->
-			<div class="panel-footer" style="background-color:#322542;">
+			<div class="panel-footer" style="background-color:black;border-top:1px solid #322542;border-radius:0px;">
 				<div class="input-group">
-					<input id="chatinput" type="text" style="height: 30px;" class="form-control input-sm" placeholder="Type your message here..." /> 
+					<input id="chatinput" type="text" style="padding:20px;" class="form-control input-sm" placeholder="Type your message here..." /> 
 					<span class="input-group-btn">
-						<button class="btn btn-warning btn-sm" id="btn-chat">Send</button>
+						<button class="btn btn-warning btn-sm" id="btn-chat" style="padding:11px;">Send</button>
 					</span>
 				</div>
 			</div>
