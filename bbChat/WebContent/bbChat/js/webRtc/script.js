@@ -76,7 +76,7 @@ function initChat() {
 					"color"   : color
 				}
 			}));
-			addToChat(input.value);
+			addToChat(input.value ,$("#userImgPath").val());
 			input.value = "";
 		}
 	}, false);
@@ -92,7 +92,7 @@ function initChat() {
 					"color"   : color
 				}
 			}));
-			addToChat(input.value);
+			addToChat(input.value ,$("#userImgPath").val());
 			input.value = "";
 		}
 	}, false);
@@ -100,7 +100,7 @@ function initChat() {
 	// receive_chat_msg ����
 	rtc.on(chat.event, function() {
 		var data = chat.recv.apply(this, arguments);
-		addToChat(data.messages, data.color.toString(16),data.user);
+		addToChat(data.messages, data.img, data.color.toString(16),data.user);
 	});
 	
 }
@@ -644,7 +644,7 @@ function init() {
 			roomNm    = decodeURI($("#roomNm").val());
 			userNm    = decodeURI($("#userNm").val());
 			
-			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm, $("#joinGb").val()); // 시스널주소
+			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val()); // 시스널주소
 
 			rtc.on('add remote stream', function(stream, socketId) {
 				console.log("ADDING REMOTE STREAM...");
@@ -697,7 +697,8 @@ function subdivideVideos() {
 	var chatChk = true;
 	if( $("#fileShareArea").is(":hidden")){
 		for(var i = 0, len = videos.length; i < len; i++) {
-			var video = videos[i];
+			var video   = videos[i];
+			var visible = "";
 			if( !$("#chatbox").is(":hidden") && chatChk){
 				right   = 400;
 				chatChk = false;
@@ -706,15 +707,21 @@ function subdivideVideos() {
 				right += 160;
 			}
 			if( $(video).attr("id") != "you" ){
+				if($(video).is(":hidden")){
+					visible = "none;";
+				}else{
+					visible = "block;";
+				}
 				$(video).attr("width"  ,"150px;" );
-				$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;" );
+				$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 			}else if( $(video).attr("id") == "you" ){
 				$(video).attr("style"  ,"width: 100%; height: 100%;" );
 			}
 		}
 	}else{
 		for(var i = 0, len = videos.length; i < len; i++) {
-			var video = videos[i];
+			var video   = videos[i];
+			var visible = "";
 			if( !$("#chatbox").is(":hidden") && chatChk){
 				right   = 410;
 				chatChk = false;
@@ -724,9 +731,15 @@ function subdivideVideos() {
 				right += 160;
 			}
 			
+			if($(video).is(":hidden")){
+				visible = "none;";
+			}else{
+				visible = "block;";
+			}
+			
 			$(video).attr("width"   ,"150px;" );
 			$(video).attr("height"  ,"150px;" );
-			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;" );
+			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 		}
 		
 	}
@@ -774,7 +787,7 @@ function removeVideo(socketId) {
 	}
 }
 
-function addToChat(msg, color, user) {
+function addToChat(msg, img, color, user) {
 	var messages = document.getElementById('messages');
 	msg = sanitize(msg);
 	// �޼��� �� ������
@@ -783,65 +796,73 @@ function addToChat(msg, color, user) {
 		
 		if(color) { // 다른사람꺼
 		//	msg = '<span style="color: ' + color + '; padding-left: 15px">' + user + '>>' + msg + '</span>';
-	        msgTag += "<li class=\"left clearfix\">                                                                    ";
-		    msgTag += "    <span class=\"chat-img pull-left\">                                                         ";
-		    msgTag += "        <img src=\"http://placehold.it/50/55C1E7/fff\" alt=\"User Avatar\" class=\"img-circle\" />   ";
-		    msgTag += "    </span>                                                                                    ";
-		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div>                                                                   ";
-		    msgTag += "            <strong style=\"color:white;\" class=\"primary-font\">"+user+"</strong>                     ";
-		    msgTag += "			   <small class=\"pull-right text-muted\">								";
-		    msgTag += "			   <i class=\"fa fa-clock-o fa-fw\"></i> " +getToDay()+ " 					";
-		    msgTag += " 		   </small>																";
-		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
-		    msgTag += "            "+ msg+"                                                         ";
-		    msgTag += "        </p>                                                                                   ";
-		    msgTag += "    </div>                                                                                     ";
-	        msgTag += "</li>                                                                                          ";
+	        msgTag += "<li class=\"left clearfix\">                                                         	        	    ";
+		    msgTag += "    <span class=\"chat-img pull-left\">                                                  		        ";
+		    if(img != "" || img != null){
+		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
+		    }else{
+		    	msgTag += "        <img src=\"/bbChat/img/icon/person_you.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";
+		    }
+		    msgTag += "    </span>                                                                                    		    ";
+		    msgTag += "    <div class=\"chat-body clearfix\">                                                           	    ";
+		    msgTag += "        <div>                                                                   							";
+		    msgTag += "            <strong style=\"color:white;\" class=\"primary-font\">"+user+"</strong>                      ";
+		    msgTag += "			   <small class=\"pull-right text-muted\">														";
+		    msgTag += "			   <i class=\"fa fa-clock-o fa-fw\"></i> " +getToDay()+ " 										";
+		    msgTag += " 		   </small>																						";
+		    msgTag += "        </div>                                                                                 			";
+		    msgTag += "        <p style=\"color:white;\">                                                                       ";
+		    msgTag += "            "+ msg+"                                                         							";
+		    msgTag += "        </p>                                                                                   			";
+		    msgTag += "    </div>                                                                                     			";
+	        msgTag += "</li>                                                                                          			";
 		} else { // 내꺼 
 		//	msg = '<strong style="padding-left: 15px">' + userNm + '>>'  + msg + '</strong>';
-	        msgTag += "<li class=\"right clearfix\">                                                                    ";
-		    msgTag += "    <span class=\"chat-img pull-right\">                                                         ";
-		    msgTag += "        <img src=\"http://placehold.it/50/FA6F57/fff\" alt=\"User Avatar\" class=\"img-circle\" />   ";
-		    msgTag += "    </span>                                                                                    ";
-		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div>                                                                   ";
-		    msgTag += "		   <small class=\"text-muted\"> ";
-		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
-		    msgTag += "            <strong style=\"color:white;\" class=\"pull-right primary-font\">"+userNm+"</strong>                     ";
-		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
-		    msgTag += "            "+ msg+"                                                         ";
-		    msgTag += "        </p>                                                                                   ";
-		    msgTag += "    </div>                                                                                     ";
-	        msgTag += "</li>                                                                                          ";
+	        msgTag += "<li class=\"right clearfix\">                                                                    		";
+		    msgTag += "    <span class=\"chat-img pull-right\">                                                         		";
+		    if(img != "" || img != null){
+		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
+		    }else{
+		    	msgTag += "        <img src=\"/bbChat/img/icon/person_me.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";
+		    }
+		    msgTag += "    </span>                                                                                    			";
+		    msgTag += "    <div class=\"chat-body clearfix\">                                                           		";
+		    msgTag += "        <div>                                                                   							";
+		    msgTag += "		   <small class=\"text-muted\"> 																	";
+		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>									";
+		    msgTag += "            <strong style=\"color:white;\" class=\"pull-right primary-font\">"+userNm+"</strong>         ";
+		    msgTag += "        </div>                                                                                 			";
+		    msgTag += "        <p style=\"color:white;\">                                                                       ";
+		    msgTag += "            "+ msg+"                                                         							";
+		    msgTag += "        </p>                                                                                   			";
+		    msgTag += "    </div>                                                                                     			";
+	        msgTag += "</li>                                                                                          			";
 		}
 	}else{
 		if(color == "ENTER"){
-	        msgTag += "<li class=\"right clearfix\">                                                                    ";
-		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div>                                                                   ";
-		    msgTag += "		   <small class=\"text-muted\"> ";
-		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
-		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
-		    msgTag += "            "+ msg+"                                                         ";
-		    msgTag += "        </p>                                                                                   ";
-		    msgTag += "    </div>                                                                                     ";
-	        msgTag += "</li>                                                                                          ";
+	        msgTag += "<li class=\"right clearfix\">                                                                    		";
+		    msgTag += "    <div class=\"chat-body clearfix\">                                                           		";
+		    msgTag += "        <div>                                                                   							";
+		    msgTag += "		   <small class=\"text-muted\"> 																	";
+		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>									";
+		    msgTag += "        </div>                                                                                 			";
+		    msgTag += "        <p style=\"color:white;\">                                                                       ";
+		    msgTag += "            "+ msg+"                                                         							";
+		    msgTag += "        </p>                                                                                   			";
+		    msgTag += "    </div>                                                                                     			";
+	        msgTag += "</li>                                                                                          			";
 		}else if(color == "EXIT"){
-	        msgTag += "<li class=\"right clearfix\">                                                                    ";
-		    msgTag += "    <div class=\"chat-body clearfix\">                                                           ";
-		    msgTag += "        <div>                                                                   ";
-		    msgTag += "		   <small class=\"text-muted\"> ";
-		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>";
-		    msgTag += "        </div>                                                                                 ";
-		    msgTag += "        <p style=\"color:white;\">                                                                                    ";
-		    msgTag += "            "+ msg+"                                                         ";
-		    msgTag += "        </p>                                                                                   ";
-		    msgTag += "    </div>                                                                                     ";
-	        msgTag += "</li>                                                                                          ";
+	        msgTag += "<li class=\"right clearfix\">                                                                    		";
+		    msgTag += "    <div class=\"chat-body clearfix\">                                                           		";
+		    msgTag += "        <div>                                                                   							";
+		    msgTag += "		   <small class=\"text-muted\"> 																	";
+		    msgTag += "        <i class=\"fa fa-clock-o fa-fw\"></i> "+ getToDay() +"</small>									";
+		    msgTag += "        </div>                                                                                 			";
+		    msgTag += "        <p style=\"color:white;\">                                                                       ";
+		    msgTag += "            "+ msg+"                                                        	 							";
+		    msgTag += "        </p>                                                                                   			";
+		    msgTag += "    </div>                                                                                     			";
+	        msgTag += "</li>                                                                                          			";
 		}
 	}
 	
