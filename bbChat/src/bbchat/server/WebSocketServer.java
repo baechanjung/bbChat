@@ -25,6 +25,7 @@ public class WebSocketServer {
 	
 	private static Map<String,Object> rooms = new HashMap<String,Object>(); 
 	private static Map<String,Object> users = new HashMap<String,Object>(); 
+	private static Map<String,Object> imgs  = new HashMap<String,Object>(); 
 
 	@OnMessage
 	public void onMessage(String message, Session userSession) throws IOException, InterruptedException {
@@ -162,6 +163,7 @@ public class WebSocketServer {
 	public void joinRoom( JSONObject data, Session socket ){
 		String strRoom  	 = (String)data.get("room");
 		String strUser  	 = (String)data.get("user");
+		String strImg    	 = (String)data.get("img");
 		String strGb  	     = (String)data.get("gb");
 		List   roomUserlist  = new ArrayList();
 		List   connectionsId = new ArrayList();
@@ -181,6 +183,7 @@ public class WebSocketServer {
 		
 		rooms.put(strRoom, roomUserlist);
 		users.put(socket.getId(), strUser);
+		imgs.put(socket.getId() , strImg );
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			String id = (String)roomUserlist.get(i);
@@ -244,9 +247,12 @@ public class WebSocketServer {
 				
 				sendData = new JSONObject();
 				
-				sendData.put("messages"	, strMsg	);
-				sendData.put("user"		, strUser	);
-				sendData.put("color"	, strColor	);
+				sendData.put("messages"	, strMsg					);
+				sendData.put("user"		, strUser					);
+				sendData.put("color"	, strColor				    );
+				sendData.put("img"		, imgs.get(socket.getId())	);
+				
+				
 				
 				sockectSend(soc ,"receive_chat_msg", sendData );
 				
@@ -498,9 +504,6 @@ public class WebSocketServer {
 		String  strSoc  = (String)data.get("socketId");
 
 		Session soc 	= getSocket(strSoc);
-		
-		System.out.println("receive_offer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-		System.out.println("soc ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" + soc);
 		
 		if(soc != null){
 			
