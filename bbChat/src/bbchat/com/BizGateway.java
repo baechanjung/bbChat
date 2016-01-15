@@ -33,6 +33,8 @@ public class BizGateway extends HttpServlet  {
 			rd = sc.getRequestDispatcher("/bbChat/view/bb_main.jsp");
 		}
 		
+		System.out.println( "uriPattern =======" +uriPattern);
+		
 		rd.forward(request, response);
 		
 	}
