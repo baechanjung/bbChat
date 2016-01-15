@@ -5,8 +5,8 @@ $(function($){
 	$("#retroclockbox_xs").flipcountdown({
 		size:"sm"
 	});
-	$("#chatbox" ).find(".chat-panel").css("height", window.innerHeight - 70 + "px");
-	$("#messages").parent().css("height", window.innerHeight - 163 + "px");
+	$("#chatbox" ).find(".chat-panel").css("height", window.innerHeight - 60 + "px");
+	$("#messages").parent().css("height", window.innerHeight - 174 + "px");
 	
 	$("#cuyBtn").click(function(){
 		if($("#chatbox").is(":hidden")){
@@ -79,8 +79,8 @@ $(function($){
 	// 브라우져 크기 조정
 	window.onresize = function(event) {
 		$("#fileShareArea"  ).css("height", window.innerHeight - 60 + "px");
-		$("#chatbox" 		).find(".chat-panel").css("height", window.innerHeight - 70 + "px");
-		$("#messages"		).parent().css("height", window.innerHeight - 163 + "px");
+		$("#chatbox" 		).find(".chat-panel").css("height", window.innerHeight - 60 + "px");
+		$("#messages"		).parent().css("height", window.innerHeight - 174 + "px");
 		subdivideVideos();
 	};
 	

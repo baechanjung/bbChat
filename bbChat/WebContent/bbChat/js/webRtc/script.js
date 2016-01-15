@@ -253,13 +253,13 @@ function imgListLoad( jsonObj ){
 	imgPath = [];
 	for(var i = 1; i < Number(jsonObj["SIZE"]) + 1 ; i++){
 		
-		$("#slideList").append("<li><div style=\"padding-top: 9px;text-align:center;\"><div style=\"margin-left: 11%;\" align=\"left\">"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".jpg ' 		 style=\"width: 150px;height: 100px; cursor: pointer; border:2px solid black;\"></div></li>");
+		$("#slideList").append("<li><div style=\"padding-top: 9px;text-align:center;\"><div style=\"margin-left: 11%;\" align=\"left\">"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".gif ' 		 style=\"width: 150px;height: 100px; cursor: pointer; border:2px solid black;\"></div></li>");
 		
 		
-		imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".jpg ";
+		imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".gif ";
 		
 		if( i == 1){
-		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".jpg");
+		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".gif");
 		}
 		
 		$("#slideList").find("li:last").data("imgIndex", i );
