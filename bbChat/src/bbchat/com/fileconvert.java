@@ -143,11 +143,11 @@ public class fileconvert extends HttpServlet  {
 				graphics.setPaint(Color.white);
 				graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 				slide[i].draw(graphics);
-				FileOutputStream outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".jpg");
+				FileOutputStream outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
 				
-				temp.put(i, "/file/img/slide-"+ tmpName + "_" +  (i + 1) + ".jpg");
+				temp.put(i, "/file/img/slide-"+ tmpName + "_" +  (i + 1) + ".gif");
 				
-				javax.imageio.ImageIO.write(img, "jpg", outImg);
+				javax.imageio.ImageIO.write(img, "gif", outImg);
 				
 				outImg.close();
 			}
@@ -177,11 +177,11 @@ public class fileconvert extends HttpServlet  {
 				graphics.setPaint(Color.white);
 				graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
 				slide[i].draw(graphics);
-				FileOutputStream outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".jpg");
+				FileOutputStream outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
 				
-				temp.put(i, "/file/img/slide-"+ tmpName + "_" +(i + 1) + ".jpg");
+				temp.put(i, "/file/img/slide-"+ tmpName + "_" +(i + 1) + ".gif");
 				
-				javax.imageio.ImageIO.write(img, "jpg", outImg);
+				javax.imageio.ImageIO.write(img, "gif", outImg);
 				outImg.close();
 			}
 			
@@ -192,7 +192,7 @@ public class fileconvert extends HttpServlet  {
 			System.out.println("pdf");
 			
 			//출력이미지 확장자
-			String imageFormat = "jpg";
+			String imageFormat = "gif";
 			
 			int pdfPageCn = 0;
 			PDDocument pdfDoc = null;
