@@ -60,7 +60,7 @@ $(function($){
 	});
 	
 	$("#exitBtn").click(function(){
-		location.href = "/bizMeet/main";
+		location.href = "/bizmeet/main";
 	});
 	
 	$("#exit").live("click",function(){

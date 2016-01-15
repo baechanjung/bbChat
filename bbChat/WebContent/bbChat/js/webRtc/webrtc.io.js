@@ -126,7 +126,7 @@ if(window.mozRTCPeerConnection){
 			
 			rtc.on('empty_room', function(data) {
 				alert("현재 존재하지 않는 회의실 입니다.");
-				location.href="/bizMeet/main";
+				location.href="/bizmeet/main";
 			});
 
 			rtc.on('get_peers', function(data) {
