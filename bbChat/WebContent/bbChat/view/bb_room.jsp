@@ -68,7 +68,7 @@ function callinit(data){
       text-align:center;
    }
    .filearea a{cursor:pointer;color:white;}
-   .filearea ul{list-style: none;height:225px;overflow-x: auto;}
+   .filearea ul{list-style: none;/*height:225px;overflow-x: auto;*/}
    .filearea ul > li{height: 45px; border-top: 1px solid #ebedf2;height: 45px;padding-top: 8px;text-align:left;}
    .file_box {
       width:300px;
@@ -154,7 +154,7 @@ function callinit(data){
 <input type="hidden"	id="joinGb"			name="joinGb"		value="<%=StringUtil.null2void( request.getParameter("joinGb")  	, "J"  )%>" />
 
 	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; ">
-		<div class="header_inner" style="text-align: center;">
+		<div class="header_inner" style="text-align: center;width: 100%;">
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
 					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
@@ -173,20 +173,22 @@ function callinit(data){
 
 	<div class="filearea" style="display: none;">
 		<div class="file_box">
-			<div style="height: 45px; padding-top: 3px;">
-				<img src="/bbChat/img/icon/upload95.png"
-					style="width: 35px; margin-right: 5px;" /><a>발표자료 업로드</a>
+			<div id="uploadBtn" style="height: 45px; padding-top: 3px;">
+				<img src="/bbChat/img/icon/upload95.png" style="width: 35px; margin-right: 5px;" /><a>발표자료 업로드</a>
 			</div>
-			<ul>
+			<ul style="margin-bottom:0px;">
+			<!-- 
 				<li><a>RTC소개자료.pptx</a></li>
 				<li><a>RTC소개자료.pptx</a></li>
 				<li><a>RTC소개자료.pptx</a></li>
 				<li><a>RTC소개자료.pptx</a></li>
 				<li><a>RTC소개자료.pptx</a></li>
 				<li><a>RTC소개자료.pptx</a></li>
+			 -->
 			</ul>
 		</div>
 	</div>
+	
 	<div class="statuscontrol" style="display: none;">
 		<div class="progress">
 			<span style="width: 0%;"></span>
@@ -199,7 +201,7 @@ function callinit(data){
 				<img src="/bbChat/img/icon/upload95.png" />
 			</div>
 			<div class="statusmsg">
-				<span>sss</span>님의 발표자료를 변환 하고 있습니다.
+				<span>sss</span>님의 발표자료를 <span>업로드</span> 하고 있습니다.
 			</div>
 		</div>
 	</div>
@@ -254,12 +256,6 @@ function callinit(data){
 	<div id="mainArea">
 		<video  id="you" style="width: 100%; height: 100%" autoplay></video>
 	</div>
-	
-	<div id="ProcessLayer" style="opacity:0.5;width:100%;height:100%;z-index:1002;position:absolute;top:0;left:0;background-color:#fff;display: none;"></div>
-	<div id="ProcessBox"   style="position:absolute;margin-top:15%; top:0px;z-index:1003;display:none; padding-left:42%;" >
-		<img src="/bbChat/img/loading-2.gif">
-	</div>
-	
 	
 	
 </body>

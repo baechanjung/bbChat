@@ -13,6 +13,10 @@
 <%@ include file="/bbChat/inc/inc_0001_01.jsp" %>
 <script type="text/javascript">
 	function confirmFn() {
+		if( $("#USER_NM").val() == ""){
+			alert("닉네임을 입력해 주세요.");
+			return;
+		}
 		var item = {};
 		item["USER_NM"] = $("#USER_NM").val();
 		closeLayer("callinit",item);	
