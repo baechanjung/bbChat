@@ -22,6 +22,124 @@ function callinit(data){
 	init();
 }
 </script>
+<style>
+	/*========================BUBBLE========================*/
+	.bubble_box {
+		position: relative;
+		background: rgba(0, 0, 0, 0.48);
+		border: 2px solid #B04EF0;
+		border-radius: 5px;
+		color: white;
+		font-size: 17px;
+		padding:10px 10px 10px 10px;
+		-webkit-transition-duration: 0.4s; /* Safari */
+		transition-duration: 0.4s;
+	}
+	.bubble_box:after, .bubble_box:before {
+		top: 100%;
+		left: 50%;
+		border: solid transparent;
+		content: " ";
+		height: 0;
+		width: 0;
+		position: absolute;
+		pointer-events: none;
+	}
+	.bubble_box:after {
+		border-color: rgba(0, 0, 0, 0);
+		border-top-color: rgb(63, 46, 74);
+		border-width: 10px;
+		margin-left: -10px;
+	}
+	.bubble_box:before {
+		border-color: rgba(176, 78, 240, 0);
+		border-top-color: #B04EF0;
+		border-width: 13px;
+		margin-left: -13px;
+	}
+
+   .filearea{
+      width: 100%; 
+      position: absolute; 
+      top: 74px; 
+      height: 300px; 
+      background:transparent; 
+      z-index: 1000; 
+      text-align:center;
+   }
+   .filearea a{cursor:pointer;color:white;}
+   .filearea ul{list-style: none;height:225px;overflow-x: auto;}
+   .filearea ul > li{height: 45px; border-top: 1px solid #ebedf2;height: 45px;padding-top: 8px;text-align:left;}
+   .file_box {
+      width:300px;
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.48);
+      border: 2px solid #B04EF0;
+      border-radius: 5px;
+      color: white;
+      font-size: 17px;
+      padding:10px 10px 10px 10px;
+      -webkit-transition-duration: 0.4s; /* Safari */
+      transition-duration: 0.4s;
+   }
+   .file_box:after, .file_box:before {
+      bottom: 100%;
+      left: 50%;
+      border: solid transparent;
+      content: " ";
+      height: 0;
+      width: 0;
+      position: absolute;
+      pointer-events: none;
+   }
+   .file_box:after {
+      border-color: rgba(0, 0, 0, 0);
+      border-bottom-color: rgb(63, 46, 74);
+      border-width: 10px;
+      margin-left: -10px;
+   }
+   .file_box:before {
+      border-color: rgba(176, 78, 240, 0);
+      border-bottom-color: #B04EF0;
+      border-width: 13px;
+      margin-left: -13px;
+   }
+   
+   .statuscontrol{
+      width: 100%; 
+      position: absolute; 
+      top: 60px; 
+      height: 130px; 
+      background: rgba(0, 0, 0, 0.76);
+      z-index: 1000;
+   }
+   .statuscontrol > .progress{
+      position: absolute;
+      left: -2px; 
+      right: 0px;
+      height:3px;
+   }   
+   .statuscontrol > .progress span{
+      background-color: #B04EF0; 
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      -webkit-transition-duration: 0.4s;
+      transition-duration: 0.4s;
+   }      
+   .statuscontrol > .statusbox{
+      text-align:center; 
+      margin-top:18px;
+   }
+   .statuscontrol > .statusbox > .statusmsg{
+      color:white;
+      font-size:20px;
+      margin-top:13px;
+   }
+</style>
+	
 </head>
 <body style="margin: 0;overflow: hidden;" onload="init();">
 <form id='shareForm' name="shareForm" enctype='multipart/form-data' method="post">
@@ -40,9 +158,9 @@ function callinit(data){
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
 					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<li id="shareBtn" ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<li id="hideBtn"  ><img title="숨기기"   src="/bbChat/img/icon/icon-pip-hide1.png"	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<li id="exitBtn"  ><img title="회의종료" src="/bbChat/img/icon/icon-exit1.png" 		 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 				</ul>
 			</div>
@@ -53,6 +171,38 @@ function callinit(data){
 		</div>
 	</div>
 
+	<div class="filearea" style="display: none;">
+		<div class="file_box">
+			<div style="height: 45px; padding-top: 3px;">
+				<img src="/bbChat/img/icon/upload95.png"
+					style="width: 35px; margin-right: 5px;" /><a>발표자료 업로드</a>
+			</div>
+			<ul>
+				<li><a>RTC소개자료.pptx</a></li>
+				<li><a>RTC소개자료.pptx</a></li>
+				<li><a>RTC소개자료.pptx</a></li>
+				<li><a>RTC소개자료.pptx</a></li>
+				<li><a>RTC소개자료.pptx</a></li>
+				<li><a>RTC소개자료.pptx</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="statuscontrol" style="display: none;">
+		<div class="progress">
+			<span style="width: 0%;"></span>
+		</div>
+		<div class="statusbox">
+			<div id="transfer" style="display: none;">
+				<img src="/bbChat/img/icon/transfer5.png" />
+			</div>
+			<div id="upload">
+				<img src="/bbChat/img/icon/upload95.png" />
+			</div>
+			<div class="statusmsg">
+				<span>sss</span>님의 발표자료를 변환 하고 있습니다.
+			</div>
+		</div>
+	</div>
 
 	<div id="chatbox" style="right: 0px; position:fixed; top:60px; height: 100%; z-index:130; display: none;" >
 		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;border-radius:0px;">
