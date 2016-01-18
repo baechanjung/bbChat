@@ -63,11 +63,7 @@ function initSocketUser() {
 	rtc.on("div_user", function() {
 		var data = user.recv.apply(this, arguments);
 		
-		
 		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div>");
-		
-		
-		//alert(data.id);
 		//alert(data.user);
 	});
 }
@@ -136,7 +132,29 @@ function initFileConvert(){
 	var convert = websocketConvert;
 
 	rtc.on("imgList",function(){
-		var data = convert.recv.apply(this, arguments);
+		var data 	 = convert.recv.apply(this, arguments);
+		var appendYn = false;
+		
+		if(data["MODE"] == "U"){
+			$(".file_box"	).find("ul").append("<li><a>"+data["ORG_FILE_NM"]+"</a></li>");
+			$(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , data);
+			$(".file_box"	).find("ul").find("li:last").bind("click" ,function(){
+				var obj = $(this).data("FILE_LIST");
+				imgListLoad(obj);
+				
+				websocketConvert.send(JSON.stringify({
+					"eventName" : "fileConvertSend",
+					"data" : {
+						"ROOM"       	: roomNm
+					  ,	"SIZE"       	: obj["SIZE"]
+					  ,	"FILE_NM"    	: obj["FILE_NM"]
+					  ,	"ORG_FILE_NM"   : obj["ORG_FILE_NM"]
+					  ,	"MODE"   		: "C" // C : 변경 ,  U : 업로드
+					}
+				}));
+			});
+		}
+		
 		imgListLoad(data);
 	});
 
@@ -177,11 +195,26 @@ function initFileConvert(){
 	});
 
 	rtc.on("showLoding",function(){
-		showLoding();
+		var data = convert.recv.apply(this, arguments);
+		showLoding(data.user);
 	});
-
+	
 	rtc.on("hideLoding",function(){
 		hideLoding();
+	});
+	
+	rtc.on("up_percentage",function(){
+		var data = convert.recv.apply(this, arguments);
+		upPercentage(data.per);
+	});
+	
+	rtc.on("convert_percentage",function(){
+		var data = convert.recv.apply(this, arguments);
+		convertPercentage(data.totPage,data.curPage);
+	});
+
+	rtc.on("convertLoding",function(){
+		convertLoding();
 	});
 	
 	rtc.on('closePT', function() {
@@ -218,17 +251,54 @@ function changeFile(o){
 		return;
 	}
 	
-	showLoding();
+	$(".filearea").hide();
+	
+	showLoding(userNm);
 
 	websocketConvert.send(JSON.stringify({
 		"eventName" : "show_Loding",
 		"data" : {
-			"ROOM"       : roomNm
+			 "ROOM"       : roomNm
+			,"USER"       : userNm
 		}
 	}));
 	
 	var fd  = new FormData();
 	var xhr = new XMLHttpRequest();
+	
+	xhr.upload.addEventListener('progress', function(e){
+
+		if (e.lengthComputable) {
+			uploaded = e.loaded;
+			total    = e.total;
+			var percentage = Math.round((e.loaded / e.total) * 100);
+			
+			
+			websocketConvert.send(JSON.stringify({
+				"eventName" : "up_percentage",
+				"data" : {
+					 "ROOM"       : roomNm
+					,"PER"        : percentage
+				}
+			}));
+			console.log(percentage);
+			
+			upPercentage(percentage);
+			
+            if(percentage == 100){
+            	convertLoding();
+        		
+        		websocketConvert.send(JSON.stringify({
+        			"eventName" : "convert_Loding",
+        			"data" : {
+        				"ROOM"       : roomNm
+        			}
+        		}));
+            }
+		}				
+	}, false);
+	
+	fd.append('ROOM'		 , roomNm	 );
 	fd.append('uploadingFile', o.files[0]);
 
 	xhr.open("POST","/fileconvert");
@@ -236,15 +306,6 @@ function changeFile(o){
 	xhr.send(fd);
 	
 	xhr.onreadystatechange = function(){
-
-		hideLoding();
-		
-		websocketConvert.send(JSON.stringify({
-			"eventName" : "hide_Loding",
-			"data" : {
-				"ROOM"       : roomNm
-			}
-		}));
 		
 		if(xhr.readyState == 4 && xhr.status == 200){
 			//console.log(xhr.responseText);
@@ -255,14 +316,35 @@ function changeFile(o){
 				if( jsonObj["SIZE"] > 0 ){
 
 					imgListLoad(jsonObj);
-					$("#canvasDraw").show();
+					
+					$(".file_box"	).find("ul").append("<li><a>"+jsonObj["ORG_FILE_NM"]+"</a></li>");
+					$(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , jsonObj);
+					$(".file_box"	).find("ul").find("li:last").bind("click" ,function(){
+						var obj = $(this).data("FILE_LIST");
+						imgListLoad(obj);
+						
+						websocketConvert.send(JSON.stringify({
+							"eventName" : "fileConvertSend",
+							"data" : {
+								"ROOM"       	: roomNm
+							  ,	"SIZE"       	: obj["SIZE"]
+							  ,	"FILE_NM"    	: obj["FILE_NM"]
+							  ,	"ORG_FILE_NM"   : obj["ORG_FILE_NM"]
+							  ,	"MODE"   		: "C" // C : 변경 ,  U : 업로드
+							}
+						}));
+					});
+					
+					$("#canvasDraw"	).show();
 					
 					websocketConvert.send(JSON.stringify({
 						"eventName" : "fileConvertSend",
 						"data" : {
-							"ROOM"       : roomNm
-						  ,	"SIZE"       : jsonObj["SIZE"]
-						  ,	"FILE_NM"    : jsonObj["FILE_NM"]
+							"ROOM"       	: roomNm
+						  ,	"SIZE"       	: jsonObj["SIZE"]
+						  ,	"FILE_NM"    	: jsonObj["FILE_NM"]
+						  ,	"ORG_FILE_NM"   : jsonObj["ORG_FILE_NM"]
+						  ,	"MODE"   		: "U" // C : 변경 ,  U : 업로드
 						}
 					}));
 				}
@@ -403,14 +485,41 @@ function nextBtn() {
 }
 
 
-function showLoding(){
-	document.getElementById("ProcessLayer").style.display = "block";	
-	document.getElementById("ProcessBox"  ).style.display = "block";
+function showLoding(param){
+	$(".statusmsg"	  ).find("span:eq(0)").html(param);
+	$(".statuscontrol").show();
 }
 
-function hideLoding (){
-	document.getElementById("ProcessLayer").style.display = "none";	
-	document.getElementById("ProcessBox"  ).style.display = "none";
+function hideLoding(){
+	$(".progress").find("span").css("width","0%");
+	$(".statuscontrol").hide();
+}
+
+function upPercentage(param){
+	$(".progress").find("span").css("width",param+"%");
+	$(".statusmsg").find("span:eq(1)").html("업로드");
+}
+
+function convertPercentage(totPage,curPage ){
+	var per = Number(curPage) / Number(totPage) * 100;
+	$(".progress").find("span").css("width",per+"%");
+	
+	if( curPage == totPage){
+		
+		websocketConvert.send(JSON.stringify({
+	   		"eventName" : "hideLoding",
+	   		"data" : {
+	   				"ROOM"       : roomNm
+	   		}
+	   	}));
+		
+	}
+	
+}
+
+function convertLoding (){
+	$(".progress" ).find("span").css("width","0%");
+	$(".statusmsg").find("span:eq(1)").html("변환");
 }
 
 
@@ -652,7 +761,7 @@ function init() {
 		               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
 		];
 		
-		openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y"});
+		openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y", closeBtn : "N"});
 		
 		openIframeLoad();
 		return;
@@ -758,6 +867,7 @@ function subdivideVideos() {
 				$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}else if( $(video).attr("id") == "you" ){
+				$("#div_remoteyou").html("");
 				$(video).attr("style"  ,"width: 100%; height: 100%;" );
 				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}
@@ -790,6 +900,7 @@ function subdivideVideos() {
 				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}else{
 				$("#div_remoteyou").attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
+				$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div>");
 			}
 			
 		
@@ -839,9 +950,11 @@ function cloneVideo(domId, socketId) {
 
 function removeVideo(socketId) { 
 	var video = document.getElementById('remote' + socketId);
+	var div   = document.getElementById('div_remote' + socketId);
 	if(video) {
 		videos.splice(videos.indexOf(video), 1);
 		video.parentNode.removeChild(video);
+		div.parentNode.removeChild(div);
 	}
 }
 
@@ -856,7 +969,8 @@ function addToChat(msg, img, id, color, user) {
 		//	msg = '<span style="color: ' + color + '; padding-left: 15px">' + user + '>>' + msg + '</span>';
 	        msgTag += "<li class=\"left clearfix\">                                                         	        	    ";
 		    msgTag += "    <span class=\"chat-img pull-left\">                                                  		        ";
-		    if(img != "" || img != null){
+		    
+		    if(img != ""){
 		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
 		    }else{
 		    	msgTag += "        <img src=\"/bbChat/img/icon/person_you.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";
@@ -880,7 +994,7 @@ function addToChat(msg, img, id, color, user) {
 	        	var currTime  = new Date().getTime();
 	        	var tempId    = id + "_" + rand();
 	        	
-	        	$("body"			).append("<div id='bubble"+tempId+"' class=\"bubble_box\" style=\"width:200px; position: absolute;\">"+msg+"</div>");
+	        	$("body"			).append("<div id='bubble"+tempId+"' class=\"bubble_box\" style=\"width:200px; position: absolute;overflow: hidden;white-space:nowrap; text-overflow:ellipsis;\">"+msg+"</div>");
 	        	$("#bubble"+tempId	).css("top"    , (offset.top  - 40) +"px");
 	        	$("#bubble"+tempId	).css("left"   , (offset.left - 80) +"px");
 	        	
@@ -895,7 +1009,7 @@ function addToChat(msg, img, id, color, user) {
 		//	msg = '<strong style="padding-left: 15px">' + userNm + '>>'  + msg + '</strong>';
 	        msgTag += "<li class=\"right clearfix\">                                                                    		";
 		    msgTag += "    <span class=\"chat-img pull-right\">                                                         		";
-		    if(img != "" || img != null){
+		    if(img != ""){
 		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
 		    }else{
 		    	msgTag += "        <img src=\"/bbChat/img/icon/person_me.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";

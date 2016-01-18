@@ -24,6 +24,19 @@ $(function($){
 	});
 	
 	$("#shareBtn").click("click",function(){
+		
+		if($(".statuscontrol").is(":hidden")){
+			if($(".filearea").is(":hidden")){
+				$(".filearea").show();
+			}else{
+				$(".filearea").hide();
+			}
+		}else{
+			alert("업로드 중인 파일이 있습니다.");
+		}
+	});
+	
+	$("#uploadBtn").click("click",function(){
 		$("#ifile").click();	
 	});
 	

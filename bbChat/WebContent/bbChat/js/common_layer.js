@@ -10,6 +10,7 @@ var layerPop = (function() {
 			,   frm     : option.frm     || ""
 			,   target  : option.target
 			,   loading : option.loading
+			,   closeBtn : option.closeBtn
 	 };
     */
     var options        = [];
@@ -44,7 +45,11 @@ var layerPop = (function() {
             	lhtml += "			<div class='pop-container'>																						";
             	lhtml += "				<div class='pop-conts'>																						";
             	if(opt.header != ""){
-            	lhtml += "				<div class='header-layer'><h3>"+opt.header+"</h3><a style='cursor:pointer;' class='btn_popclose' onclick='closeLayer();'><img src='/bbChat/img/btn/btn_pop_close.png'></a></div>																	";
+            	lhtml += "				<div class='header-layer'><h3>"+opt.header+"</h3>";
+            		if( opt.closeBtn != "N"){
+            			lhtml += "					<a style='cursor:pointer;' class='btn_popclose' onclick='closeLayer();'><img src='/bbChat/img/btn/btn_pop_close.png'></a>";
+            		}
+            	lhtml += "				</div>																	";
             	}
            
             	if(opt.frm !=""){
