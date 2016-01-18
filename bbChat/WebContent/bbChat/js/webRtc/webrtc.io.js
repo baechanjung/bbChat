@@ -26,7 +26,7 @@ if(window.mozRTCPeerConnection){
 
 	// Holds callbacks for certain events.
 	rtc._events = {};
-
+	
 	rtc.on = function(eventName, callback) {
 		rtc._events[eventName] = rtc._events[eventName] || [];
 		rtc._events[eventName].push(callback);
@@ -74,7 +74,7 @@ if(window.mozRTCPeerConnection){
 	rtc.connections = [];
 	// Stream-related variables.
 	rtc.streams = [];
-
+	
 	// Reference to the data channels
 	rtc.dataChannels = {};
 
@@ -143,11 +143,11 @@ if(window.mozRTCPeerConnection){
 			});
 
 			rtc.on('new_peer_connected', function(data) {
-				rtc.connections.push(data.socketId);
-
 				var pc = rtc.createPeerConnection(data.socketId);
+				
 				for (var i = 0; i < rtc.streams.length; i++) {
 					var stream = rtc.streams[i];
+					
 					pc.addStream(stream);        
 				}
 			});

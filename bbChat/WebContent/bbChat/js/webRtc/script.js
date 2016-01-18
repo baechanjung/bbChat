@@ -5,6 +5,15 @@ var imgSize  = 0;
 var imgIndex = 0;
 var imgPath  = [];
 
+var websocketUser = {
+	send: function(message) {
+		rtc._socket.send(message);
+	},
+	recv: function(message) {
+		return message;
+	}
+};
+
 var websocketChat = {
 	send: function(message) {
 		rtc._socket.send(message);
@@ -45,6 +54,23 @@ var websocketConvert = {
 			return message;
 		}
 	};
+
+
+function initSocketUser() {
+	
+	var user = websocketUser;
+
+	rtc.on("div_user", function() {
+		var data = user.recv.apply(this, arguments);
+		
+		
+		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div>");
+		
+		
+		//alert(data.id);
+		//alert(data.user);
+	});
+}
 
 function initChat() {
 	
@@ -98,9 +124,9 @@ function initChat() {
 	}, false);
 	
 	// receive_chat_msg ����
-	rtc.on(chat.event, function() {
+	rtc.on("receive_chat_msg", function() {
 		var data = chat.recv.apply(this, arguments);
-		addToChat(data.messages, data.img, data.color.toString(16),data.user);
+		addToChat(data.messages, data.img, data.id, data.color.toString(16),data.user);
 	});
 	
 }
@@ -638,7 +664,14 @@ function init() {
 			"video": true,
 			"audio": false
 		}, function(stream) {
+			var newDiv = document.createElement("div");
 			document.getElementById('you').src = URL.createObjectURL(stream);
+			newDiv.id     = "div_remoteyou";
+			document.getElementById('mainArea').appendChild(newDiv);
+			
+			$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
+			
+			
 			videos.push(document.getElementById('you'));
 			
 			roomNm    = decodeURI($("#roomNm").val());
@@ -652,6 +685,14 @@ function init() {
 				document.getElementById(clone.id).setAttribute("class", "");
 				rtc.attachStream(stream, clone.id);  
 				subdivideVideos();
+				
+				websocketUser.send(JSON.stringify({
+					"eventName": "get_div_user",
+					"data": {
+						"id"    : socketId,
+					}
+				}));
+				
 			});
 
 			rtc.on('disconnect stream', function(data) {
@@ -664,9 +705,8 @@ function init() {
 			initDraw();      	// canvas 설정
 			subdivideVideos(); 	// 비디오 크기 설정 
 			initFileConvert(); 	// 파일 변환 설정
+			initSocketUser(); 	
 			
-			
-			subdivideVideos();
 		});
 		
 	} else {
@@ -707,15 +747,19 @@ function subdivideVideos() {
 				right += 160;
 			}
 			if( $(video).attr("id") != "you" ){
+				var divId = "div_"+$(video).attr("id");
+				
 				if($(video).is(":hidden")){
 					visible = "none;";
 				}else{
 					visible = "block;";
 				}
-				$(video).attr("width"  ,"150px;" );
-				$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+				$(video		).attr("width"  ,"150px;" );
+				$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}else if( $(video).attr("id") == "you" ){
 				$(video).attr("style"  ,"width: 100%; height: 100%;" );
+				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}
 		}
 	}else{
@@ -740,6 +784,15 @@ function subdivideVideos() {
 			$(video).attr("width"   ,"150px;" );
 			$(video).attr("height"  ,"150px;" );
 			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+			
+			if( $(video).attr("id") != "you" ){
+				var divId = "div_"+$(video).attr("id");
+				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
+			}else{
+				$("#div_remoteyou").attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
+			}
+			
+		
 		}
 		
 	}
@@ -767,13 +820,18 @@ function moveVideos(){
 }
 
 function cloneVideo(domId, socketId) {
-	var video = document.getElementById(domId);
-	var clone = video.cloneNode(false);
-	clone.id = "remote" + socketId;
-	clone.width  = "150";
-	clone.height = "150";
+	var newDiv    = document.createElement("div");
+	var video     = document.getElementById(domId);
+	var clone     = video.cloneNode(false);
+	clone.id      = "remote" + socketId;
+	clone.width   = "150";
+	clone.height  = "150";
+	newDiv.id     = "div_remote" + socketId;
+	newDiv.width  = "150";
+	newDiv.height = "150";
 //	document.getElementById('videos').appendChild(clone);
 	document.getElementById('mainArea').appendChild(clone);
+	document.getElementById('mainArea').appendChild(newDiv);
 //	$("#userListArea").find(".panel-body").append(clone);
 	videos.push(clone); 
 	return clone;
@@ -787,7 +845,7 @@ function removeVideo(socketId) {
 	}
 }
 
-function addToChat(msg, img, color, user) {
+function addToChat(msg, img, id, color, user) {
 	var messages = document.getElementById('messages');
 	msg = sanitize(msg);
 	// �޼��� �� ������
@@ -816,6 +874,23 @@ function addToChat(msg, img, color, user) {
 		    msgTag += "        </p>                                                                                   			";
 		    msgTag += "    </div>                                                                                     			";
 	        msgTag += "</li>                                                                                          			";
+	        
+	        if($("#chatbox").is(":hidden")){
+	        	var offset    = $("#remote"+id).offset();
+	        	var currTime  = new Date().getTime();
+	        	var tempId    = id + "_" + rand();
+	        	
+	        	$("body"			).append("<div id='bubble"+tempId+"' class=\"bubble_box\" style=\"width:200px; position: absolute;\">"+msg+"</div>");
+	        	$("#bubble"+tempId	).css("top"    , (offset.top  - 40) +"px");
+	        	$("#bubble"+tempId	).css("left"   , (offset.left - 80) +"px");
+	        	
+	        	
+	        	setTimeout(function(){
+	        		removeBubbleFn("bubble"+tempId);
+	        	}, 1500);//1.5초 후에 사라짐
+	        	
+	        }
+	        
 		} else { // 내꺼 
 		//	msg = '<strong style="padding-left: 15px">' + userNm + '>>'  + msg + '</strong>';
 	        msgTag += "<li class=\"right clearfix\">                                                                    		";
@@ -871,6 +946,19 @@ function addToChat(msg, img, color, user) {
 	messages.scrollTop = 10000;
 }
 
+function removeBubbleFn(id)
+{
+	$("#"+id).remove();
+}
+
+function rand(){
+	var text = "";
+	var possible = "0123456789";
+	for (var i = 0; i < 3; i++)
+		text += possible.charAt(Math.floor(Math.random()* possible.length));
+	return text;
+}
+
 function getToDay (){
 	var now  =new Date(); 
 	var year =now.getFullYear();
@@ -885,7 +973,7 @@ function getToDay (){
 	
 	currentDate += String(hour>9?hour:'0'+hour)+":"+String(min>9?min:'0'+min)+":"+String(sec>9?sec:'0'+sec);
 	 
-	return currentDate;
+	return String(hour>9?hour:'0'+hour)+":"+String(min>9?min:'0'+min)+":"+String(sec>9?sec:'0'+sec);
 }
 
 function sanitize(msg) {
