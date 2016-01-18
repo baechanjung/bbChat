@@ -34,9 +34,12 @@ import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import bbchat.server.WebSocketServer;
+
 public class fileconvert extends HttpServlet  {
 
 	private static final long serialVersionUID = 1L;
+	private String roomNum = "";
 
 	
 	protected void doPost( HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -88,7 +91,16 @@ public class fileconvert extends HttpServlet  {
                 FileItem item = (FileItem) iter.next(); //아이템 얻기
                  //4. FileItem이 폼 입력 항목인지 여부에 따라 알맞은 처리
                 if(item.isFormField()){ //파일이 아닌경우
+                	String name = item.getFieldName();
+            		String value = item.getString("UTF-8");
+            		
+            		System.out.println("name =============" + name);
+            		System.out.println("value =============" + value);
+            		
+            		roomNum = value;
+            		
                 } else { //파일인 경우
+                	System.out.println("convert######################################################");
                 	processUploadFile(out, item, contextRootPath, response);
                 }
             }
@@ -101,6 +113,7 @@ public class fileconvert extends HttpServlet  {
 			//System.out.println(outString);
 			out.print(outString);			
 			*/
+			
 		} catch(Exception e) {	
 			e.printStackTrace();
 			out.print("{\"result\":\"500\"");
@@ -119,6 +132,7 @@ public class fileconvert extends HttpServlet  {
 		String 		FILE_CNT    = ""; 									//리턴 파일수
 		JSONObject 	temp     	= new JSONObject();
 		
+		
 		FileInputStream is = (FileInputStream)item.getInputStream();
 		
 		if(".ppt".equals( fileName.substring(fileName.lastIndexOf(".")) )){
@@ -128,13 +142,17 @@ public class fileconvert extends HttpServlet  {
 			SlideShow ppt = new SlideShow(is);
 			is.close();
 			
-			double zoom = 3; // magnify it by 2
+			double zoom = 2; // magnify it by 2
 			AffineTransform at = new AffineTransform();
 			at.setToScale(zoom, zoom);
 			
 			Dimension pgsize = ppt.getPageSize();
 			
+			
 			Slide[] slide = ppt.getSlides();
+			
+			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
+			
 			for (int i = 0; i < slide.length; i++) {
 				
 				BufferedImage img = new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
@@ -150,6 +168,8 @@ public class fileconvert extends HttpServlet  {
 				javax.imageio.ImageIO.write(img, "gif", outImg);
 				
 				outImg.close();
+				
+				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
 			}
 			
 			FILE_CNT = Integer.toString( slide.length );
@@ -161,13 +181,15 @@ public class fileconvert extends HttpServlet  {
 			XMLSlideShow ppt = new XMLSlideShow(is);
 			is.close();
 			
-			double zoom = 3; // magnify it by 2
+			double zoom = 2; // magnify it by 2
 			AffineTransform at = new AffineTransform();
 			at.setToScale(zoom, zoom);
 			
 			Dimension pgsize = ppt.getPageSize();
 			
 			XSLFSlide[] slide = ppt.getSlides();
+			
+			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
 			
 			for (int i = 0; i < slide.length; i++) {
 				System.out.println(i);
@@ -183,6 +205,8 @@ public class fileconvert extends HttpServlet  {
 				
 				javax.imageio.ImageIO.write(img, "gif", outImg);
 				outImg.close();
+				
+				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
 			}
 			
 			FILE_CNT = Integer.toString( slide.length );
@@ -209,19 +233,26 @@ public class fileconvert extends HttpServlet  {
 			
 			PDFImageWriter imageWriter = new PDFImageWriter();
 			
+			WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
+			
 			try {
 				
-				imageWriter.writeImage(
-						pdfDoc, 
-						imageFormat, 
-						"",
-						1, //이미지 출력 시작페이지
-						pdfPageCn, //이미지 출력 종료페이지
-						//"C:\\Users\\admin\\git\\bbchat\\bbChat\\WebContent\\file\\img\\slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
-						"/WAS_DATA/webRoot/prj_0001/src/file/img/slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
-						BufferedImage.TYPE_INT_RGB,
-						300 //이미지 품질  300 추천
-				);
+				for(int i = 1 ; i < pdfPageCn + 1 ; i++){
+					
+					imageWriter.writeImage(
+							pdfDoc, 
+							imageFormat, 
+							"",
+							i, //이미지 출력 시작페이지
+							i, //이미지 출력 종료페이지
+							"C:\\Users\\admin\\git\\bbchat\\bbChat\\WebContent\\file\\img\\slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+							//"/WAS_DATA/webRoot/prj_0001/src/file/img/slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+							BufferedImage.TYPE_INT_RGB,
+							150 //이미지 품질  300 추천
+					);
+					
+					WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) , Integer.toString(i));
+				}
 				
 			} catch (IOException ioe) {
 				System.out.println("PDF 이미지저장 실패 : " + ioe.getMessage());
@@ -230,9 +261,10 @@ public class fileconvert extends HttpServlet  {
 			FILE_CNT = Integer.toString( pdfPageCn );
 			
 		}
-		temp.put("RES_CD"	,	"0000"		);
-		temp.put("SIZE"  	,	FILE_CNT	);
-		temp.put("FILE_NM"  ,	FILE_NM		);
+		temp.put("RES_CD"		,	"0000"			);
+		temp.put("SIZE"  		,	FILE_CNT		);
+		temp.put("FILE_NM"  	,	FILE_NM			);
+		temp.put("ORG_FILE_NM"  ,	fileName		);
 		
 		response.setContentType("text/html; charset=utf-8");
 		
