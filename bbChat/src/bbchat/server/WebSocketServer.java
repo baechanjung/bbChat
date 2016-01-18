@@ -151,6 +151,8 @@ public class WebSocketServer {
 				mouseup  (jData , userSession);
 			}else if( "drawClick".equals(eventNm) ){
 				drawClick  (jData , userSession);
+			}else if( "get_div_user".equals(eventNm) ){
+				getDivUser  (jData , userSession);
 			}
 			
 		} catch (Exception e) {
@@ -199,7 +201,7 @@ public class WebSocketServer {
 					
 					sendData = new JSONObject();
 					
-					sendData.put("socketId", socket.getId());
+					sendData.put("socketId"	, socket.getId());
 					
 					sockectSend(soc ,"new_peer_connected", sendData );
 					
@@ -251,6 +253,7 @@ public class WebSocketServer {
 				sendData.put("user"		, strUser					);
 				sendData.put("color"	, strColor				    );
 				sendData.put("img"		, imgs.get(socket.getId())	);
+				sendData.put("id"		, socket.getId()			);
 				
 				
 				
@@ -480,6 +483,20 @@ public class WebSocketServer {
 				
 			}
 		}
+	}
+	
+	
+	public void getDivUser( JSONObject data, Session socket ){
+		String strId  	 = (String)data.get("id");
+		String user 	 = (String)users.get(strId);
+		
+		JSONObject sendData  = new JSONObject();
+		
+		sendData.put("user"	, user 		);
+		sendData.put("id"	, strId 	);
+		
+		sockectSend(socket ,"div_user", sendData );
+		
 	}
 	
 	
