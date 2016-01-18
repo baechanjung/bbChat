@@ -249,6 +249,7 @@ $(function(){
  * 버튼 이벤트 처리
  */
 function fnNext( o , eleId ){
+	
 	/*회의실 개설*/
 	if( eleId == "step3" ){
 		$('#frm'    ).attr('action','/bizmeet/room');
