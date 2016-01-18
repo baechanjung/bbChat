@@ -137,8 +137,10 @@ public class WebSocketServer {
 				sendAnswer  (jData , userSession);
 			}else if( "show_Loding".equals(eventNm) ){
 				showLoding  (jData , userSession);
-			}else if( "hide_Loding".equals(eventNm) ){
+			}else if( "hideLoding".equals(eventNm) ){
 				hideLoding  (jData , userSession);
+			}else if( "convert_Loding".equals(eventNm) ){
+				convertLoding  (jData , userSession);
 			}else if( "fileConvertSend".equals(eventNm) ){
 				fileConvert  (jData , userSession);
 			}else if( "imgListClick".equals(eventNm) ){
@@ -268,7 +270,9 @@ public class WebSocketServer {
 	public void fileConvert( JSONObject data, Session socket ){
 		String strRoom  	 = (String)data.get("ROOM");
 		String strFileNm  	 = (String)data.get("FILE_NM");
+		String strOrgFileNm  = (String)data.get("ORG_FILE_NM");
 		String strSize  	 = (String)data.get("SIZE");
+		String strMode  	 = (String)data.get("MODE");
 		
 		List   roomUserlist  = (List)rooms.get(strRoom);
 		
@@ -284,8 +288,10 @@ public class WebSocketServer {
 				
 				sendData = new JSONObject();
 				
-				sendData.put("FILE_NM"	, strFileNm	);
-				sendData.put("SIZE"		, strSize	);
+				sendData.put("FILE_NM"		, strFileNm	);
+				sendData.put("SIZE"			, strSize	);
+				sendData.put("ORG_FILE_NM"	, strOrgFileNm	);
+				sendData.put("MODE"			, strMode	);
 				
 				sockectSend(soc ,"imgList", sendData );
 				
@@ -327,8 +333,11 @@ public class WebSocketServer {
 	
 	public void showLoding( JSONObject data, Session socket ){
 		String strRoom  	 = (String)data.get("ROOM");
+		String strUser  	 = (String)data.get("USER");
 		
 		List   roomUserlist  = (List)rooms.get(strRoom);
+		
+		JSONObject sendData  = null;
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
@@ -338,7 +347,11 @@ public class WebSocketServer {
 				
 				Session soc = getSocket(id);
 				
-				sockectSend(soc ,"showLoding", null );
+				sendData = new JSONObject();
+				
+				sendData.put("user"	, strUser	);
+				
+				sockectSend(soc ,"showLoding", sendData );
 				
 			}
 		}
@@ -352,12 +365,29 @@ public class WebSocketServer {
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
 			String id = (String)roomUserlist.get(i);
+			
+				
+			Session soc = getSocket(id);
+				
+			sockectSend(soc ,"hideLoding", null );
+				
+		}
+	}
+	
+	public void convertLoding( JSONObject data, Session socket ){
+		String strRoom  	 = (String)data.get("ROOM");
+		
+		List   roomUserlist  = (List)rooms.get(strRoom);
+		
+		for (int i = 0; i < roomUserlist.size(); i++) {
+			
+			String id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
 				
 				Session soc = getSocket(id);
 				
-				sockectSend(soc ,"hideLoding", null );
+				sockectSend(soc ,"convertLoding", null );
 				
 			}
 		}
@@ -550,7 +580,7 @@ public class WebSocketServer {
 	}
 	
 	
-	public Session getSocket(String id){
+	public static Session getSocket(String id){
 		Session soc = null;
 		
 		Iterator<Session> iterator = sessionUsers.iterator();
@@ -565,7 +595,7 @@ public class WebSocketServer {
 	}
 	
 	
-	public void sockectSend( Session soc , String eventNm, JSONObject json){
+	public static void sockectSend( Session soc , String eventNm, JSONObject json){
 		
 		JSONObject jmsg  = new JSONObject();
 		
@@ -578,6 +608,40 @@ public class WebSocketServer {
 			soc.getBasicRemote().sendText(jmsg.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void fileConverPercent(String strRoom, String totPage, String curPage){
+		System.out.println("###################################");
+		System.out.println("###################################");
+		System.out.println("###################################");
+		System.out.println("###################################" + totPage);
+		System.out.println("###################################" + curPage );
+		System.out.println("###################################");
+		System.out.println("###################################");
+		System.out.println("###################################");
+		
+		List   roomUserlist  = (List)rooms.get(strRoom);
+		
+		JSONObject sendData  = null;
+		
+		for (int i = 0; i < roomUserlist.size(); i++) {
+			
+			String id = (String)roomUserlist.get(i);
+				
+			Session soc = getSocket(id);
+			
+			if(soc != null){
+				
+				sendData = new JSONObject();
+				
+				sendData.put("totPage"	, totPage		);
+				sendData.put("curPage"	, curPage		);
+				
+				sockectSend(soc ,"convert_percentage", sendData );
+			}
+				
 		}
 		
 	}
