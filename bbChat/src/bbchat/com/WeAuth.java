@@ -54,16 +54,13 @@ public class WeAuth extends HttpServlet  {
 				session.setAttribute("IMG_PATH", (String)mUser.get("IMG_PATH"));				
 			} 
 			/*응답 실패 처리*/
-			else{
+			else{ 
 				throw new BbChatException((String)mUserInfo.get("RSLT_MSG"));
 			}
 		}else{
 			authData = pc.errorTrace();
 			throw new BbChatException((String)authData.get("MESSAGE"));
 		}
-		
-		System.out.println( request.getRequestURI() );
-		System.out.println( request.getRequestURL().toString() );
 		
 		response.sendRedirect("/bizmeet/main");
 	}

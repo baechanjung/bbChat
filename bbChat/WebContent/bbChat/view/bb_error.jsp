@@ -32,8 +32,11 @@ if("404".equals( strErrCode )){
 	<meta http-equiv="Cache-Control" content="No-Cache" />
 	<meta http-equiv="Pragma" content="No-Cache" />
 </head>
-<body>
-<h3><%=strErrTitle%></h3>
-<h4><%=strErrMsg%></h4>
+<body style="background:#E6E6E6;">
+	<div style="text-align:center;">
+		<img src="/bbChat/img/icon/website21.png" style="padding-top:50px;"/>
+		<h3 style="font-size:27px;margin-bottom:80px;"><%=strErrTitle%></h3>
+		<h4><%=strErrMsg%></h4>
+	</div>
 </body>
 </html>

@@ -29,7 +29,7 @@
 			</div>
 			
 			<div class="group" >
-				<input id="USER_NM"  name="USER_NM" type="text" required> <span class="highlight"></span>
+				<input id="USER_NM"  name="USER_NM" type="text" style="padding-right:0px; padding-left:0px;" required> <span class="highlight"></span>
 				<span class="bar"></span> <label>닉네임</label>
 			</div>
 		</div>
