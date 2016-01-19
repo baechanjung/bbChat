@@ -245,10 +245,10 @@ public class fileconvert extends HttpServlet  {
 							"",
 							i, //이미지 출력 시작페이지
 							i, //이미지 출력 종료페이지
-							"C:\\Users\\admin\\git\\bbchat\\bbChat\\WebContent\\file\\img\\slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
-							//"/WAS_DATA/webRoot/prj_0001/src/file/img/slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+							//"C:\\Users\\admin\\git\\bbchat\\bbChat\\WebContent\\file\\img\\slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+							"/WAS_DATA/webRoot/prj_0001/src/file/img/slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
 							BufferedImage.TYPE_INT_RGB,
-							150 //이미지 품질  300 추천
+							100 //이미지 품질  300 추천
 					);
 					
 					WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) , Integer.toString(i));
