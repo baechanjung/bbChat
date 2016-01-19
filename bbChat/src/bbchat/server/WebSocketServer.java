@@ -288,10 +288,11 @@ public class WebSocketServer {
 				
 				sendData = new JSONObject();
 				
-				sendData.put("FILE_NM"		, strFileNm	);
-				sendData.put("SIZE"			, strSize	);
-				sendData.put("ORG_FILE_NM"	, strOrgFileNm	);
-				sendData.put("MODE"			, strMode	);
+				sendData.put("FILE_NM"		, strFileNm			);
+				sendData.put("SIZE"			, strSize			);
+				sendData.put("ORG_FILE_NM"	, strOrgFileNm		);
+				sendData.put("MODE"			, strMode			);
+				sendData.put("SHARE_ID"		, socket.getId()	);
 				
 				sockectSend(soc ,"imgList", sendData );
 				
