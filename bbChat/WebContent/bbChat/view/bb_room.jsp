@@ -157,10 +157,13 @@ function callinit(data){
 		<div class="header_inner" style="text-align: center;width: 100%;">
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
-					<li id="cuyBtn"   ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="inviteBtn"><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="shareBtn" ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="cuyBtn"    ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="inviteBtn" ><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	  style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="shareBtn"  ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<li id="expandBtn" ><img title="확대"     src="/bbChat/img/icon/icon_expand.png"	 	  style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					<!-- 
 					<li id="hideBtn"  ><img title="숨기기"   src="/bbChat/img/icon/icon-pip-hide1.png"	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
+					 -->
 					<li id="exitBtn"  ><img title="회의종료" src="/bbChat/img/icon/icon-exit1.png" 		 style="width: 45px;height: 45px; cursor: pointer;"> </li>
 				</ul>
 			</div>
