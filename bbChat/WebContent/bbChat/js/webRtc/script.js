@@ -426,7 +426,7 @@ function imgListLoad( jsonObj ){
 	$("#filePage"   ).show();
 	$("#exit" 	    ).show();
 
-	initSlide( jsonObj["SIZE"] );
+	//initSlide( jsonObj["SIZE"] );
 	
 }
 
@@ -496,8 +496,10 @@ function hideLoding(){
 }
 
 function upPercentage(param){
-	$(".progress").find("span").css("width",param+"%");
-	$(".statusmsg").find("span:eq(1)").html("업로드");
+	$("#upload" 	).show();
+	$("#transfer"	).hide();
+	$(".progress"	).find("span").css("width",param+"%");
+	$(".statusmsg"	).find("span:eq(1)").html("업로드");
 }
 
 function convertPercentage(totPage,curPage ){
@@ -518,6 +520,8 @@ function convertPercentage(totPage,curPage ){
 }
 
 function convertLoding (){
+	$("#transfer" ).show();
+	$("#upload"	  ).hide();
 	$(".progress" ).find("span").css("width","0%");
 	$(".statusmsg").find("span:eq(1)").html("변환");
 }
@@ -752,7 +756,7 @@ function imgChange(path){
 function init() {
 	if( $("#roomNm").val() == "" ){
 		alert("잘못된 접근 경로 입니다.");
-		location.href="/bizMeet/main";
+		location.href="/bizmeet/main";
 		return;
 	}
 
