@@ -297,7 +297,8 @@ if(window.mozRTCPeerConnection){
 				onSuccess(stream);
 			}, function() {
 				alert("Could not connect stream.");
-				onFail();
+				//onFail();
+				onSuccess(null);
 			});
 		} else {
 			alert('webRTC is not yet supported in this browser.');

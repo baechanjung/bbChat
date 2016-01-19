@@ -1,6 +1,6 @@
 var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-var userNm,roomNm;
+var userNm,roomNm,fileOwner=false;
 var imgSize  = 0;
 var imgIndex = 0;
 var imgPath  = [];
@@ -63,7 +63,7 @@ function initSocketUser() {
 	rtc.on("div_user", function() {
 		var data = user.recv.apply(this, arguments);
 		
-		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div>");
+		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'>");
 		//alert(data.user);
 	});
 }
@@ -142,6 +142,11 @@ function initFileConvert(){
 				var obj = $(this).data("FILE_LIST");
 				imgListLoad(obj);
 				
+				fileOwner = true;
+				$("[name='shareIcon']").hide();
+				$("#div_remoteyou").find("img").show();
+				$("#exit").show();
+				
 				websocketConvert.send(JSON.stringify({
 					"eventName" : "fileConvertSend",
 					"data" : {
@@ -156,6 +161,11 @@ function initFileConvert(){
 		}
 		
 		imgListLoad(data);
+		
+		fileOwner = false;
+		$("#div_remoteyou").find("img").hide();
+		$("#div_remote"+data["SHARE_ID"]).find("img").show();
+		$("#exit").hide();
 	});
 
 	rtc.on("imgChange",function(){
@@ -317,11 +327,21 @@ function changeFile(o){
 
 					imgListLoad(jsonObj);
 					
+					fileOwner = true;
+					$("[name='shareIcon']").hide();
+					$("#div_remoteyou").find("img").show();
+					$("#exit").show();
+					
 					$(".file_box"	).find("ul").append("<li><a>"+jsonObj["ORG_FILE_NM"]+"</a></li>");
 					$(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , jsonObj);
 					$(".file_box"	).find("ul").find("li:last").bind("click" ,function(){
 						var obj = $(this).data("FILE_LIST");
 						imgListLoad(obj);
+						
+						fileOwner = true;
+						$("[name='shareIcon']").hide();
+						$("#div_remoteyou").find("img").show();
+						$("#exit").show();
 						
 						websocketConvert.send(JSON.stringify({
 							"eventName" : "fileConvertSend",
@@ -389,16 +409,16 @@ function imgListLoad( jsonObj ){
 		   	
 		   	$("#filePage" ).find("span:eq(0)").html(imgIndex + 1);
 		   	
-		   	
-		   	websocketConvert.send(JSON.stringify({
-		   		"eventName" : "imgListClick",
-		   		"data" : {
-		   				"ROOM"       : roomNm
-		   			,	"PATH"       : $(this).find("img").attr("src")
-		   			,	"IDX"        : String(imgIndex)
-		   		}
-		   	}));
-		   	
+		   	if(fileOwner){
+			   	websocketConvert.send(JSON.stringify({
+			   		"eventName" : "imgListClick",
+			   		"data" : {
+			   				"ROOM"       : roomNm
+			   			,	"PATH"       : $(this).find("img").attr("src")
+			   			,	"IDX"        : String(imgIndex)
+			   		}
+			   	}));
+			}
 		});
 		
 		
@@ -412,7 +432,8 @@ function imgListLoad( jsonObj ){
 	subdivideVideos();
 	
 	
-	imgSize = jsonObj["SIZE"];
+	imgSize  = jsonObj["SIZE"];
+	imgIndex = 0;
 	
 	if($("#chatbox").is(":hidden")){
 		$("#exit"	).css( "right" , "10px" );
@@ -448,15 +469,17 @@ function preBtn() {
 	
 	$("#canvasImg" ).attr("src"   , imgPath[imgIndex] );
 	$("#canvasDraw").attr("width" , $("#canvasDraw").attr("width"));
-   
-	websocketConvert.send(JSON.stringify({
-   		"eventName" : "imgListClick",
-   		"data" : {
-   				"ROOM"       : roomNm
-   			,	"PATH"       : imgPath[imgIndex]
-			,	"IDX"        : String(imgIndex)
-   		}
-   	}));
+    
+	if(fileOwner){
+		websocketConvert.send(JSON.stringify({
+	   		"eventName" : "imgListClick",
+	   		"data" : {
+	   				"ROOM"       : roomNm
+	   			,	"PATH"       : imgPath[imgIndex]
+				,	"IDX"        : String(imgIndex)
+	   		}
+	   	}));
+	}
 	
 }
 
@@ -474,14 +497,16 @@ function nextBtn() {
 	$("#canvasImg" ).attr("src"   , imgPath[imgIndex] );
 	$("#canvasDraw").attr("width" , $("#canvasDraw").attr("width"));
    	
-	websocketConvert.send(JSON.stringify({
-   		"eventName" : "imgListClick",
-   		"data" : {
-   				"ROOM"       : roomNm
-   			,	"PATH"       : imgPath[imgIndex]
-			,	"IDX"        : String(imgIndex)	
-   		}
-   	}));
+	if(fileOwner){
+		websocketConvert.send(JSON.stringify({
+	   		"eventName" : "imgListClick",
+	   		"data" : {
+	   				"ROOM"       : roomNm
+	   			,	"PATH"       : imgPath[imgIndex]
+				,	"IDX"        : String(imgIndex)	
+	   		}
+	   	}));
+	}
 }
 
 
@@ -570,63 +595,69 @@ function initDraw() {
 	*/
 	
 	$("#canvasDraw").bind('mousedown', function(e) {
-		eventObject.click = true;
-		var offset, type, x, y;
-		type = e.handleObj.type;
-		offset = $(this).offset();
-		eventObject.x = e.offsetX;
-		eventObject.y = e.offsetY;
-		
-		draw.send(JSON.stringify({
-			"eventName": "mousedown",
-			"data": {
-				"room": room,
-				'x'   : eventObject.x,
-				'y'   : eventObject.y,
-				'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
-				'sendY': $("#canvasDraw"   ).attr ("height").replace("px",""),
-				'click': true
-			}
-		}));
-	});
-	
-	$("#canvasDraw").bind('mouseup'  , function(e) {
-		eventObject.click = false;
-		
-		picture.canvas  = document.getElementById("canvasDraw");
-		picture.context = picture.canvas.getContext("2d");		
-		picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
-		
-		draw.send(JSON.stringify({
-			"eventName": "mouseup",
-			"data": {
-				"room": room,
-				"click": false
-			}
-		}));
-	});
-	
-	$("#canvasDraw").bind('mousemove', function(e) {
-		if (eventObject.click) {
+		if(fileOwner){
+			eventObject.click = true;
 			var offset, type, x, y;
 			type = e.handleObj.type;
 			offset = $(this).offset();
-			x = e.offsetX;// - offset.left;
-			y = e.offsetY;// - offset.top;
-			
-			drawing(x, y ,color);
+			eventObject.x = e.offsetX;
+			eventObject.y = e.offsetY;
 			
 			draw.send(JSON.stringify({
-				"eventName": "drawClick",
+				"eventName": "mousedown",
 				"data": {
-					"room" : room,
-					'x'    : x,
-					'y'    : y,
-					'color': color,
+					"room": room,
+					'x'   : eventObject.x,
+					'y'   : eventObject.y,
 					'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
-					'sendY': $("#canvasDraw"   ).attr ("height").replace("px","")
+					'sendY': $("#canvasDraw"   ).attr ("height").replace("px",""),
+					'click': true
 				}
 			}));
+		}
+	});
+	
+	$("#canvasDraw").bind('mouseup'  , function(e) {
+		if(fileOwner){
+			eventObject.click = false;
+			
+			picture.canvas  = document.getElementById("canvasDraw");
+			picture.context = picture.canvas.getContext("2d");		
+			picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
+			
+			draw.send(JSON.stringify({
+				"eventName": "mouseup",
+				"data": {
+					"room": room,
+					"click": false
+				}
+			}));
+		}
+	});
+	
+	$("#canvasDraw").bind('mousemove', function(e) {
+		if(fileOwner){
+			if (eventObject.click) {
+				var offset, type, x, y;
+				type = e.handleObj.type;
+				offset = $(this).offset();
+				x = e.offsetX;// - offset.left;
+				y = e.offsetY;// - offset.top;
+				
+				drawing(x, y ,color);
+				
+				draw.send(JSON.stringify({
+					"eventName": "drawClick",
+					"data": {
+						"room" : room,
+						'x'    : x,
+						'y'    : y,
+						'color': color,
+						'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
+						'sendY': $("#canvasDraw"   ).attr ("height").replace("px","")
+					}
+				}));
+			}
 		}
 	});
 	
@@ -668,37 +699,19 @@ function initDraw() {
 		picture.context = picture.canvas.getContext("2d");		
 		picture.context.clearRect(eventObject.x -3 , eventObject.y -3, 20, 20);
 	});
-	/*
-	rtc.on('imgChange', function() {
-		alert('??');
-		var data = draw.recv.apply(this, arguments);
-		imgChange(data.path);
-	});
-	*/
 }
 
 function closePT(){
 	
+	$("#fileShareArea"	  ).hide();
+	$("#next" 			  ).hide();
+	$("#filePage"   	  ).hide();
+	$("#exit" 	    	  ).hide();
+	$("#ifile"            ).val("");
+	$("[name='shareIcon']").hide();
 	
-	$("#fileShareArea"	).hide();
-	$("#next" 			).hide();
-	$("#filePage"   	).hide();
-	$("#exit" 	    	).hide();
-	$("#ifile"          ).val("");
+	fileOwner = false;
 	
-	/*
-	$("#exit"	  	 ).hide();
-	$("#pre" 	  	 ).hide();
-	$("#next"	  	 ).hide();
-	$("#canvasImg"	 ).hide();
-	$("#userListArea").hide();
-	$("#canvasDraw"  ).hide();
-	$("#ifile"       ).val("");
-	$("#share-screen").show();
-	$("#screen-share-video").remove();
-	$("#menu-toc" 	 ).find("center").html("<ul id=\"slideList\"></ul>");
-	$("#mainArea" 	 ).find("video").show();
-	*/
 	subdivideVideos();
 }
 
@@ -904,7 +917,11 @@ function subdivideVideos() {
 				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}else{
 				$("#div_remoteyou").attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
-				$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div>");
+				if( $("#div_remoteyou").find("img").is(":hidden") ){
+					$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
+				}else{
+					$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:inline;' name='shareIcon' >");
+				}
 			}
 			
 		
