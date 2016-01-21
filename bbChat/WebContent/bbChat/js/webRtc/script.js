@@ -1,6 +1,6 @@
 var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-var userNm,roomNm,fileOwner=false;
+var userNm,roomNm,fileOwner=false,mainView="remoteyou";
 var imgSize  = 0;
 var imgIndex = 0;
 var imgPath  = [];
@@ -288,7 +288,7 @@ function changeFile(o){
 				"eventName" : "up_percentage",
 				"data" : {
 					 "ROOM"       : roomNm
-					,"PER"        : percentage
+					,"PER"        : String(percentage)
 				}
 			}));
 			console.log(percentage);
@@ -516,20 +516,21 @@ function showLoding(param){
 }
 
 function hideLoding(){
-	$(".progress").find("span").css("width","0%");
+	$(".progress").find("span:eq(0)").css("width","0%");
+	$(".progress").find("span:eq(1)").css("width","0%");
 	$(".statuscontrol").hide();
 }
 
 function upPercentage(param){
 	$("#upload" 	).show();
 	$("#transfer"	).hide();
-	$(".progress"	).find("span").css("width",param+"%");
+	$(".progress"	).find("span:eq(0)").css("width",param+"%");
 	$(".statusmsg"	).find("span:eq(1)").html("업로드");
 }
 
 function convertPercentage(totPage,curPage ){
 	var per = Number(curPage) / Number(totPage) * 100;
-	$(".progress").find("span").css("width",per+"%");
+	$(".progress").find("span:eq(1)").css("width",per+"%");
 	
 	if( curPage == totPage){
 		
@@ -547,7 +548,7 @@ function convertPercentage(totPage,curPage ){
 function convertLoding (){
 	$("#transfer" ).show();
 	$("#upload"	  ).hide();
-	$(".progress" ).find("span").css("width","0%");
+	$(".progress" ).find("span:eq(1)").css("width","0%");
 	$(".statusmsg").find("span:eq(1)").html("변환");
 }
 
@@ -791,23 +792,26 @@ function init() {
 			"audio": false
 		}, function(stream) {
 			var newDiv = document.createElement("div");
-			document.getElementById('you').src = URL.createObjectURL(stream);
+			roomNm     = decodeURI($("#roomNm").val());
+			userNm     = decodeURI($("#userNm").val());
+			
+			if(stream != null)
+				document.getElementById('remoteyou').src = URL.createObjectURL(stream);
+			
 			newDiv.id     = "div_remoteyou";
 			document.getElementById('mainArea').appendChild(newDiv);
 			
 			$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
+			$("#div_remoteyou").append("<div style='padding-left:5px;color:white;display:none;'>"+userNm+"</div>");
 			
 			
-			videos.push(document.getElementById('you'));
-			
-			roomNm    = decodeURI($("#roomNm").val());
-			userNm    = decodeURI($("#userNm").val());
+			videos.push(document.getElementById('remoteyou'));
 			
 			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val()); // 시스널주소
 
 			rtc.on('add remote stream', function(stream, socketId) {
 				console.log("ADDING REMOTE STREAM...");
-				var clone = cloneVideo('you', socketId);	
+				var clone = cloneVideo('remoteyou', socketId);	
 				document.getElementById(clone.id).setAttribute("class", "");
 				rtc.attachStream(stream, clone.id);  
 				subdivideVideos();
@@ -864,6 +868,7 @@ function subdivideVideos() {
 	if( $("#fileShareArea").is(":hidden")){
 		for(var i = 0, len = videos.length; i < len; i++) {
 			var video   = videos[i];
+			var divId   = "div_"+$(video).attr("id");
 			var visible = "";
 			if( !$("#chatbox").is(":hidden") && chatChk){
 				right   = 400;
@@ -872,28 +877,33 @@ function subdivideVideos() {
 			if( i > 1){
 				right += 160;
 			}
-			if( $(video).attr("id") != "you" ){
-				var divId = "div_"+$(video).attr("id");
+			if( $(video).attr("id") != mainView ){
 				
 				if($(video).is(":hidden")){
 					visible = "none;";
 				}else{
 					visible = "block;";
 				}
+				$("#"+divId ).find("div").show();
 				$(video		).attr("width"  ,"150px;" );
-				$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
-				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
-			}else if( $(video).attr("id") == "you" ){
-				$("#div_remoteyou").html("");
+				if( $(video).attr("id") != "remoteyou" ){
+					$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+				}else{
+					$(video		).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible );
+				}
+				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
+			}else if( $(video).attr("id") == mainView ){
+				$("#"+divId).find("div").hide();
 				$(video).attr("style"  ,"width: 100%; height: 100%;" );
-				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
+				$("#"+divId).attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
 			}
 		}
-		
 	}else{
 		for(var i = 0, len = videos.length; i < len; i++) {
 			var video   = videos[i];
 			var visible = "";
+			var divId   = "div_"+$(video).attr("id");
+			
 			if( !$("#chatbox").is(":hidden") && chatChk){
 				right   = 410;
 				chatChk = false;
@@ -913,15 +923,16 @@ function subdivideVideos() {
 			$(video).attr("height"  ,"150px;" );
 			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 			
-			if( $(video).attr("id") != "you" ){
-				var divId = "div_"+$(video).attr("id");
-				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
+			$("#"+divId ).find("div").show();
+			
+			if( $(video).attr("id") != "remoteyou" ){
+				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
 			}else{
-				$("#div_remoteyou").attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);" );
-				if( $("#div_remoteyou").find("img").is(":hidden") ){
-					$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
+				$("#"+divId).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
+				if( $("#"+divId).find("img").is(":hidden") ){
+					$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
 				}else{
-					$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:inline;' name='shareIcon' >");
+					$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:inline;' name='shareIcon' >");
 				}
 			}
 			
@@ -962,11 +973,9 @@ function cloneVideo(domId, socketId) {
 	newDiv.id     = "div_remote" + socketId;
 	newDiv.width  = "150";
 	newDiv.height = "150";
-//	document.getElementById('videos').appendChild(clone);
 	document.getElementById('mainArea').appendChild(clone);
 	document.getElementById('mainArea').appendChild(newDiv);
-//	$("#userListArea").find(".panel-body").append(clone);
-	videos.push(clone); 
+	videos.push(clone);
 	return clone;
 }
 
@@ -1012,19 +1021,33 @@ function addToChat(msg, img, id, color, user) {
 	        msgTag += "</li>                                                                                          			";
 	        
 	        if($("#chatbox").is(":hidden")){
-	        	var offset    = $("#remote"+id).offset();
-	        	var currTime  = new Date().getTime();
 	        	var tempId    = id + "_" + rand();
+	        	var tempHtml  = "";
+	        	var tempW  	  = window.innerWidth  / 2 - 200;
+	        	var tempH  	  = window.innerHeight / 2 - 50;
 	        	
-	        	$("body"			).append("<div id='bubble"+tempId+"' class=\"bubble_box\" style=\"width:200px; position: absolute;overflow: hidden;white-space:nowrap; text-overflow:ellipsis;\">"+msg+"</div>");
-	        	$("#bubble"+tempId	).css("top"    , (offset.top  - 40) +"px");
-	        	$("#bubble"+tempId	).css("left"   , (offset.left - 80) +"px");
+	        	if ( $(".instant-msg").length > 0 )
+	        		$(".instant-msg").remove();
 	        	
+	        	tempHtml += "<div id='bubble"+tempId+"' class='instant-msg' style='top: "+tempH+"px;left: "+tempW+"px;'> 		";
+	        	tempHtml += "	<div class='photo'>																				";
+			    if(img != ""){
+			    	tempHtml += "        <img src='"+img+"' >																	";
+			    }else{
+			    	tempHtml += "        <img src=\"/bbChat/img/icon/person_you.png\" />   										";
+			    }
+	        	tempHtml += "	</div>																							";
+	        	tempHtml += "	<div class='msg-info'>																			"; 
+	        	tempHtml += "		<div class='nickname'>"+user+"</div>														";
+	        	tempHtml += "		<div class='message'>"+msg+"</div>															";
+	        	tempHtml += "	</div>																							";
+	        	tempHtml += "</div>																								";
+	        	
+	        	$("body"			).append(tempHtml);
 	        	
 	        	setTimeout(function(){
 	        		removeBubbleFn("bubble"+tempId);
 	        	}, 1500);//1.5초 후에 사라짐
-	        	
 	        }
 	        
 		} else { // 내꺼 

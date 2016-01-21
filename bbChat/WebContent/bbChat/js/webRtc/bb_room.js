@@ -82,6 +82,7 @@ $(function($){
 		location.href = "/bizmeet/main";
 	});
 	
+	
 	$("#exit").live("click",function(){
 		closePT();
 		
@@ -91,6 +92,18 @@ $(function($){
 				"ROOM"       : roomNm
 			}
 		}));
+	});
+	
+	$("#mainArea").find("div").live("click",function(){
+		if( $("#fileShareArea").is(":hidden")){
+			var divId   = $(this).attr("id");
+	
+			if(divId == undefined)
+				return;
+			
+			mainView = divId.replace("div_","");
+			subdivideVideos();
+		}
 	});
 	
 	// 브라우져 크기 조정

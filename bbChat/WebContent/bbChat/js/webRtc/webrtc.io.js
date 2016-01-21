@@ -296,7 +296,7 @@ if(window.mozRTCPeerConnection){
 				rtc.streams.push(stream);
 				onSuccess(stream);
 			}, function() {
-				alert("Could not connect stream.");
+				alert("카메라를 지원하지 않습니다.");
 				//onFail();
 				onSuccess(null);
 			});
