@@ -889,6 +889,7 @@ function subdivideVideos() {
 				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			}
 		}
+		
 	}else{
 		for(var i = 0, len = videos.length; i < len; i++) {
 			var video   = videos[i];
