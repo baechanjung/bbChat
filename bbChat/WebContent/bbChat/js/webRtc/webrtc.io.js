@@ -89,7 +89,6 @@ if(window.mozRTCPeerConnection){
 
 	rtc.dataChannelSupport = rtc.checkDataChannelSupport();
 
-
 	/**
 	 * Connects to the websocket server.
 	 */
