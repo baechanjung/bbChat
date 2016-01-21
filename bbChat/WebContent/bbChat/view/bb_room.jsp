@@ -96,7 +96,7 @@ function callinit(data){
       width:300px;
       display: inline-block;
       background: rgba(0, 0, 0, 0.48);
-      border: 2px solid #B04EF0;
+      /*border: 2px solid #B04EF0;*/
       border-radius: 5px;
       color: white;
       font-size: 17px;
@@ -116,13 +116,14 @@ function callinit(data){
    }
    .file_box:after {
       border-color: rgba(0, 0, 0, 0);
-      border-bottom-color: rgb(63, 46, 74);
+      /*border-bottom-color: rgb(63, 46, 74);*/
+      border-bottom-color: rgba(0, 0, 0, 0.48);
       border-width: 10px;
       margin-left: -10px;
    }
    .file_box:before {
       border-color: rgba(176, 78, 240, 0);
-      border-bottom-color: #B04EF0;
+      /*border-bottom-color: #B04EF0;*/
       border-width: 13px;
       margin-left: -13px;
    }
@@ -201,8 +202,9 @@ function callinit(data){
 
 	<div class="filearea" style="display: none;">
 		<div class="file_box">
-			<div id="uploadBtn" style="height: 45px; padding-top: 3px;">
-				<img src="/bbChat/img/icon/upload95.png" style="width: 35px; margin-right: 5px;" /><a>발표자료 업로드</a>
+			<div id="uploadBtn" style="height: 45px; padding-top: 10px;">
+				<div style="display: inline-block;"><img src="/bbChat/img/icon/upload95.png" style="width: 35px; margin-right: 5px;margin-top: -6px;" /></div>
+				<div style="display: inline-block;"><a>발표자료 업로드</a></div>
 			</div>
 			<ul style="margin-bottom:0px;">
 			<!-- 
