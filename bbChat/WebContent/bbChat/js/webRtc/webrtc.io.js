@@ -96,7 +96,7 @@ if(window.mozRTCPeerConnection){
 	rtc.connect = function(server, room, user, img, gb) {
 		
 		room = room || ""; // by default, join a room called the blank string
-		rtc._socket = new WebSocket('ws://127.0.0.1:8080/websocket/bbchat'/*server*/); 
+		rtc._socket = new WebSocket(server); 
 
 		
 		rtc._socket.onopen = function() {

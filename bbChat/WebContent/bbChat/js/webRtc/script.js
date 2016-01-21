@@ -791,9 +791,10 @@ function init() {
 			"video": true,
 			"audio": false
 		}, function(stream) {
-			var newDiv = document.createElement("div");
-			roomNm     = decodeURI($("#roomNm").val());
-			userNm     = decodeURI($("#userNm").val());
+			var newDiv 		= document.createElement("div");
+			var server 		= "";
+			roomNm     		= decodeURI($("#roomNm").val());
+			userNm     		= decodeURI($("#userNm").val());
 			
 			if(stream != null)
 				document.getElementById('remoteyou').src = URL.createObjectURL(stream);
@@ -807,7 +808,12 @@ function init() {
 			
 			videos.push(document.getElementById('remoteyou'));
 			
-			rtc.connect("ws:" + window.location.href.substring(window.location.protocol.length).split('#')[0], roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val()); // 시스널주소
+			if( window.location.protocol.indexOf("https") > -1 )
+				server = "wss:" + window.location.href.substring(window.location.protocol.length+2).split('/')[0] + "/websocket/bbchat";
+			else
+				server = "ws:" + window.location.href.substring(window.location.protocol.length+2).split('/')[0] + "/websocket/bbchat";
+			
+			rtc.connect(server, roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val()); // 시스널주소
 
 			rtc.on('add remote stream', function(stream, socketId) {
 				console.log("ADDING REMOTE STREAM...");
