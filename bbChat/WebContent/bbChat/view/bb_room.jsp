@@ -142,7 +142,7 @@ function callinit(data){
       right: 0px;
       height:3px;
    }   
-   .statuscontrol > .progress span{
+   .statuscontrol > .progress > .uploadbar{
       background-color: #B04EF0; 
       position: absolute;
       top: 0px;
@@ -151,7 +151,18 @@ function callinit(data){
       right: 0px;
       -webkit-transition-duration: 0.4s;
       transition-duration: 0.4s;
-   }      
+   }
+   .statuscontrol > .progress > .transferbar{
+      background-color: #00FF34; 
+      position: absolute;
+      top: 0px;
+      bottom: 0px;
+      left: 0px;
+      right: 0px;
+      -webkit-transition-duration: 0.4s;
+      transition-duration: 0.4s;
+   }
+      
    .statuscontrol > .statusbox{
       text-align:center; 
       margin-top:18px;
@@ -161,6 +172,55 @@ function callinit(data){
       font-size:20px;
       margin-top:13px;
    }
+   
+	.instant-msg{
+		width: 100%; 
+		position: absolute; 
+		height: 100px; 
+		width: 400px; 
+		background:rgba(0, 0, 0, 0.48); 
+		z-index: 1000;
+		padding:0;
+		border-radius: 5px;
+	}
+	.instant-msg > .photo{
+		position: relative;
+		float: left; 
+		margin:0; 
+		width:100px;
+		height:100%;
+	}
+	.instant-msg > .photo img{
+		margin-top: 19px;
+		margin-left:18px;
+		width:60px;
+		height:60px;
+	    border-radius: 50%;
+	}   
+	.instant-msg > .msg-info{
+		position: relative;
+		float:right; 
+		margin:0; 
+		width:300px;
+		height:100%;
+		color:white;
+	}
+	.instant-msg > .msg-info > .nickname{
+		height: 35%;
+		width: 300px;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		padding-top: 12px;
+		font-weight: bold;
+	}
+	.instant-msg > .msg-info > .message{
+		height:65%;
+		width:300px;
+		overflow:hidden;
+		text-overflow:ellipsis;
+		padding-top: 5px;
+	}			   
 </style>
 	
 </head>
@@ -221,7 +281,8 @@ function callinit(data){
 	
 	<div class="statuscontrol" style="display: none;">
 		<div class="progress">
-			<span style="width: 0%;"></span>
+			<span style="width:0%;" class="uploadbar"></span>
+			<span style="width:0%;" class="transferbar"></span>
 		</div>
 		<div class="statusbox">
 			<div id="transfer" style="display: none;">
@@ -233,6 +294,16 @@ function callinit(data){
 			<div class="statusmsg">
 				<span>sss</span>님의 발표자료를 <span>업로드</span> 하고 있습니다.
 			</div>
+		</div>
+	</div>
+	
+	<div class="instant-msg" style="top: 74px;left: 74px;">
+		<div class="photo">
+			<img src="http://172.20.20.189/wecloud/20150804_2dafe13e-f226-42cb-9644-e9ea8f1ac393_thum_300x300.jpg" alt="photo" >
+		</div>
+		<div class="msg-info"> 
+			<div class="nickname">김사장김사장김사장김김사장김사장김사장김사장김사장사장김사장</div>
+			<div class="message">안녕하세요 이병주 입니다.asdfasdfasdfdddddddddddddddddddddddddddddddddddddddd</div>
 		</div>
 	</div>
 
