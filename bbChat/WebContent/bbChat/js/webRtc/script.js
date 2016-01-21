@@ -805,7 +805,6 @@ function init() {
 			$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
 			$("#div_remoteyou").append("<div style='padding-left:5px;color:white;display:none;'>"+userNm+"</div>");
 			
-			
 			videos.push(document.getElementById('remoteyou'));
 			
 			if( window.location.protocol.indexOf("https") > -1 )
