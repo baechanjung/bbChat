@@ -32,9 +32,6 @@ public class BizGateway extends HttpServlet  {
 		}else if("".equals(uriPattern) ){
 			rd = sc.getRequestDispatcher("/bbChat/view/bb_main.jsp");
 		}
-		
-		System.out.println( "uriPattern =======" +uriPattern);
-		
 		rd.forward(request, response);
 		
 	}
