@@ -162,7 +162,6 @@ function callinit(data){
       -webkit-transition-duration: 0.4s;
       transition-duration: 0.4s;
    }
-      
    .statuscontrol > .statusbox{
       text-align:center; 
       margin-top:18px;
