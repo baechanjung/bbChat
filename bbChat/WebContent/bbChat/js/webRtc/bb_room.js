@@ -111,6 +111,7 @@ $(function($){
 		clipboard.on('aftercopy', function(event) { alert('접속 URL이 복사되었습니다. \n'+event.data['text/plain']); });
 	}
 	
+	
 	function toggleFullScreen() {
 		if ((document.fullScreenElement && document.fullScreenElement !== null) ||    
 				(!document.mozFullScreen && !document.webkitIsFullScreen)) {
