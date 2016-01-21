@@ -41,6 +41,8 @@ public class fileconvert extends HttpServlet  {
 	
 	protected void doPost( HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
+
+		
 		request.setCharacterEncoding("UTF-8");
 		
 		if (request.getHeader("accept").indexOf("application/json") != -1) {
@@ -183,7 +185,8 @@ public class fileconvert extends HttpServlet  {
 			
 			System.out.println("pdf");
 			
-
+			String          osName          =   System.getProperty("os.name");
+			String          filePath        =   "";
 			String 			imageFormat 	= 	"gif";				//출력이미지 확장자
 			int 			pdfPageCn 		= 	0;
 			PDDocument 		pdfDoc 			= 	null;
@@ -194,6 +197,12 @@ public class fileconvert extends HttpServlet  {
 				pdfPageCn 	= 	pdfDoc.getNumberOfPages();					//PDF파일 총페이지 수 취득
 			} catch (IOException ioe) {
 				System.out.println("PDF 정보취득 실패 : " + ioe.getMessage());
+			}
+			
+			if( osName.indexOf("Win") > -1  ){
+				filePath = getServletContext().getRealPath("") + "\\file\\img\\";
+			}else{
+				filePath = getServletContext().getRealPath("") + "/file/img/";
 			}
 			
 			WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
@@ -208,8 +217,7 @@ public class fileconvert extends HttpServlet  {
 							"",
 							i, //이미지 출력 시작페이지
 							i, //이미지 출력 종료페이지
-							//"C:\\Users\\admin\\git\\bbchat\\bbChat\\WebContent\\file\\img\\slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
-							"/WAS_DATA/webRoot/prj_0001/src/file/img/slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+							filePath + "slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
 							BufferedImage.TYPE_INT_RGB,
 							100 //이미지 품질  300 추천
 					);
