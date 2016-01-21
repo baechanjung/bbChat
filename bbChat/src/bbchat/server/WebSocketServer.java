@@ -57,61 +57,57 @@ public class WebSocketServer {
 		System.out.println( "########## WebSocketServer onClose##########" );
 		System.out.println( "############################################" );
 		
+		int 		exist  			= 0;
+		String		socId           = "";	// 채탕방의 사용자 세션ID 추출
+		Session 	soc				= null; 
+		List 		strUserList 	= null; // 채팅방의 사용자 리스트
+		List 		newUserList 	= null;	// 사용자 접속 종료 후 사용자 리스트
+		JSONObject 	sendData 		= null;
+		
+		
 		// 활성중인 채팅방중 사용자의 채팅방을 찾는다. 
 		for( Map.Entry<String,Object> key : rooms.entrySet() ){
-			 
-			//System.out.println( String.format("키 : %s", key.getKey() ) );
-			 
-			 int 	exist  		= rooms.get(key.getKey()).toString().indexOf(userSession.getId());
-			 
-			 // 활성중인 채팅방중 사용자 존재 확인.
-			 if( exist > -1 ){
-				 
-				 List 		strUserList = (List)rooms.get(key.getKey()); // 채팅방의 사용자 리스트
-				 List 		newUserList = new ArrayList();				 // 사용자 접속 종료 후 사용자 리스트
-				 JSONObject sendData 	= null;
-				 
-				 
-				 for(int i = 0; i < strUserList.size(); i++){
-					 String socId = (String)strUserList.get(i);	// 채탕방의 사용자 세션ID 추출
-					 
-					 // 종료 사용자를 제외한 나머지 채팅방 사용자들에게 종료메세지 전송
-					 if( socId != userSession.getId()){
-						 newUserList.add(socId);
 
-						 Session soc = getSocket(socId);
+			exist  		= rooms.get(key.getKey()).toString().indexOf(userSession.getId());
 
-						 sendData = new JSONObject();
-						 
+			// 활성중인 채팅방중 사용자 존재 확인.
+			if( exist > -1 ){
 
-						 sendData.put("messages"	, users.get(userSession.getId())  + "(이)가 접속을 종료 하였습니다."	);
-						 sendData.put("user"	   	, users.get(userSession.getId())									);
-						 sendData.put("color"		, "ENTER"															);
-						 
-						 sockectSend(soc ,"receive_chat_msg", sendData );	   // 메세지 전송
+				strUserList  = (List)rooms.get(key.getKey()); // 채팅방의 사용자 리스트
+				newUserList  = new ArrayList();				 // 사용자 접속 종료 후 사용자 리스트
 
-						 sendData = new JSONObject();
+				for(int i = 0; i < strUserList.size(); i++){
+					
+					socId = (String)strUserList.get(i);	// 채탕방의 사용자 세션ID 추출
 
-						 sendData.put("socketId"	, userSession.getId()									);
+					// 종료 사용자를 제외한 나머지 채팅방 사용자들에게 종료메세지 전송
+					if( socId != userSession.getId()){
+						
+						soc = getSocket(socId);
+						
+						newUserList.add(socId);
 
-						 sockectSend(soc ,"remove_peer_connected", sendData ); // 종료 사용자의 peer_connected 삭제 전송
-					 }
-				 }
-				 
-				 users.remove(userSession.getId());	// 사용자 정보 삭제
-				 
-				 if( newUserList.size() > 0){
-					 rooms.put(key.getKey(), newUserList);
-					 //System.out.println( " roomsUser    ===" + rooms.get(key.getKey()).toString());
-				 }else{
-					 rooms.remove(key.getKey());
-					 //System.out.println( " 방삭제    ===");
-				 }
-				 
-			 }
-			 
+						sendData = new JSONObject();
+						sendData.put("messages"	, users.get(userSession.getId())  + "(이)가 접속을 종료 하였습니다."	);
+						sendData.put("user"	   	, users.get(userSession.getId())									);
+						sendData.put("color"	, "ENTER"															);
+						sockectSend(soc ,"receive_chat_msg", sendData );	   // 메세지 전송
+
+						sendData = new JSONObject();
+						sendData.put("socketId"	, userSession.getId()									);
+						sockectSend(soc ,"remove_peer_connected", sendData ); // 종료 사용자의 peer_connected 삭제 전송
+					}
+				}
+
+				users.remove(userSession.getId());	// 사용자 정보 삭제
+
+				if( newUserList.size() > 0){
+					rooms.put(key.getKey(), newUserList);
+				}else{
+					rooms.remove(key.getKey());
+				}
+			}
 		}
-		
 		sessionUsers.remove(userSession);	// 사용자 세션 정보 삭제
 		System.out.println( " sessionUsers ===" + sessionUsers.size());
 	}
@@ -120,10 +116,10 @@ public class WebSocketServer {
 	public void sendEvent(String msg, Session userSession){
 		
 		try {
-			JSONParser parser       = new JSONParser();
-			JSONObject jResult   	= (JSONObject)parser.parse(msg);
-			JSONObject jData    	= (JSONObject)jResult.get("data");
-			String 	   eventNm 		= (String)jResult.get("eventName");
+			JSONParser 		parser       	= new JSONParser();
+			JSONObject 		jResult   		= (JSONObject)parser.parse(msg);
+			JSONObject 		jData    		= (JSONObject)jResult.get("data");
+			String 	   		eventNm 		= (String)jResult.get("eventName");
 			
 			if( "join_room".equals(eventNm) ){
 				joinRoom (jData , userSession);
@@ -139,6 +135,8 @@ public class WebSocketServer {
 				showLoding  (jData , userSession);
 			}else if( "hideLoding".equals(eventNm) ){
 				hideLoding  (jData , userSession);
+			}else if( "up_percentage".equals(eventNm) ){
+				upPercentage  (jData , userSession);
 			}else if( "convert_Loding".equals(eventNm) ){
 				convertLoding  (jData , userSession);
 			}else if( "fileConvertSend".equals(eventNm) ){
@@ -165,14 +163,15 @@ public class WebSocketServer {
 	
 	// 채팅방 참여시 처리 함수
 	public void joinRoom( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("room");
-		String strUser  	 = (String)data.get("user");
-		String strImg    	 = (String)data.get("img");
-		String strGb  	     = (String)data.get("gb");
-		List   roomUserlist  = new ArrayList();
-		List   connectionsId = new ArrayList();
-		
-		JSONObject sendData  = null;
+		String 		 strRoom  	 	= (String)data.get("room");
+		String		 strUser  	 	= (String)data.get("user");
+		String 		 strImg    	 	= (String)data.get("img");
+		String 		 strGb  	    = (String)data.get("gb");
+		String 		 id             = ""; 
+		List   		 roomUserlist  	= new ArrayList();
+		List   		 connectionsId	= new ArrayList();
+		JSONObject 	 sendData  		= null;
+		Session 	 soc			= null; 
 		
 		// 기존 회의실 참여시 없는 방일 경우 처리
 		if( "J".equals(strGb) && rooms.get(strRoom) == null ){
@@ -190,33 +189,28 @@ public class WebSocketServer {
 		imgs.put(socket.getId() , strImg );
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
-			String id = (String)roomUserlist.get(i);
+			
+			id = (String)roomUserlist.get(i);
 			
 			if (id == socket.getId()) {
 				continue;
 			}else{
 				connectionsId.add(id);
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				if(soc != null){
 					
 					sendData = new JSONObject();
-					
 					sendData.put("socketId"	, socket.getId());
-					
 					sockectSend(soc ,"new_peer_connected", sendData );
 					
 					sendData = new JSONObject();
-					
 					sendData.put("messages"	, strUser + "(이)가 접속 하였습니다."	);
 					sendData.put("user"	   	, strUser							);
 					sendData.put("color"	, "ENTER"							);
-					
 					sockectSend(soc ,"receive_chat_msg", sendData );
-					
 				}
-				
 			}
 		}
 		
@@ -225,77 +219,67 @@ public class WebSocketServer {
 		sendData.put("you"			,	socket.getId()	);
 		
 		sockectSend(socket ,"get_peers", sendData );
-		
-		
 	}
 
 	
 	// 채팅방 채팅 메세지 처리 함수
 	public void chatMsg( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("room");
-		String strUser  	 = (String)data.get("user");
-		String strColor  	 = (String)data.get("color");
-		String strMsg	  	 = (String)data.get("messages");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("room");
+		String 		strUser  	 	= (String)data.get("user");
+		String 		strColor  	 	= (String)data.get("color");
+		String 		strMsg	  	 	= (String)data.get("messages");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				sendData = new JSONObject();
-				
 				sendData.put("messages"	, strMsg					);
 				sendData.put("user"		, strUser					);
 				sendData.put("color"	, strColor				    );
 				sendData.put("img"		, imgs.get(socket.getId())	);
 				sendData.put("id"		, socket.getId()			);
-				
-				
-				
 				sockectSend(soc ,"receive_chat_msg", sendData );
 				
 			}
 		}
-		
 	}
 	
 	// 이미지 리스트 전송 함수
 	public void fileConvert( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		String strFileNm  	 = (String)data.get("FILE_NM");
-		String strOrgFileNm  = (String)data.get("ORG_FILE_NM");
-		String strSize  	 = (String)data.get("SIZE");
-		String strMode  	 = (String)data.get("MODE");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		strFileNm  	 	= (String)data.get("FILE_NM");
+		String 		strOrgFileNm 	= (String)data.get("ORG_FILE_NM");
+		String 		strSize  	 	= (String)data.get("SIZE");
+		String 		strMode  	 	= (String)data.get("MODE");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				sendData = new JSONObject();
-				
 				sendData.put("FILE_NM"		, strFileNm			);
 				sendData.put("SIZE"			, strSize			);
 				sendData.put("ORG_FILE_NM"	, strOrgFileNm		);
 				sendData.put("MODE"			, strMode			);
 				sendData.put("SHARE_ID"		, socket.getId()	);
-				
 				sockectSend(soc ,"imgList", sendData );
-				
 			}
 		}
 		
@@ -303,29 +287,26 @@ public class WebSocketServer {
 	
 	// 이미지 리스트 클릭 함수
 	public void imgListClick( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		String strPath  	 = (String)data.get("PATH");
-		String strIdx	  	 = (String)data.get("IDX");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		strPath  	 	= (String)data.get("PATH");
+		String 		strIdx	  	 	= (String)data.get("IDX");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				sendData = new JSONObject();
-				
 				sendData.put("PATH"	, strPath	);
 				sendData.put("IDX"	, strIdx	);
-				
 				sockectSend(soc ,"imgChange", sendData );
-				
 			}
 		}
 		
@@ -333,25 +314,23 @@ public class WebSocketServer {
 	
 	
 	public void showLoding( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		String strUser  	 = (String)data.get("USER");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		strUser  	 	= (String)data.get("USER");
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		String 		id              = ""; 
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				sendData = new JSONObject();
-				
 				sendData.put("user"	, strUser	);
-				
 				sockectSend(soc ,"showLoding", sendData );
 				
 			}
@@ -359,53 +338,73 @@ public class WebSocketServer {
 	}
 	
 	public void hideLoding( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
-			
-				
-			Session soc = getSocket(id);
-				
+			id  = (String)roomUserlist.get(i);
+			soc = getSocket(id);
 			sockectSend(soc ,"hideLoding", null );
-				
 		}
 	}
 	
+	public void upPercentage( JSONObject data, Session socket ){
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		strPer  	 	= (String)data.get("PER");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		Session 	soc				= null; 
+		JSONObject 	sendData  		= null;
+
+		for (int i = 0; i < roomUserlist.size(); i++) {
+			
+			id  = (String)roomUserlist.get(i);
+			
+			if (id != socket.getId()) {
+				soc = getSocket(id);
+				
+				sendData = new JSONObject();
+				sendData.put("per"	, strPer	);
+				sockectSend(soc ,"up_percentage", sendData );
+			}
+			
+		}
+	}
+	
+	
 	public void convertLoding( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 
 			if (id != socket.getId()) {
-				
-				Session soc = getSocket(id);
-				
+				soc = getSocket(id);
 				sockectSend(soc ,"convertLoding", null );
-				
 			}
 		}
 	}
 	
 	public void closePT( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("ROOM");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
+		String 		strRoom  	 	= (String)data.get("ROOM");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 			
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				if(soc != null){
 					sockectSend(soc ,"closePT", null );
@@ -416,35 +415,32 @@ public class WebSocketServer {
 	}
 	
 	public void mousedown( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("room");
-		Long strX		  	 = (Long)data.get("x");
-		Long strY  		 	 = (Long)data.get("y");
-		String strSendX  	 = (String)data.get("sendX");
-		String strSendY  	 = (String)data.get("sendY");
-		boolean strClick  	 = (boolean)data.get("click");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	 = (String)data.get("room");
+		Long 		strX			 = (Long)data.get("x");
+		Long 		strY  			 = (Long)data.get("y");
+		String 		strSendX  		 = (String)data.get("sendX");
+		String 		strSendY  		 = (String)data.get("sendY");
+		String 		id               = ""; 
+		boolean 	strClick  	 	 = (boolean)data.get("click");
+		List   		roomUserlist     = (List)rooms.get(strRoom);
+		JSONObject 	sendData  		 = null;
+		Session 	soc				 = null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 			
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				if(soc != null){
-					
 					sendData = new JSONObject();
-					
 					sendData.put("x"		, strX		);
 					sendData.put("y"		, strY		);
 					sendData.put("sendX"	, strSendX	);
 					sendData.put("sendY"	, strSendY	);
 					sendData.put("click"	, strClick	);
-					
 					sockectSend(soc ,"mDown", sendData );
 				}
 				
@@ -453,27 +449,24 @@ public class WebSocketServer {
 	}
 	
 	public void mouseup( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("room");
-		boolean strClick  	 = (boolean)data.get("click");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("room");
+		String 		id              = ""; 
+		boolean 	strClick  	 	= (boolean)data.get("click");
+		List  	 	roomUserlist  	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 			
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				if(soc != null){
-					
 					sendData = new JSONObject();
-					
 					sendData.put("click"	, strClick	);
-					
 					sockectSend(soc ,"mUp", sendData );
 				}
 				
@@ -482,33 +475,31 @@ public class WebSocketServer {
 	}
 	
 	public void drawClick( JSONObject data, Session socket ){
-		String strRoom  	 = (String)data.get("room");
-		Long strX		  	 = (Long)data.get("x");
-		Long strY  		 	 = (Long)data.get("y");
-		String strSendX  	 = (String)data.get("sendX");
-		String strSendY  	 = (String)data.get("sendY");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String 		strRoom  	 	= (String)data.get("room");
+		Long 		strX		  	= (Long)data.get("x");
+		Long 		strY  		 	= (Long)data.get("y");
+		String 		strSendX  	 	= (String)data.get("sendX");
+		String 		strSendY  	 	= (String)data.get("sendY");
+		String 		id              = ""; 
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
+			id = (String)roomUserlist.get(i);
 			
 			if (id != socket.getId()) {
 				
-				Session soc = getSocket(id);
+				soc = getSocket(id);
 				
 				if(soc != null){
 					
 					sendData = new JSONObject();
-					
 					sendData.put("x"		, strX		);
 					sendData.put("y"		, strY		);
 					sendData.put("sendX"	, strSendX	);
 					sendData.put("sendY"	, strSendY	);
-					
 					sockectSend(soc ,"draw", sendData );
 				}
 				
@@ -518,10 +509,9 @@ public class WebSocketServer {
 	
 	
 	public void getDivUser( JSONObject data, Session socket ){
-		String strId  	 = (String)data.get("id");
-		String user 	 = (String)users.get(strId);
-		
-		JSONObject sendData  = new JSONObject();
+		String 		strId  	 	= (String)data.get("id");
+		String 		user 	 	= (String)users.get(strId);
+		JSONObject 	sendData  	= new JSONObject();
 		
 		sendData.put("user"	, user 		);
 		sendData.put("id"	, strId 	);
@@ -532,9 +522,8 @@ public class WebSocketServer {
 	
 	
 	public void sendIceCandidate( JSONObject data, Session socket ){
-		String  strSoc  = (String)data.get("socketId");
-
-		Session soc 	= getSocket(strSoc);
+		String  	strSoc  = (String)data.get("socketId");
+		Session 	soc 	= getSocket(strSoc);
 		
 		if(soc != null){
 			
@@ -549,9 +538,8 @@ public class WebSocketServer {
 	}
 	
 	public void sendOffer( JSONObject data, Session socket ){
-		String  strSoc  = (String)data.get("socketId");
-
-		Session soc 	= getSocket(strSoc);
+		String  	strSoc  = (String)data.get("socketId");
+		Session 	soc 	= getSocket(strSoc);
 		
 		if(soc != null){
 			
@@ -559,15 +547,13 @@ public class WebSocketServer {
 			
 			sendData.put("sdp"		, data.get("sdp")		);
 			sendData.put("socketId"	, socket.getId()		);
-			
 			sockectSend(soc ,"receive_offer", sendData );
 		}
 	}
 	
 	public void sendAnswer( JSONObject data, Session socket ){
-		String  strSoc  = (String)data.get("socketId");
-
-		Session soc 	= getSocket(strSoc);
+		String  	strSoc  = (String)data.get("socketId");
+		Session 	soc 	= getSocket(strSoc);
 		
 		if(soc != null){
 			
@@ -575,18 +561,17 @@ public class WebSocketServer {
 			
 			sendData.put("sdp"		, data.get("sdp")		);
 			sendData.put("socketId"	, socket.getId()		);
-			
 			sockectSend(soc ,"receive_answer", sendData );
 		}
 	}
 	
 	
 	public static Session getSocket(String id){
-		Session soc = null;
-		
-		Iterator<Session> iterator = sessionUsers.iterator();
+		Session 		  soc 		= 	null;
+		Iterator<Session> iterator  = sessionUsers.iterator();
+		Session			  s			= null;
 		while(iterator.hasNext()){
-			Session s = iterator.next();
+			s = iterator.next();
 			
 			if(id.equals(s.getId())){
 				return s;
@@ -600,12 +585,10 @@ public class WebSocketServer {
 		
 		JSONObject jmsg  = new JSONObject();
 		
-		jmsg.put("eventName", eventNm );
-		jmsg.put("data"		, json	  );
+		jmsg.put("eventName"	, eventNm );
+		jmsg.put("data"			, json	  );
 		
 		try {
-			
-			//System.out.println("sockectSend === " + jmsg.toString());
 			soc.getBasicRemote().sendText(jmsg.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -614,24 +597,17 @@ public class WebSocketServer {
 	}
 	
 	public static void fileConverPercent(String strRoom, String totPage, String curPage){
-		System.out.println("###################################");
-		System.out.println("###################################");
-		System.out.println("###################################");
 		System.out.println("###################################" + totPage);
 		System.out.println("###################################" + curPage );
-		System.out.println("###################################");
-		System.out.println("###################################");
-		System.out.println("###################################");
-		
-		List   roomUserlist  = (List)rooms.get(strRoom);
-		
-		JSONObject sendData  = null;
+		String		id				= "";
+		List   		roomUserlist 	= (List)rooms.get(strRoom);
+		JSONObject 	sendData  		= null;
+		Session		soc				= null;
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
-			String id = (String)roomUserlist.get(i);
-				
-			Session soc = getSocket(id);
+			id 		= (String)roomUserlist.get(i);
+			soc 	= getSocket(id);
 			
 			if(soc != null){
 				
@@ -639,7 +615,6 @@ public class WebSocketServer {
 				
 				sendData.put("totPage"	, totPage		);
 				sendData.put("curPage"	, curPage		);
-				
 				sockectSend(soc ,"convert_percentage", sendData );
 			}
 				
