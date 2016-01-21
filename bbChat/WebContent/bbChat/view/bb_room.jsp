@@ -91,7 +91,7 @@ function callinit(data){
    }
    .filearea a{cursor:pointer;color:white;}
    .filearea ul{list-style: none;/*height:225px;overflow-x: auto;*/}
-   .filearea ul > li{height: 45px; border-top: 1px solid #ebedf2;height: 45px;padding-top: 8px;text-align:left;}
+   .filearea ul > li{border-top: 1px solid #ebedf2;padding-top: 8px;text-align:left;}
    .file_box {
       width:300px;
       display: inline-block;
@@ -355,7 +355,7 @@ function callinit(data){
 
 
 	<div id="mainArea">
-		<video  id="you" style="width: 100%; height: 100%" autoplay></video>
+		<video  id="remoteyou" style="width: 100%; height: 100%" autoplay></video>
 	</div>
 	
 	
