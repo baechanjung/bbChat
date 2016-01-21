@@ -236,7 +236,7 @@ function callinit(data){
 <input type="hidden"	id="userImgPath"	name="userImgPath"	value="<%=StringUtil.null2void( request.getParameter("userImgPath") , ""   )%>" />
 <input type="hidden"	id="joinGb"			name="joinGb"		value="<%=StringUtil.null2void( request.getParameter("joinGb")  	, "J"  )%>" />
 
-	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; ">
+	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; z-index:30;">
 		<div class="header_inner" style="text-align: center;width: 100%;">
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
@@ -297,16 +297,6 @@ function callinit(data){
 		</div>
 	</div>
 	
-	<div class="instant-msg" style="top: 74px;left: 74px;">
-		<div class="photo">
-			<img src="http://172.20.20.189/wecloud/20150804_2dafe13e-f226-42cb-9644-e9ea8f1ac393_thum_300x300.jpg" alt="photo" >
-		</div>
-		<div class="msg-info"> 
-			<div class="nickname">김사장김사장김사장김김사장김사장김사장김사장김사장사장김사장</div>
-			<div class="message">안녕하세요 이병주 입니다.asdfasdfasdfdddddddddddddddddddddddddddddddddddddddd</div>
-		</div>
-	</div>
-
 	<div id="chatbox" style="right: 0px; position:fixed; top:60px; height: 100%; z-index:130; display: none;" >
 		<div class="chat-panel panel panel-default" style="width: 400px;height: 877px;border-color:#322542;background-color:inherit;border-radius:0px;">
 			<div class="panel-heading" style="color:rgb(255,255,255);background-color:black;border-bottom:1px solid #322542;border-radius:0px;">
