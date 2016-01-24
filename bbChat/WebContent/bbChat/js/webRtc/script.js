@@ -1,6 +1,6 @@
 var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
-var userNm,roomNm,fileOwner=false,mainView="remoteyou";
+var userNm,roomNm,fileOwner=false,mainView="remoteyou",supportYn="Y";
 var imgSize  = 0;
 var imgIndex = 0;
 var imgPath  = [];
@@ -516,9 +516,11 @@ function showLoding(param){
 }
 
 function hideLoding(){
-	$(".progress").find("span:eq(0)").css("width","0%");
-	$(".progress").find("span:eq(1)").css("width","0%");
-	$(".statuscontrol").hide();
+	$(".progress"		).find("span:eq(0)").css("width","0%");
+	$(".progress"		).find("span:eq(1)").css("width","0%");
+	$(".statuscontrol"	).hide();
+	$("#transfer"	  	).hide();
+	$("#upload"		  	).hide();
 }
 
 function upPercentage(param){
@@ -711,7 +713,7 @@ function closePT(){
 	$("#ifile"            ).val("");
 	$("[name='shareIcon']").hide();
 	
-	fileOwner = false;
+	fileOwner 	= false;
 	
 	subdivideVideos();
 }
@@ -774,16 +776,6 @@ function init() {
 		return;
 	}
 
-	if( $("#userNm").val() == "" ){
-		var btnlist = [
-		               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
-		];
-		
-		openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y", closeBtn : "N"});
-		
-		openIframeLoad();
-		return;
-	}
 	
 	if(PeerConnection) {
 		//미디어 스트림 생성
@@ -793,26 +785,44 @@ function init() {
 		}, function(stream) {
 			var newDiv 		= document.createElement("div");
 			var server 		= "";
+			
+			
+			if( $("#userNm").val() == "" ){
+				var btnlist = [
+				               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
+				];
+				
+				openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y", closeBtn : "N"});
+				
+				openIframeLoad();
+				return;
+			}
+			
 			roomNm     		= decodeURI($("#roomNm").val());
 			userNm     		= decodeURI($("#userNm").val());
 			
-			if(stream != null)
+			if(stream != null){
 				document.getElementById('remoteyou').src = URL.createObjectURL(stream);
-			
-			newDiv.id     = "div_remoteyou";
-			document.getElementById('mainArea').appendChild(newDiv);
-			
-			$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
-			$("#div_remoteyou").append("<div style='padding-left:5px;color:white;display:none;'>"+userNm+"</div>");
-			
-			videos.push(document.getElementById('remoteyou'));
+				
+				newDiv.id     = "div_remoteyou";
+				document.getElementById('mainArea').appendChild(newDiv);
+				
+				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
+				$("#div_remoteyou").append("<div style='padding-left:5px;color:white;display:none;'>"+userNm+"</div>");
+				
+				videos.push(document.getElementById('remoteyou'));
+				
+			}else{
+				supportYn = "N";
+			}
+
 			
 			if( window.location.protocol.indexOf("https") > -1 )
 				server = "wss:" + window.location.href.substring(window.location.protocol.length+2).split('/')[0] + "/websocket/bbchat";
 			else
 				server = "ws:" + window.location.href.substring(window.location.protocol.length+2).split('/')[0] + "/websocket/bbchat";
 			
-			rtc.connect(server, roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val()); // 시스널주소
+			rtc.connect(server, roomNm, userNm , $("#userImgPath").val() , $("#joinGb").val(), stream); // 시스널주소
 
 			rtc.on('add remote stream', function(stream, socketId) {
 				console.log("ADDING REMOTE STREAM...");
@@ -870,6 +880,7 @@ function getNumPerRow() {
 function subdivideVideos() {
 	var right   = 10;
 	var chatChk = true;
+	var cnt     = 0;
 	if( $("#fileShareArea").is(":hidden")){
 		for(var i = 0, len = videos.length; i < len; i++) {
 			var video   = videos[i];
@@ -879,10 +890,12 @@ function subdivideVideos() {
 				right   = 400;
 				chatChk = false;
 			}
-			if( i > 1){
-				right += 160;
-			}
+
 			if( $(video).attr("id") != mainView ){
+				
+				if( cnt > 0 ){
+					right += 160;
+				}
 				
 				if($(video).is(":hidden")){
 					visible = "none;";
@@ -891,12 +904,11 @@ function subdivideVideos() {
 				}
 				$("#"+divId ).find("div").show();
 				$(video		).attr("width"  ,"150px;" );
-				if( $(video).attr("id") != "remoteyou" ){
-					$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
-				}else{
-					$(video		).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible );
-				}
+				$(video		).attr("height" ,"150px;" );
+				$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
+				
+				cnt++;
 			}else if( $(video).attr("id") == mainView ){
 				$("#"+divId).find("div").hide();
 				$(video).attr("style"  ,"width: 100%; height: 100%;" );
@@ -1009,7 +1021,7 @@ function addToChat(msg, img, id, color, user) {
 		    if(img != ""){
 		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
 		    }else{
-		    	msgTag += "        <img src=\"/bbChat/img/icon/person_you.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";
+		    	msgTag += "        <img src=\"/bbChat/img/icon/person.png\" style='width:50px;height:50px;' class=\"img-circle\" />   		";
 		    }
 		    msgTag += "    </span>                                                                                    		    ";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           	    ";
@@ -1039,7 +1051,7 @@ function addToChat(msg, img, id, color, user) {
 			    if(img != ""){
 			    	tempHtml += "        <img src='"+img+"' >																	";
 			    }else{
-			    	tempHtml += "        <img src=\"/bbChat/img/icon/person_you.png\" />   										";
+			    	tempHtml += "        <img src=\"/bbChat/img/icon/person.png\" />   											";
 			    }
 	        	tempHtml += "	</div>																							";
 	        	tempHtml += "	<div class='msg-info'>																			"; 
@@ -1062,7 +1074,7 @@ function addToChat(msg, img, id, color, user) {
 		    if(img != ""){
 		    	msgTag += "        <img src='"+img+"' alt=\"User Avatar\" class=\"img-circle\" style='width:50px;height:50px;'/>";
 		    }else{
-		    	msgTag += "        <img src=\"/bbChat/img/icon/person_me.png\" alt=\"User Avatar\" class=\"img-circle\" />   ";
+		    	msgTag += "        <img src=\"/bbChat/img/icon/person.png\" style='width:50px;height:50px;' class=\"img-circle\" />   		";
 		    }
 		    msgTag += "    </span>                                                                                    			";
 		    msgTag += "    <div class=\"chat-body clearfix\">                                                           		";
