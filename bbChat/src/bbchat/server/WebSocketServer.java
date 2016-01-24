@@ -174,6 +174,7 @@ public class WebSocketServer {
 		JSONObject 	 sendData  		= null;
 		Session 	 soc			= null; 
 		
+		
 		// 기존 회의실 참여시 없는 방일 경우 처리
 		if( "J".equals(strGb) && rooms.get(strRoom) == null ){
 			sockectSend(socket ,"empty_room", sendData );
