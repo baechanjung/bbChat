@@ -168,6 +168,7 @@ public class WebSocketServer {
 		String 		 strImg    	 	= (String)data.get("img");
 		String 		 strGb  	    = (String)data.get("gb");
 		String 		 id             = ""; 
+		Object 		 objStream      = (Object)data.get("stream"); 
 		List   		 roomUserlist  	= new ArrayList();
 		List   		 connectionsId	= new ArrayList();
 		JSONObject 	 sendData  		= null;
@@ -203,6 +204,7 @@ public class WebSocketServer {
 					
 					sendData = new JSONObject();
 					sendData.put("socketId"	, socket.getId());
+					sendData.put("stream"	, objStream		);
 					sockectSend(soc ,"new_peer_connected", sendData );
 					
 					sendData = new JSONObject();
@@ -215,8 +217,9 @@ public class WebSocketServer {
 		}
 		
 		sendData = new JSONObject();
-		sendData.put("connections"	,	connectionsId	);
+		sendData.put("connections"	,	connectionsId	);  // 회의실 안의 나아닌 다른 컨넥션 배열
 		sendData.put("you"			,	socket.getId()	);
+		sendData.put("stream"		, 	objStream		);
 		
 		sockectSend(socket ,"get_peers", sendData );
 	}
@@ -620,6 +623,10 @@ public class WebSocketServer {
 				
 		}
 		
+	}
+	
+	public static Map<String, Object> getRoomList(){
+		return rooms;
 	}
 	
 }
