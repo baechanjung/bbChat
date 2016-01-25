@@ -1,3 +1,4 @@
+var nonVideos = [];
 var videos = [];
 var PeerConnection = window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
 var userNm,roomNm,fileOwner=false,mainView="remoteyou",supportYn="Y";
@@ -62,7 +63,6 @@ function initSocketUser() {
 
 	rtc.on("div_user", function() {
 		var data = user.recv.apply(this, arguments);
-		
 		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'>");
 		//alert(data.user);
 	});
@@ -95,7 +95,8 @@ function initChat() {
 					"messages": input.value,
 					"room"    : room,
 					"user"    : user,
-					"color"   : color
+					"color"   : color,
+					"img"	  : $("#userImgPath").val()
 				}
 			}));
 			addToChat(input.value ,$("#userImgPath").val());
@@ -111,7 +112,8 @@ function initChat() {
 					"messages": input.value,
 					"room"    : room,
 					"user"    : user,
-					"color"   : color
+					"color"   : color,
+					"img"	  : $("#userImgPath").val()
 				}
 			}));
 			addToChat(input.value ,$("#userImgPath").val());
@@ -143,9 +145,11 @@ function initFileConvert(){
 				imgListLoad(obj);
 				
 				fileOwner = true;
-				$("[name='shareIcon']").hide();
-				$("#div_remoteyou").find("img").show();
-				$("#exit").show();
+				$(".filearea"			).hide();
+				$("[name='shareIcon']"	).hide();
+				$("#div_nonvideoyou"	).hide();
+				$("#div_remoteyou"		).find("img").show();
+				$("#exit"				).show();
 				
 				websocketConvert.send(JSON.stringify({
 					"eventName" : "fileConvertSend",
@@ -163,9 +167,11 @@ function initFileConvert(){
 		imgListLoad(data);
 		
 		fileOwner = false;
-		$("#div_remoteyou").find("img").hide();
+		$("[name='shareIcon']"			).hide();
+		$("#div_remoteyou"				).find("img").hide();
+		$("#div_nonvideoyou"			).hide();
 		$("#div_remote"+data["SHARE_ID"]).find("img").show();
-		$("#exit").hide();
+		$("#exit"						).hide();
 	});
 
 	rtc.on("imgChange",function(){
@@ -328,9 +334,10 @@ function changeFile(o){
 					imgListLoad(jsonObj);
 					
 					fileOwner = true;
-					$("[name='shareIcon']").hide();
-					$("#div_remoteyou").find("img").show();
-					$("#exit").show();
+					$("[name='shareIcon']"	).hide();
+					$("#div_nonvideoyou"	).hide();
+					$("#div_remoteyou"		).find("img").show();
+					$("#exit"				).show();
 					
 					$(".file_box"	).find("ul").append("<li><a>"+jsonObj["ORG_FILE_NM"]+"</a></li>");
 					$(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , jsonObj);
@@ -339,9 +346,11 @@ function changeFile(o){
 						imgListLoad(obj);
 						
 						fileOwner = true;
-						$("[name='shareIcon']").hide();
-						$("#div_remoteyou").find("img").show();
-						$("#exit").show();
+						$(".filearea"			).hide();
+						$("[name='shareIcon']"	).hide();
+						$("#div_nonvideoyou"	).hide();
+						$("#div_remoteyou"		).find("img").show();
+						$("#exit"				).show();
 						
 						websocketConvert.send(JSON.stringify({
 							"eventName" : "fileConvertSend",
@@ -713,6 +722,12 @@ function closePT(){
 	$("#ifile"            ).val("");
 	$("[name='shareIcon']").hide();
 	
+	if( supportYn == "N"){
+		$("#div_nonvideoyou"  ).show();
+	}else{
+		$("#div_nonvideoyou"  ).hide();
+	}
+	
 	fileOwner 	= false;
 	
 	subdivideVideos();
@@ -775,6 +790,17 @@ function init() {
 		location.href="/bizmeet/main";
 		return;
 	}
+	
+	if( $("#userNm").val() == "" ){
+		var btnlist = [
+		               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
+		];
+		
+		openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y", closeBtn : "N"});
+		
+		openIframeLoad();
+		return;
+	}
 
 	
 	if(PeerConnection) {
@@ -784,36 +810,29 @@ function init() {
 			"audio": false
 		}, function(stream) {
 			var newDiv 		= document.createElement("div");
+			var nonVideoDiv = document.createElement("div");
 			var server 		= "";
-			
-			
-			if( $("#userNm").val() == "" ){
-				var btnlist = [
-				               {btnNm : "확인" , btnCss : "cbtn-y"  , btnFn : "confirmFn"}
-				];
-				
-				openLayer({href: "/bbChat/view/bb_info.jsp", header : "안내" , btn : btnlist , width: 400, height: 250, target : window , frm:$("#frm") , loading : "Y", closeBtn : "N"});
-				
-				openIframeLoad();
-				return;
-			}
 			
 			roomNm     		= decodeURI($("#roomNm").val());
 			userNm     		= decodeURI($("#userNm").val());
 			
 			if(stream != null){
 				document.getElementById('remoteyou').src = URL.createObjectURL(stream);
-				
+				videos.push(document.getElementById('remoteyou'));
+			}else{
+				supportYn = "N";	// 카메라 지원 여부
+			}
+			
+			if( supportYn != "Y"){
+				$("#div_nonvideoyou").show();
+				$("#remoteyou"		).remove();
+				//$("#div_nonvideoyou").attr("style"  ,"" );
+			}else{
 				newDiv.id     = "div_remoteyou";
 				document.getElementById('mainArea').appendChild(newDiv);
 				
 				$("#div_remoteyou").attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);" );
 				$("#div_remoteyou").append("<div style='padding-left:5px;color:white;display:none;'>"+userNm+"</div>");
-				
-				videos.push(document.getElementById('remoteyou'));
-				
-			}else{
-				supportYn = "N";
 			}
 
 			
@@ -835,6 +854,7 @@ function init() {
 					"eventName": "get_div_user",
 					"data": {
 						"id"    : socketId,
+						"room"  : roomNm
 					}
 				}));
 				
@@ -848,7 +868,6 @@ function init() {
 			
 			initChat();        	// 채팅 설정
 			initDraw();      	// canvas 설정
-			subdivideVideos(); 	// 비디오 크기 설정 
 			initFileConvert(); 	// 파일 변환 설정
 			initSocketUser(); 	
 			
@@ -881,19 +900,58 @@ function subdivideVideos() {
 	var right   = 10;
 	var chatChk = true;
 	var cnt     = 0;
-	if( $("#fileShareArea").is(":hidden")){
-		for(var i = 0, len = videos.length; i < len; i++) {
-			var video   = videos[i];
-			var divId   = "div_"+$(video).attr("id");
-			var visible = "";
-			if( !$("#chatbox").is(":hidden") && chatChk){
-				right   = 400;
-				chatChk = false;
-			}
+	
+	if( supportYn == "Y" ){
+		if( $("#fileShareArea").is(":hidden")){
 
-			if( $(video).attr("id") != mainView ){
+			for(var i = 0, len = videos.length; i < len; i++) {
+				var video   = videos[i];
+				var divId   = "div_"+$(video).attr("id");
+				var visible = "";
+				if( !$("#chatbox").is(":hidden") && chatChk){
+					right   = 410;
+					chatChk = false;
+				}
+
+				if( $(video).attr("id") != mainView ){
+					
+					if( cnt > 0 ){
+						right += 160;
+					}
+					
+					if($(video).is(":hidden")){
+						visible = "none;";
+					}else{
+						visible = "block;";
+					}
+					$("#"+divId ).find("div").show();
+					$(video		).attr("width"  ,"150px;" );
+					$(video		).attr("height" ,"150px;" );
+					$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+					$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
+					
+					cnt++;
+				}else if( $(video).attr("id") == mainView ){
+					$("#"+divId).find("div").hide();
+					$(video).attr("style"  ,"width: 100%; height: 100%;" );
+					$("#"+divId).attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
+				}
+			}
+			
+			nonVideoSortFn(right,cnt,chatChk);
+			
+		}else{
+			for(var i = 0, len = videos.length; i < len; i++) {
+				var video   = videos[i];
+				var visible = "";
+				var divId   = "div_"+$(video).attr("id");
 				
-				if( cnt > 0 ){
+				if( !$("#chatbox").is(":hidden") && chatChk){
+					right   = 410;
+					chatChk = false;
+				}
+				
+				if( i > 0){
 					right += 160;
 				}
 				
@@ -902,61 +960,36 @@ function subdivideVideos() {
 				}else{
 					visible = "block;";
 				}
-				$("#"+divId ).find("div").show();
-				$(video		).attr("width"  ,"150px;" );
-				$(video		).attr("height" ,"150px;" );
-				$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
-				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
 				
+				$(video).attr("width"   ,"150px;" );
+				$(video).attr("height"  ,"150px;" );
+				$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+				
+				$("#"+divId ).find("div").show();
+				
+				if( $(video).attr("id") != "remoteyou" ){
+					$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
+				}else{
+					$("#"+divId).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
+					if( $("#"+divId).find("img").is(":hidden") ){
+						$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
+					}else{
+						$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:inline;' name='shareIcon' >");
+					}
+				}
 				cnt++;
-			}else if( $(video).attr("id") == mainView ){
-				$("#"+divId).find("div").hide();
-				$(video).attr("style"  ,"width: 100%; height: 100%;" );
-				$("#"+divId).attr("style"  ,"position:absolute;top:0;width:100%;height:100%;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
 			}
+			
+			nonVideoSortFn(right,cnt,chatChk);
 		}
 	}else{
-		for(var i = 0, len = videos.length; i < len; i++) {
-			var video   = videos[i];
-			var visible = "";
-			var divId   = "div_"+$(video).attr("id");
-			
-			if( !$("#chatbox").is(":hidden") && chatChk){
-				right   = 410;
-				chatChk = false;
-			}
-			
-			if( i > 0){
-				right += 160;
-			}
-			
-			if($(video).is(":hidden")){
-				visible = "none;";
-			}else{
-				visible = "block;";
-			}
-			
-			$(video).attr("width"   ,"150px;" );
-			$(video).attr("height"  ,"150px;" );
-			$(video).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
-			
-			$("#"+divId ).find("div").show();
-			
-			if( $(video).attr("id") != "remoteyou" ){
-				$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
-			}else{
-				$("#"+divId).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:5;" );
-				if( $("#"+divId).find("img").is(":hidden") ){
-					$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
-				}else{
-					$("#"+divId).html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:inline;' name='shareIcon' >");
-				}
-			}
-			
 		
-		}
+		nonVideoSortFn(right,cnt,chatChk);
 		
 	}
+	
+	
+	
 	
 	if( $("#canvasDraw").is(":visible")){
 		$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
@@ -996,13 +1029,23 @@ function cloneVideo(domId, socketId) {
 	return clone;
 }
 
-function removeVideo(socketId) { 
+function removeVideo(socketId) {
+	
 	var video = document.getElementById('remote' + socketId);
 	var div   = document.getElementById('div_remote' + socketId);
 	if(video) {
 		videos.splice(videos.indexOf(video), 1);
 		video.parentNode.removeChild(video);
 		div.parentNode.removeChild(div);
+	}else if(div){
+		for(var i = 0 ; i < nonVideos.length ; i++ ){
+			if ( nonVideos[i].indexOf('div_remote' + socketId) > -1 ){
+				nonVideos.splice(i, 1);
+				$('#div_remote' + socketId).remove();
+			}
+		}
+		
+		console.log("remove nonVideos == " + nonVideos.length);
 	}
 }
 
@@ -1125,6 +1168,43 @@ function addToChat(msg, img, id, color, user) {
 function removeBubbleFn(id)
 {
 	$("#"+id).remove();
+}
+
+function nonVideoSortFn(right,cnt,chatChk)
+{
+	$('#mainArea').find(".non-video").remove();
+	
+	if( !$("#chatbox").is(":hidden") && chatChk){
+		right   = 410;
+		chatChk = false;
+	}
+	
+	for(var i = 0, len = nonVideos.length; i < len; i++) {
+		if( cnt > 0 ){
+			right += 160;
+		}
+		$('#mainArea').append(nonVideos[i]);
+		$('#mainArea').find(".non-video:last").css("right",right+"px");
+		cnt++;
+	}
+	
+	if( !$("#fileShareArea").is(":hidden") && supportYn == "N" ){
+		
+		if( cnt > 0 ){
+			right += 160;
+		}
+		
+		$('#mainArea'	  ).append	("<div id='div_remoteyou'></div>");
+		$("#div_remoteyou").attr	("class"  , "non-video" 		 );
+		$("#div_remoteyou").css 	("right"  , right + "px" 		 );
+		$("#div_remoteyou").css 	("width"  , "150px" 			 );
+		$("#div_remoteyou").css 	("height" , "112px" 		 	 );
+		$("#div_remoteyou").css 	("bottom" , "9px" 				 );
+
+		$("#div_remoteyou").html("<div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon' >");
+	}
+	
+	
 }
 
 function rand(){

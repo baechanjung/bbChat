@@ -1,7 +1,6 @@
 //CLIENT
 
 //Fallbacks for vendor-specific variables until the spec is finalized.
-
 var PeerConnection 			= window.PeerConnection || window.webkitPeerConnection00 || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
 var URL 		   			= window.URL || window.webkitURL || window.msURL || window.oURL;
 var getUserMedia1  			= navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
@@ -92,7 +91,7 @@ if(window.mozRTCPeerConnection){
 	/**
 	 * Connects to the websocket server.
 	 */
-	rtc.connect = function(server, room, user, img, gb) {
+	rtc.connect = function(server, room, user, img, gb, stream) {
 		
 		room = room || ""; // by default, join a room called the blank string
 		rtc._socket = new WebSocket(server); 
@@ -103,10 +102,11 @@ if(window.mozRTCPeerConnection){
 			rtc._socket.send(JSON.stringify({ 	
 				"eventName": "join_room",
 				"data":{
-					 "room" : room
-					,"user" : user
-					,"gb"   : gb
-					,"img"  : img
+					 "room" 	: room
+					,"user" 	: user
+					,"gb"   	: gb
+					,"img"  	: img
+					,"stream"   : stream
 				}
 			}));
 
@@ -130,10 +130,49 @@ if(window.mozRTCPeerConnection){
 			});
 
 			rtc.on('get_peers', function(data) {
-				rtc.connections = data.connections;
-				rtc._me = data.you;
 				
-				rtc.fire('ready');
+				if( data.stream != null ){
+					rtc.connections = data.connections;
+					rtc._me = data.you;
+					
+					var userInfo =	""; 
+					var userNm 	 = 	"";
+					var socId 	 =	"";
+					
+					rtc.fire('ready');
+					
+					for (var i = 0, len = data.notvideos.length; i < len; i++) {
+						
+						userInfo = data.notvideos[i];
+						userNm 	 = userInfo["USER_NM"];
+						socId 	 = userInfo["SOCKET_ID"];
+						
+						nonVideos.push("<div id='div_remote"+socId+"' class='non-video'><div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'></div>");
+					}
+				}else{
+					// 카메라 없을때 상대방 DIV 처리
+					var userInfo =	""; 
+					var userNm 	 = 	"";
+					var socId 	 =	"";
+						
+					for (var i = 0, len = data.notvideos.length; i < len; i++) {
+						userInfo = data.notvideos[i];
+						userNm 	 = userInfo["USER_NM"];
+						socId 	 = userInfo["SOCKET_ID"];
+						
+						nonVideos.push("<div id='div_remote"+socId+"' class='non-video'><div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'></div>");
+					}
+					for (var i = 0, len = data.videos.length; i < len; i++) {
+						userInfo = data.videos[i];
+						userNm 	 = userInfo["USER_NM"];
+						socId 	 = userInfo["SOCKET_ID"];
+						
+						nonVideos.push("<div id='div_remote"+socId+"' class='non-video'><div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'></div>");
+					}
+					
+				}
+				console.log("nonVideos.length == " + nonVideos.length);
+				subdivideVideos();
 			});
 			
 			rtc.on('receive_ice_candidate', function(data) {
@@ -142,18 +181,27 @@ if(window.mozRTCPeerConnection){
 			});
 
 			rtc.on('new_peer_connected', function(data) {
-				var pc = rtc.createPeerConnection(data.socketId);
-				
-				for (var i = 0; i < rtc.streams.length; i++) {
-					var stream = rtc.streams[i];
+				if( data.stream != null && supportYn == "Y" ){
+					var pc = rtc.createPeerConnection(data.socketId);
 					
-					pc.addStream(stream);        
+					for (var i = 0; i < rtc.streams.length; i++) {
+						var stream = rtc.streams[i];
+						pc.addStream(stream);
+					}
+				}else{
+					var userNm 	 = 	data.user;
+					var socId 	 =	data.socketId;
+					nonVideos.push("<div id='div_remote"+socId+"' class='non-video'><div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'></div>");
+					console.log("nonVideos.length == " + nonVideos.length);
+					subdivideVideos();
 				}
+				
 			});
 
 			rtc.on('remove_peer_connected', function(data) {
 				rtc.fire('disconnect stream', data.socketId);
-				delete rtc.peerConnections[data.socketId];
+				if ( data.stream != null )
+					delete rtc.peerConnections[data.socketId];
 			});
 
 			rtc.on('receive_offer', function(data) {
@@ -175,6 +223,22 @@ if(window.mozRTCPeerConnection){
 			rtc.sendOffer(socketId);
 		}
 	};
+	
+	rtc.sendOffer = function(socketId) {
+		var pc = rtc.peerConnections[socketId];
+		
+		pc.createOffer( function(session_description) {
+			
+			pc.setLocalDescription(session_description);
+			rtc._socket.send(JSON.stringify({
+				"eventName": "send_offer",
+				"data":{
+					"socketId": socketId,
+					"sdp"     : session_description
+				}
+			}));
+		},function(e){alert(e);});
+	};
 
 	rtc.onClose = function(data) {
 		rtc.on('close_stream', function() {
@@ -194,6 +258,8 @@ if(window.mozRTCPeerConnection){
 			config = rtc.dataChannelConfig;
 
 		var pc = rtc.peerConnections[id] = new PeerConnection(rtc.SERVER, config);
+		
+		//return;
 		pc.onicecandidate = function(event) {
 			if (event.candidate) {
 				rtc._socket.send(JSON.stringify({
@@ -223,22 +289,6 @@ if(window.mozRTCPeerConnection){
 		}
 
 		return pc;
-	};
-
-	rtc.sendOffer = function(socketId) {
-		
-		var pc = rtc.peerConnections[socketId];
-		pc.createOffer( function(session_description) {
-			
-			pc.setLocalDescription(session_description);
-			rtc._socket.send(JSON.stringify({
-				"eventName": "send_offer",
-				"data":{
-					"socketId": socketId,
-					"sdp"     : session_description
-				}
-			}));
-		},function(e){alert(e);});
 	};
 
 
@@ -276,8 +326,7 @@ if(window.mozRTCPeerConnection){
 		
 		var options;
 		onSuccess = onSuccess || function() {};
-		onFail    = onFail || function() {};
-		
+		onFail    = onFail 	  || function() {};
 		options = {
 				video: {
 				    mandatory: {
@@ -290,13 +339,20 @@ if(window.mozRTCPeerConnection){
 				audio: !!opt.audio
 		};
 		
+		/*
+		options = {
+				video: !!opt.video,
+				audio: !!opt.audio
+		};
+		 */
+		
 		if (getUserMedia1) {
 			getUserMedia1.call(navigator, options, function(stream) {
 				rtc.streams.push(stream);
 				onSuccess(stream);
 			}, function() {
-				alert("카메라를 지원하지 않습니다.");
 				//onFail();
+				//rtc.streams.push(null);
 				onSuccess(null);
 			});
 		} else {
@@ -309,8 +365,11 @@ if(window.mozRTCPeerConnection){
 		console.log(' rtc.streams.length :: ' + rtc.streams.length);
 		for (var i = 0; i < rtc.streams.length; i++) {
 			var stream = rtc.streams[i];
-			for (var connection in rtc.peerConnections) {
-				rtc.peerConnections[connection].addStream(stream);
+
+			if( stream != null ){
+				for (var connection in rtc.peerConnections) {
+					rtc.peerConnections[connection].addStream(stream);
+				}
 			}
 		}
 	};

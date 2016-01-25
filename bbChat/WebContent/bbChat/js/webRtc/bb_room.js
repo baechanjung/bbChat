@@ -97,8 +97,12 @@ $(function($){
 	$("#mainArea").find("div").live("click",function(){
 		if( $("#fileShareArea").is(":hidden")){
 			var divId   = $(this).attr("id");
+			
 	
 			if(divId == undefined)
+				return;
+			
+			if($(this).attr("class") != undefined)
 				return;
 			
 			mainView = divId.replace("div_","");
