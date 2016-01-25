@@ -34,16 +34,17 @@
 <title>biz Meeting</title>
 <%@ include file="/bbChat/inc/inc_0001_01.jsp" %>
 <link href="/bbChat/css/bootstrap.css"   			rel="stylesheet">
-<script type="text/javascript" src="/bbChat/js/webRtc/webrtc.io.js"></script>
-<script type="text/javascript" src="/bbChat/js/webRtc/script.js"></script>
-<script type="text/javascript" src="/bbChat/js/webRtc/bb_room.js"></script>
-<script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
 <script type="text/javascript">
 function callinit(data){
 	$("#userNm").val(data["USER_NM"]);
 	init();
 }
 </script>
+<script type="text/javascript" src="/bbChat/js/webRtc/webrtc.io.js"></script>
+<script type="text/javascript" src="/bbChat/js/webRtc/script.js"></script>
+<script type="text/javascript" src="/bbChat/js/webRtc/bb_room.js"></script>
+<script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
+
 <style>
 	/*========================BUBBLE========================*/
 	.bubble_box {
@@ -219,6 +220,21 @@ function callinit(data){
 		overflow:hidden;
 		text-overflow:ellipsis;
 		padding-top: 5px;
+	}
+	
+	.non-video{
+		background-color:black;
+		background-image: Url(/bbChat/img/icon/person2.png); 
+		background-repeat:no-repeat; 
+		background-position:center center; 
+		position:absolute;
+		bottom:9px;
+		right:10px;
+		display:block;
+		width:150px;
+		height:112px;
+		border: 1px solid rgba(84, 76, 76, 0.5);
+		z-index:10;
 	}			   
 </style>
 	
@@ -344,6 +360,13 @@ function callinit(data){
 
 
 	<div id="mainArea">
+		<div id="div_nonvideoyou" style="display:none;background-color:black;background-image: Url(/bbChat/img/icon/non-video.png); background-repeat:no-repeat; background-position:center center;position:absolute;top:0;width:100%;height:100%;text-align: center;">
+			<div style="padding-top:100px;;color:white;" id="notSupportBrowser">
+				<h2 style="font-size: 30px;">접속하신 디바이스에 카메라가 지원되지 않습니다.</h2>
+				<br>
+				<h2 style="font-size: 30px;">현재 채팅 및 문서공유 기능만 이용 가능 합니다.</h2>
+			</div>
+		</div>
 		<video  id="remoteyou" style="width: 100%; height: 100%" autoplay></video>
 	</div>
 	
