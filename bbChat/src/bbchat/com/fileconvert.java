@@ -264,10 +264,12 @@ public class fileconvert extends HttpServlet  {
 			richTexts = trun.getRichTextRuns();
 			for (RichTextRun richText : richTexts) {
 				fontName = richText.getFontName();
-				if ( isTrueType(fontName) ){
-					richText.setFontName("Dialog.plan");
-				}else{
-					richText.setFontName(fontName     );
+				if(fontName != null){
+					if ( isTrueType(fontName) ){
+						richText.setFontName("Dialog.plan");
+					}else{
+						richText.setFontName(fontName     );	
+					}					
 				}
 			}				
 		}		
@@ -276,7 +278,7 @@ public class fileconvert extends HttpServlet  {
 	private static void setTrueTypeFont(XSLFSlide slide) {
 		for(XSLFShape shape : slide){
 			setTrueTypeFont( shape );
-		}		
+		}
 //		XSLFTextShape 			 txShape 			= null;
 //		List <XSLFTextParagraph> xslfTextParagraphs = null;
 //		List <XSLFTextRun>		 xslfTextRuns       = null;	
@@ -312,10 +314,12 @@ public class fileconvert extends HttpServlet  {
 				 xslfTextRuns = xslfTextParagraph.getTextRuns();
 				 for(XSLFTextRun xslfTextRun : xslfTextRuns){
 					 fontName = xslfTextRun.getFontFamily();
-					 if ( isTrueType(fontName) ){                   
-						 xslfTextRun.setFontFamily("Dialog.plan");  
-					 }else{                                          
-						xslfTextRun.setFontFamily(fontName      );
+					 if(fontName != null){
+						 if ( isTrueType(fontName) ){
+							xslfTextRun.setFontFamily("Dialog.plan");  
+						 }else{                                          
+							xslfTextRun.setFontFamily(fontName      );
+						 }						 
 					 }
 				 }
 			 }
@@ -327,7 +331,7 @@ public class fileconvert extends HttpServlet  {
 				 }
 			 }
 		 }
-	}	
+	}
 	
 	private static boolean isTrueType(String fontName){
 		String[] trueType = new String[]{"Tahoma","Times New Roman","Calibri","Arial"};
