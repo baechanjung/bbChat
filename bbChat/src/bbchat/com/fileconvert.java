@@ -25,31 +25,34 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFImageWriter;
 import org.apache.poi.hslf.model.Slide;
+import org.apache.poi.hslf.model.TextRun;
+import org.apache.poi.hslf.usermodel.RichTextRun;
 import org.apache.poi.hslf.usermodel.SlideShow;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
-
+import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
+import org.apache.poi.xslf.usermodel.XSLFTextRun;
+import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.json.simple.JSONObject;
 
 import bbchat.server.WebSocketServer;
 
 public class fileconvert extends HttpServlet  {
 
-	private static final long 		serialVersionUID 	= 1L;
-	private 			 String 	roomNum 		 	= "";
+	private static final 	long 	serialVersionUID 	= 1L;
+	private 			 	String 	roomNum 		 	= "";
 
 	
 	protected void doPost( HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-
-		
 		request.setCharacterEncoding("UTF-8");
 		
 		if (request.getHeader("accept").indexOf("application/json") != -1) {
 	        response.setContentType("application/json; charset=UTF-8");
 	    } else {
 	        response.setContentType("text/plain; charset=UTF-8");
-	    }		
+	    }
+		
 		String 					name				= ""; 
 		String 					value 				= "";
 		String 					contextRootPath		= "";
@@ -61,17 +64,17 @@ public class fileconvert extends HttpServlet  {
 		FileItem 				item				= null;
 		
 		try {
-
 			contextRootPath 	= 	this.getServletContext().getRealPath("/");				//디스크상의 실제 경로 얻기
+			
 			diskFactory 		= 	new DiskFileItemFactory(); 								//1. 메모리나 파일로 업로드 파일 보관하는 FileItem의 Factory설정
-
 			diskFactory.setRepository(new File(contextRootPath + "/file/temp"));			//임시 저장폴더
 			
 			upload 				= 	new ServletFileUpload(diskFactory);						//2. 업로드 요청을 처리하는 ServletFileUpload 생성 
 			//upload.setSizeMax		(500 * 1024 * 1024); //500MB : 전체 최대 업로드 파일 크기
 			//upload.setFileSizeMax	(10  * 1024 * 1024); //10MB : 파일하나당 최대 업로드 파일 크기
 
-			items	 			= 	upload.parseRequest(request);							//3. 업로드 요청 파싱해서 FileItem 목록 구함 
+			items	 			= 	upload.parseRequest(request);							//3. 업로드 요청 파싱해서 FileItem 목록 구함
+			
 			iter 				= 	items.iterator(); 
 
 			while(iter.hasNext()) { //반목문으로 처리​    
@@ -82,22 +85,19 @@ public class fileconvert extends HttpServlet  {
                 	name 		= 	item.getFieldName();
             		value 		= 	item.getString("UTF-8");
             		roomNum 	= 	value;
-            		
                 } else { //파일인 경우
                 	processUploadFile(out, item, contextRootPath, response);
                 }
-            }
-			
+			}
 		} catch(Exception e) {	
 			e.printStackTrace();
 			out.print("{\"result\":\"500\"");
 			out.print(",\"msg\":\""+e.getMessage());			
 			out.print("\"}");				
 		}
-		
-
-		
 	}
+	
+	
 	//업로드한 정보가 파일인경우 처리
 	private void processUploadFile(PrintWriter out, FileItem item, String contextRootPath, HttpServletResponse response) throws Exception {
 		String 			fileName 	= item.getName(); 						//파일명 얻기
@@ -125,6 +125,8 @@ public class fileconvert extends HttpServlet  {
 			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
 			
 			for (int i = 0; i < slide.length; i++) {
+				
+				setTrueTypeFont(slide[i]);
 				
 				img 		= 	new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
 				graphics 	= 	img.createGraphics();
@@ -163,6 +165,9 @@ public class fileconvert extends HttpServlet  {
 			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
 			
 			for (int i = 0; i < slide.length; i++) {
+				
+				setTrueTypeFont(slide[i]);
+				
 				img = new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
 				graphics = img.createGraphics();
 				graphics.setTransform(at);
@@ -248,5 +253,55 @@ public class fileconvert extends HttpServlet  {
 			out.flush();
 			System.out.println(temp.toString());
 		} catch (Exception e) {}
+	}
+	
+	private static void setTrueTypeFont(Slide slide) {
+		TextRun    [] truns     = slide.getTextRuns();
+		RichTextRun[] richTexts = null;
+		String        fontName  = "";
+		for (TextRun trun : truns) {
+			richTexts = trun.getRichTextRuns();
+			for (RichTextRun richText : richTexts) {
+				fontName = richText.getFontName();
+				if ( isTrueType(fontName) ){
+					richText.setFontName("Dialog.plan");
+				}else{
+					richText.setFontName(fontName     );
+				}
+			}				
+		}		
+	}
+	
+	private static void setTrueTypeFont(XSLFSlide slide) {
+		XSLFTextShape 			 txShape 			= null;
+		List <XSLFTextParagraph> xslfTextParagraphs = null;
+		List <XSLFTextRun>		 xslfTextRuns       = null;	
+		String                   fontName           = "";
+		for(XSLFShape shape : slide){
+			 if(shape instanceof XSLFTextShape) {
+				 txShape            = (XSLFTextShape)shape;
+				 xslfTextParagraphs = txShape.getTextParagraphs();
+				 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
+					 xslfTextRuns = xslfTextParagraph.getTextRuns();
+					 for(XSLFTextRun xslfTextRun : xslfTextRuns){
+						 fontName = xslfTextRun.getFontFamily();
+						 if ( isTrueType(fontName) ){                   
+							 xslfTextRun.setFontFamily("Dialog.plan");  
+						 }else{                                          
+							xslfTextRun.setFontFamily(fontName      );
+						 }
+					 }
+				 }
+			 }
+		}
+	}	
+	
+	private static boolean isTrueType(String fontName){
+		String[] trueType = new String[]{"Tahoma","Times New Roman","Calibri","Arial"};
+		for(String type : trueType){
+			if(type.indexOf(fontName) > -1)
+				return true;
+		}
+		return false;
 	}
 }
