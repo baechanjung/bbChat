@@ -299,7 +299,7 @@ public class fileconvert extends HttpServlet  {
 	private static boolean isTrueType(String fontName){
 		String[] trueType = new String[]{"Tahoma","Times New Roman","Calibri","Arial"};
 		for(String type : trueType){
-			if(type.indexOf(fontName) > -1)
+			if(type.equals(fontName))
 				return true;
 		}
 		return false;
