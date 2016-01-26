@@ -29,6 +29,7 @@ import org.apache.poi.hslf.model.TextRun;
 import org.apache.poi.hslf.usermodel.RichTextRun;
 import org.apache.poi.hslf.usermodel.SlideShow;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.apache.poi.xslf.usermodel.XSLFGroupShape;
 import org.apache.poi.xslf.usermodel.XSLFShape;
 import org.apache.poi.xslf.usermodel.XSLFSlide;
 import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
@@ -273,27 +274,59 @@ public class fileconvert extends HttpServlet  {
 	}
 	
 	private static void setTrueTypeFont(XSLFSlide slide) {
+		for(XSLFShape shape : slide){
+			setTrueTypeFont( shape );
+		}		
+//		XSLFTextShape 			 txShape 			= null;
+//		List <XSLFTextParagraph> xslfTextParagraphs = null;
+//		List <XSLFTextRun>		 xslfTextRuns       = null;	
+//		String                   fontName           = "";
+//		for(XSLFShape shape : slide){
+//			 if(shape instanceof XSLFTextShape) {
+//				 txShape            = (XSLFTextShape)shape;
+//				 xslfTextParagraphs = txShape.getTextParagraphs();
+//				 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
+//					 xslfTextRuns = xslfTextParagraph.getTextRuns();
+//					 for(XSLFTextRun xslfTextRun : xslfTextRuns){
+//						 fontName = xslfTextRun.getFontFamily();
+//						 if ( isTrueType(fontName) ){                   
+//							 xslfTextRun.setFontFamily("Dialog.plan");  
+//						 }else{                                          
+//							xslfTextRun.setFontFamily(fontName      );
+//						 }
+//					 }
+//				 }
+//			 }
+//		}
+	}	
+	
+	private static void setTrueTypeFont(XSLFShape shape) {
 		XSLFTextShape 			 txShape 			= null;
 		List <XSLFTextParagraph> xslfTextParagraphs = null;
 		List <XSLFTextRun>		 xslfTextRuns       = null;	
 		String                   fontName           = "";
-		for(XSLFShape shape : slide){
-			 if(shape instanceof XSLFTextShape) {
-				 txShape            = (XSLFTextShape)shape;
-				 xslfTextParagraphs = txShape.getTextParagraphs();
-				 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
-					 xslfTextRuns = xslfTextParagraph.getTextRuns();
-					 for(XSLFTextRun xslfTextRun : xslfTextRuns){
-						 fontName = xslfTextRun.getFontFamily();
-						 if ( isTrueType(fontName) ){                   
-							 xslfTextRun.setFontFamily("Dialog.plan");  
-						 }else{                                          
-							xslfTextRun.setFontFamily(fontName      );
-						 }
+		 if(shape instanceof XSLFTextShape) {
+			 txShape            = (XSLFTextShape)shape;
+			 xslfTextParagraphs = txShape.getTextParagraphs();
+			 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
+				 xslfTextRuns = xslfTextParagraph.getTextRuns();
+				 for(XSLFTextRun xslfTextRun : xslfTextRuns){
+					 fontName = xslfTextRun.getFontFamily();
+					 if ( isTrueType(fontName) ){                   
+						 xslfTextRun.setFontFamily("Dialog.plan");  
+					 }else{                                          
+						xslfTextRun.setFontFamily(fontName      );
 					 }
 				 }
 			 }
-		}
+		 }else if(shape instanceof XSLFGroupShape) {
+			 XSLFGroupShape grpShape = (XSLFGroupShape)shape;
+			 for(XSLFShape grpItemShape : grpShape.getShapes()){
+				 if(grpItemShape instanceof XSLFTextShape) {
+					 setTrueTypeFont(grpItemShape);
+				 }
+			 }
+		 }
 	}	
 	
 	private static boolean isTrueType(String fontName){
