@@ -235,7 +235,76 @@ function callinit(data){
 		height:112px;
 		border: 1px solid rgba(84, 76, 76, 0.5);
 		z-index:10;
-	}			   
+	}
+	
+	.file-share {
+		position: absolute; 
+		top: 0px; 
+		width: 100%; 
+		top:60px; 
+		display:none;
+	}
+	.file-share > .small-list {
+		position: absolute; 
+		top: 0px;
+		left: 0px;
+		bottom: 0px;
+		width: 200px;
+		border-right: 5px solid #c0d0d9;
+		overflow: hidden;
+		overflow-x: hidden;
+		overflow-y: auto; 
+		background-color: rgb(158,191,228);
+	}
+	.div-area{
+		padding-top: 9px;
+		text-align:center;
+	}
+	
+	.div-number{
+		margin-left: 11%;
+	}
+	
+	.div-area > img{
+		width: 150px;height: 100px; cursor: pointer; border:2px solid black;
+	}
+	
+	.file-share > .big-list {
+		position: absolute;
+		top: 60px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+		text-align: left;
+		background-color: rgb(131,175,226); 
+		margin-left: 200px; 
+		overflow-y: auto;
+		text-align:center;
+	}
+	.big-list-div {
+		height: 100%; 
+		padding-bottom : 20px;
+	}
+	.big-list-div > img {
+	/*
+		width: 97%;
+		height: 90%;
+		*/ 
+		cursor: pointer;
+		margin-left: 20px; 
+		border:2px solid black;
+	}
+	.file-share > .btn-list {
+		position: absolute;
+		top: 0px;
+		bottom: 0px;
+		left: 0px;
+		right: 0px;
+		text-align: center;
+		overflow: hidden; 
+		background-color: rgb(131,175,226); 
+		margin-left: 200px;
+	}
 </style>
 	
 </head>
@@ -336,12 +405,12 @@ function callinit(data){
 	</div>
 	
 		
-	<div id="fileShareArea" style="position: absolute; top: 0px; width: 100%; top:60px; display:none;">
-		<div id="fileShareUl" style="position: absolute; top: 0px;left: 0px;bottom: 0px;width: 240px;border-right: 5px solid #c0d0d9;overflow: hidden;overflow-x: hidden;overflow-y: auto; background-color: rgb(158,191,228);">
+	<div id="fileShareArea" class="file-share">
+		<div id="fileShareUl" class="small-list">
 		</div>
-		<div style="position: absolute;top: 0px;bottom: 0px;left: 0px;right: 0px;text-align: center;overflow: hidden; background-color: rgb(131,175,226); margin-left: 241px;">
-			<div onclick="preBtn  ()" id="pre" style="display: none;background-image:url('/bbChat/img/controls.png'); background-position: 0 0; left: 10px; width: 32px;height: 32px; margin-top: 15px; margin-left: 250px; position: fixed;cursor: pointer;"></div>
-			<div id="filePage" style="display: none;position: absolute;color: white;margin-top: 20px;margin-left: 80px;font-size: larger; ">
+		<div class="btn-list">
+			<div onclick="preBtn()" id="pre" style="display: none;background-image:url('/bbChat/img/controls.png'); background-position: 0 0; left: 0px; width: 32px;height: 32px; margin-top: 15px; margin-left: 250px; position: fixed;cursor: pointer;"></div>
+			<div id="filePage" style="display: none;position: absolute;color: white;margin-top: 20px;margin-left: 95px;font-size: larger; ">
 				<span></span><span></span>
 			</div> 
 			<div onclick="nextBtn ()"  id="next" style="display: none;position: fixed; background-image:url('/bbChat/img/controls.png'); background-position: -32px 0; width: 32px;height: 32px;    margin-top: 15px; margin-left: 150px; cursor: pointer;"></div>
@@ -349,14 +418,18 @@ function callinit(data){
 				<img title="문서공유종료" src="/bbChat/img/icon/icon-close.png" width="30px;">
 			</div>
 		</div>
-		<div style="position: absolute;top: 60px;bottom: 0px;left: 0px;right: 0px;text-align: left;overflow: hidden; background-color: rgb(131,175,226); margin-left: 241px;">
-			<div style="height: 100%;">
-				<img    id="canvasImg"  style="width: 97%;height: 90%; cursor: pointer;margin-left: 20px; border:2px solid black;">
-			</div>
+		<div class="big-list">
+			<ul>
+				<li>
+					<div class='big-list-div'>
+						<img id="canvasImg" onload="imgLoad(this);" >
+						<canvas id="canvasDraw" style="position: absolute;top: 0px;bottom: 0px;right: 0px;overflow: hidden; z-index: 100; display:none;" ></canvas>
+					</div>
+				</li>
+			</ul>
 		</div>
 	</div>
 
-	<canvas id="canvasDraw" style="position: absolute;top: 120px;bottom: 0px;left: 0px;right: 0px;overflow: hidden; margin-left: 261px; z-index: 100;" ></canvas>
 
 
 	<div id="mainArea">
