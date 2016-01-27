@@ -145,6 +145,7 @@ function initFileConvert(){
 				imgListLoad(obj);
 				
 				fileOwner = true;
+				$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
 				$(".filearea"			).hide();
 				$("[name='shareIcon']"	).hide();
 				$("#div_nonvideoyou"	).hide();
@@ -167,6 +168,7 @@ function initFileConvert(){
 		imgListLoad(data);
 		
 		fileOwner = false;
+		$("#canvasDraw"					).css("cursor","");
 		$("[name='shareIcon']"			).hide();
 		$("#div_remoteyou"				).find("img").hide();
 		$("#div_nonvideoyou"			).hide();
@@ -328,6 +330,7 @@ function changeFile(o){
 					imgListLoad(jsonObj);
 					
 					fileOwner = true;
+					$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
 					$("[name='shareIcon']"	).hide();
 					$("#div_nonvideoyou"	).hide();
 					$("#div_remoteyou"		).find("img").show();
@@ -340,6 +343,7 @@ function changeFile(o){
 						imgListLoad(obj);
 						
 						fileOwner = true;
+						$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
 						$(".filearea"			).hide();
 						$("[name='shareIcon']"	).hide();
 						$("#div_nonvideoyou"	).hide();
@@ -679,7 +683,7 @@ function initDraw() {
 			return false;
 		}else{
 			alert('지우개 해제!!');
-			$("#canvasDraw").css("cursor","url(/pen_cursor.png), auto");
+			$("#canvasDraw").css("cursor","url(/bbChat/img/icon/icon_pen.png), auto");
 			eventObject.mode = "0";
 			return false;
 		}
@@ -809,6 +813,7 @@ function closePT(){
 	}
 	
 	fileOwner 	= false;
+	$("#canvasDraw").css("cursor","");
 	
 	subdivideVideos();
 }
