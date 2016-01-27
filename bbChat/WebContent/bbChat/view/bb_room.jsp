@@ -92,7 +92,15 @@ function callinit(data){
    }
    .filearea a{cursor:pointer;color:white;}
    .filearea ul{list-style: none;/*height:225px;overflow-x: auto;*/}
-   .filearea ul > li{border-top: 1px solid #ebedf2;padding-top: 8px;text-align:left;}
+   .filearea ul > li{
+   		border-top: 1px solid #ebedf2;
+   		padding-top: 8px;
+   		padding-bottom: 8px;
+   		text-align:left;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+   	}
    .file_box {
       width:300px;
       display: inline-block;
@@ -101,7 +109,7 @@ function callinit(data){
       border-radius: 5px;
       color: white;
       font-size: 17px;
-      padding:10px 10px 10px 10px;
+      padding:5px 10px 5px 10px;
       -webkit-transition-duration: 0.4s; /* Safari */
       transition-duration: 0.4s;
    }
