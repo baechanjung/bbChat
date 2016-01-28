@@ -134,7 +134,7 @@ public class WebSocketServer {
 			
 		}
 		
-		
+		System.out.println( " userSession info ===" + userSession);
 		sessionUsers.remove(userSession);	// 사용자 세션 정보 삭제
 		System.out.println( " sessionUsers ===" + sessionUsers.size());
 	}
