@@ -135,7 +135,6 @@ function initFileConvert(){
 
 	rtc.on("imgList",function(){
 		var data 	 = convert.recv.apply(this, arguments);
-		var appendYn = false;
 		
 		if(data["MODE"] == "U"){
 			$(".file_box"	).find("ul").append("<li><a>"+data["ORG_FILE_NM"]+"</a></li>");
@@ -375,6 +374,15 @@ function changeFile(o){
 						}
 					}));
 				}
+			}else{
+				alert("파일 변환중 문제가 발생하였습니다.\n잠시 후 다시 시도해 주십시오.");
+				
+				websocketConvert.send(JSON.stringify({
+			   		"eventName" : "hideLoding",
+			   		"data" : {
+			   				"ROOM"       : roomNm
+			   		}
+			   	}));
 			}
 
 		}
