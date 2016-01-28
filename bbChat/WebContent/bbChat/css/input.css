@@ -71,6 +71,327 @@ input:focus ~ .highlight {
 }
 
 
+/* ANIMATIONS ================ */
+@keyframes inputHighlighter {
+  from  { background:#5264AE; }
+  to    { width:0; background:transparent; }
+}
+
+
+
+/*========================BUBBLE========================*/
+.bubble_box {
+	position: relative;
+	background: rgba(0, 0, 0, 0.48);
+	border: 2px solid #B04EF0;
+	border-radius: 5px;
+	color: white;
+	font-size: 17px;
+	padding:10px 10px 10px 10px;
+	-webkit-transition-duration: 0.4s; /* Safari */
+	transition-duration: 0.4s;
+}
+.bubble_box:after, .bubble_box:before {
+	top: 100%;
+	left: 50%;
+	border: solid transparent;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+}
+.bubble_box:after {
+	border-color: rgba(0, 0, 0, 0);
+	border-top-color: rgb(63, 46, 74);
+	border-width: 10px;
+	margin-left: -10px;
+}
+.bubble_box:before {
+	border-color: rgba(176, 78, 240, 0);
+	border-top-color: #B04EF0;
+	border-width: 13px;
+	margin-left: -13px;
+}
+
+  .filearea{
+     width: 100%; 
+     position: absolute; 
+     top: 74px; 
+     height: 300px; 
+     background:transparent; 
+     z-index: 1000; 
+     text-align:center;
+  }
+  .filearea a{cursor:pointer;color:white;}
+  .filearea ul{list-style: none;/*height:225px;overflow-x: auto;*/}
+  .filearea ul > li{
+  		border-top: 1px solid #ebedf2;
+  		padding-top: 8px;
+  		padding-bottom: 8px;
+  		text-align:left;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+  	}
+  .file_box {
+     width:300px;
+     display: inline-block;
+     background: rgba(0, 0, 0, 0.48);
+     /*border: 2px solid #B04EF0;*/
+     border-radius: 5px;
+     color: white;
+     font-size: 17px;
+     padding:5px 10px 5px 10px;
+     -webkit-transition-duration: 0.4s; /* Safari */
+     transition-duration: 0.4s;
+  }
+  .file_box:after, .file_box:before {
+     bottom: 100%;
+     left: 50%;
+     border: solid transparent;
+     content: " ";
+     height: 0;
+     width: 0;
+     position: absolute;
+     pointer-events: none;
+  }
+  .file_box:after {
+     border-color: rgba(0, 0, 0, 0);
+     /*border-bottom-color: rgb(63, 46, 74);*/
+     border-bottom-color: rgba(0, 0, 0, 0.48);
+     border-width: 10px;
+     margin-left: -10px;
+  }
+  .file_box:before {
+     border-color: rgba(176, 78, 240, 0);
+     /*border-bottom-color: #B04EF0;*/
+     border-width: 13px;
+     margin-left: -13px;
+  }
+  
+  .statuscontrol{
+     width: 100%; 
+     position: absolute; 
+     top: 60px; 
+     height: 130px; 
+     background: rgba(0, 0, 0, 0.76);
+     z-index: 1000;
+  }
+  .statuscontrol > .progress{
+     position: absolute;
+     left: -2px; 
+     right: 0px;
+     height:3px;
+  }   
+  .statuscontrol > .progress > .uploadbar{
+     background-color: #B04EF0; 
+     position: absolute;
+     top: 0px;
+     bottom: 0px;
+     left: 0px;
+     right: 0px;
+     -webkit-transition-duration: 0.4s;
+     transition-duration: 0.4s;
+  }
+  .statuscontrol > .progress > .transferbar{
+     background-color: #00FF34; 
+     position: absolute;
+     top: 0px;
+     bottom: 0px;
+     left: 0px;
+     right: 0px;
+     -webkit-transition-duration: 0.4s;
+     transition-duration: 0.4s;
+  }
+  .statuscontrol > .statusbox{
+     text-align:center; 
+     margin-top:18px;
+  }
+  .statuscontrol > .statusbox > .statusmsg{
+     color:white;
+     font-size:20px;
+     margin-top:13px;
+  }
+  
+.instant-msg{
+	width: 100%; 
+	position: absolute; 
+	height: 100px; 
+	width: 400px; 
+	background:rgba(0, 0, 0, 0.48); 
+	z-index: 1000;
+	padding:0;
+	border-radius: 5px;
+}
+.instant-msg > .photo{
+	position: relative;
+	float: left; 
+	margin:0; 
+	width:100px;
+	height:100%;
+}
+.instant-msg > .photo img{
+	margin-top: 19px;
+	margin-left:18px;
+	width:60px;
+	height:60px;
+    border-radius: 50%;
+}   
+.instant-msg > .msg-info{
+	position: relative;
+	float:right; 
+	margin:0; 
+	width:300px;
+	height:100%;
+	color:white;
+}
+.instant-msg > .msg-info > .nickname{
+	height: 35%;
+	width: 300px;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	padding-top: 12px;
+	font-weight: bold;
+}
+.instant-msg > .msg-info > .message{
+	height:65%;
+	width:300px;
+	overflow:hidden;
+	text-overflow:ellipsis;
+	padding-top: 5px;
+}
+
+.non-video{
+	background-color:black;
+	background-image: Url(/bbChat/img/icon/person2.png); 
+	background-repeat:no-repeat; 
+	background-position:center center; 
+	position:absolute;
+	bottom:9px;
+	right:10px;
+	display:block;
+	width:150px;
+	height:112px;
+	border: 1px solid rgba(84, 76, 76, 0.5);
+	z-index:10;
+}
+
+.file-share {
+	position: absolute; 
+	top: 0px; 
+	width: 100%; 
+	top:60px; 
+	display:none;
+}
+.file-share > .small-list {
+	position: absolute; 
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	width: 200px;
+	border-right: 5px solid #c0d0d9;
+	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: auto; 
+	background-color: rgb(158,191,228);
+}
+.div-area{
+	padding-top: 9px;
+	text-align:center;
+}
+
+.div-number{
+	margin-left: 11%;
+}
+
+.div-area > img{
+	width: 150px;height: 100px; cursor: pointer; border:2px solid black;
+}
+
+.file-share > .big-list {
+	position: absolute;
+	top: 60px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	text-align: left;
+	background-color: rgb(131,175,226); 
+	margin-left: 200px; 
+	overflow-y: auto;
+	text-align:center;
+}
+.big-list-div {
+	height: 100%; 
+	padding-bottom : 20px;
+}
+.big-list-div > img {
+/*
+	width: 97%;
+	height: 90%;
+	*/ 
+	cursor: pointer;
+	margin-left: 20px; 
+	border:2px solid black;
+}
+.file-share > .btn-list {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	text-align: center;
+	overflow: hidden; 
+	background-color: rgb(131,175,226); 
+	margin-left: 200px;
+}
+
+/* Let's get this party started */
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+/* Track */
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: rgba(213,213,213,0.8); 
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(213,213,213,0.4); 
+}
+
+
+/* chat */
+
+.bbchat-area{
+	right: 0px; 
+	position:fixed; 
+	top:60px; 
+	height: 100%; 
+	z-index:130; 
+	display: none;
+}
+
+#bbchat-panel {
+	width: 400px;
+	height: 877px;
+	border-color:#322542;
+	background-color:inherit;
+	border-radius:0px;
+}
+
+#bbchat-heading {
+	color:rgb(255,255,255);
+	background-color:black;
+	border-bottom:1px solid #322542;
+	border-radius:0px;
+}
 
 #messages {
     overflow: auto;
@@ -85,8 +406,54 @@ input:focus ~ .highlight {
     width: 399px;
 }
 
-/* ANIMATIONS ================ */
-@keyframes inputHighlighter {
-  from  { background:#5264AE; }
-  to    { width:0; background:transparent; }
+#bbchat-footer{
+	background-color:black;
+	border-top:1px solid #322542;
+	border-radius:0px;
+}
+
+@media screen and (max-width:1400px) {
+	#bbchat-panel {
+		width: 300px;
+		height: 877px;
+		border-color:#322542;
+		background-color:inherit;
+		border-radius:0px;
+	}
+	
+	#messages {
+	    overflow: auto;
+	    word-wrap: break-word;
+	    background: none repeat scroll 0 0 #FFFFFF;
+	    border-radius: 5px 5px 0px 0px;
+	    font: 300 18px/40px 'light','Helvetica Neue',Arial,Helvetica,sans-serif;
+	    height: 100%;
+	    letter-spacing: 1px;
+	    margin-bottom: 0px;
+	    padding: 5px 10px;
+	    width: 300px;
+	}
+}
+
+@media screen and (max-width:1200px) {
+	#bbchat-panel {
+		width: 250px;
+		height: 877px;
+		border-color:#322542;
+		background-color:inherit;
+		border-radius:0px;
+	}
+	
+	#messages {
+	    overflow: auto;
+	    word-wrap: break-word;
+	    background: none repeat scroll 0 0 #FFFFFF;
+	    border-radius: 5px 5px 0px 0px;
+	    font: 300 18px/40px 'light','Helvetica Neue',Arial,Helvetica,sans-serif;
+	    height: 100%;
+	    letter-spacing: 1px;
+	    margin-bottom: 0px;
+	    padding: 5px 10px;
+	    width: 250px;
+	}
 }
