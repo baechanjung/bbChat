@@ -9,12 +9,15 @@ $(function($){
 	$("#messages").parent().css("height", window.innerHeight - 174 + "px");
 	
 	$("#cuyBtn").click(function(){
+		
+		var chatDivSize = Number($("#bbchat-panel").width());
+		
 		if($("#chatbox").is(":hidden")){
 			$("#chatbox").show("slide",function(){
 				subdivideVideos();
 			});
-			$("#exit"		).css( "right" , "410px" );
-			$(".big-list"	).css( "right" , "400px" );
+			$("#exit"		).css( "right" , (chatDivSize + 12) + "px" 	);
+			$(".big-list"	).css( "right" , (chatDivSize + 2 ) + "px"  );
 			fileAreaResize();
 		}else{
 			$("#chatbox").hide("slide",function(){
@@ -117,6 +120,15 @@ $(function($){
 	// 브라우져 크기 조정
 	window.onresize = function(event) {
 		
+		var chatDivSize = Number($("#bbchat-panel").width());
+		
+		if($("#chatbox").is(":visible")){
+			$("#exit"		).css( "right" , (chatDivSize + 12) + "px" 	);
+			$(".big-list"	).css( "right" , (chatDivSize + 2 ) + "px"  );
+		}else{
+			$("#exit"		).css( "right" , "10px" );
+			$(".big-list"	).css( "right" , "0px" );
+		}
 		
 		$("#fileShareArea"  ).css("height", window.innerHeight - 60 + "px");
 		$("#chatbox" 		).find(".chat-panel").css("height", window.innerHeight - 60 + "px");
@@ -127,11 +139,11 @@ $(function($){
 	};
 	
 	function fileAreaResize(){
-		var img_W = "";
-		var img_H = "";
-		var div_W = "";
-		var div_H = "";
-		var div_L = "";
+		var img_W 		= "";
+		var img_H 		= "";
+		var div_W 		= "";
+		var div_H 		= "";
+		var div_L 		= "";
 		
 		if($("#fileShareArea"  ).is(":visible")){
 			
@@ -195,4 +207,8 @@ $(function($){
 			}  
 		}  
 	}
+	
+	
+	
+	
 })
