@@ -63,6 +63,7 @@ public class fileconvert extends HttpServlet  {
 		List<FileItem> 			items				= null; 
 		Iterator 				iter				= null; 
 		FileItem 				item				= null;
+		JSONObject 				temp		     	= new JSONObject();
 		
 		try {
 			contextRootPath 	= 	this.getServletContext().getRealPath("/");				//디스크상의 실제 경로 얻기
@@ -90,170 +91,183 @@ public class fileconvert extends HttpServlet  {
                 	processUploadFile(out, item, contextRootPath, response);
                 }
 			}
+			
 		} catch(Exception e) {	
-			e.printStackTrace();
-			out.print("{\"result\":\"500\"");
-			out.print(",\"msg\":\""+e.getMessage());			
-			out.print("\"}");				
+			temp.put("RES_CD"		,	"9999"			);
+			out.println(temp.toString());
+			out.flush();			
 		}
 	}
 	
 	
 	//업로드한 정보가 파일인경우 처리
-	private void processUploadFile(PrintWriter out, FileItem item, String contextRootPath, HttpServletResponse response) throws Exception {
+	private void processUploadFile(PrintWriter out, FileItem item, String contextRootPath, HttpServletResponse response) {
+		
 		String 			fileName 	= item.getName(); 						//파일명 얻기
 		String 			tmpName 	= System.currentTimeMillis()+""; 		//파일명 얻기
 		String 			FILE_NM     = "slide-"+ tmpName + "_"; 				//리턴 파일명
 		String 			FILE_CNT    = ""; 									//리턴 파일수
 		JSONObject 		temp     	= new JSONObject();
-		FileInputStream is 			= (FileInputStream)item.getInputStream();
+		FileInputStream is 			= null;
 		
-		
-		if(".ppt".equals( fileName.substring(fileName.lastIndexOf(".")) )){
+		try{
 			
-			System.out.println("ppt");
+			response.setContentType("text/html; charset=utf-8");
+			
+			out 		= 	response.getWriter();
+			is 			= 	(FileInputStream)item.getInputStream();
+			
+			if(".ppt".equals( fileName.substring(fileName.lastIndexOf(".")) )){
+				
+				System.out.println("ppt");
 
-			double 				zoom 		= 	2; // magnify it by 2
-			AffineTransform 	at 			= 	new AffineTransform();
-			SlideShow 			ppt			= 	new SlideShow(is);
-			Dimension	 		pgsize		=   ppt.getPageSize();
-			Slide[] 			slide		= 	ppt.getSlides();
-			BufferedImage 		img			=   null; 
-			Graphics2D 			graphics	=   null; 
-			FileOutputStream 	outImg		=   null; 
-			at.setToScale(zoom, zoom);
-			
-			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
-			
-			for (int i = 0; i < slide.length; i++) {
+				double 				zoom 		= 	2; // magnify it by 2
+				AffineTransform 	at 			= 	new AffineTransform();
+				SlideShow 			ppt			= 	new SlideShow(is);
+				Dimension	 		pgsize		=   ppt.getPageSize();
+				Slide[] 			slide		= 	ppt.getSlides();
+				BufferedImage 		img			=   null; 
+				Graphics2D 			graphics	=   null; 
+				FileOutputStream 	outImg		=   null; 
+				at.setToScale(zoom, zoom);
 				
-				setTrueTypeFont(slide[i]);
+				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
 				
-				img 		= 	new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
-				graphics 	= 	img.createGraphics();
-				graphics.setTransform(at);
-				graphics.setPaint(Color.white);
-				graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
-				slide[i].draw(graphics);
-				
-				outImg 		= 	new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
-				
-				temp.put(i, "/file/img/slide-"+ tmpName + "_" +  (i + 1) + ".gif");
-				
-				javax.imageio.ImageIO.write(img, "gif", outImg);
-				
-				outImg.close();
-				
-				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
-			}
-			
-			FILE_CNT = Integer.toString( slide.length );
-			
-		}else if(".pptx".equals( fileName.substring(fileName.lastIndexOf(".")) )){
-			
-			System.out.println("pptx");
-			
-			XMLSlideShow 		ppt 		= 	new XMLSlideShow(is);
-			double 				zoom 		= 	2; // magnify it by 2
-			AffineTransform 	at 			= 	new AffineTransform();
-			Dimension 			pgsize 		= 	ppt.getPageSize();
-			XSLFSlide[] 		slide 		= 	ppt.getSlides();
-			BufferedImage 		img			= 	null;
-			Graphics2D 			graphics 	=   null;
-			FileOutputStream 	outImg 		=   null;
-			at.setToScale(zoom, zoom);
-			
-			WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
-			
-			for (int i = 0; i < slide.length; i++) {
-				
-				setTrueTypeFont(slide[i]);
-				
-				img = new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
-				graphics = img.createGraphics();
-				graphics.setTransform(at);
-				graphics.setPaint(Color.white);
-				graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
-				slide[i].draw(graphics);
-				outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
-				
-				temp.put(i, "/file/img/slide-"+ tmpName + "_" +(i + 1) + ".gif");
-				
-				javax.imageio.ImageIO.write(img, "gif", outImg);
-				outImg.close();
-				
-				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
-			}
-			
-			FILE_CNT = Integer.toString( slide.length );
-			
-		}else if(".pdf".equals( fileName.substring(fileName.lastIndexOf(".")) )){
-			
-			System.out.println("pdf");
-			
-			String          osName          =   System.getProperty("os.name");
-			String          filePath        =   "";
-			String 			imageFormat 	= 	"gif";				//출력이미지 확장자
-			int 			pdfPageCn 		= 	0;
-			PDDocument 		pdfDoc 			= 	null;
-			PDFImageWriter 	imageWriter 	= 	new PDFImageWriter();
-			
-			try {
-				pdfDoc 		= 	PDDocument.load(item.getInputStream());		//PDF파일 정보 취득
-				pdfPageCn 	= 	pdfDoc.getNumberOfPages();					//PDF파일 총페이지 수 취득
-			} catch (IOException ioe) {
-				System.out.println("PDF 정보취득 실패 : " + ioe.getMessage());
-			}
-			
-			if( osName.indexOf("Win") > -1  ){
-				filePath = getServletContext().getRealPath("") + "\\file\\img\\";
-			}else{
-				filePath = getServletContext().getRealPath("") + "/file/img/";
-			}
-			
-			WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
-			
-			try {
-				
-				for(int i = 1 ; i < pdfPageCn + 1 ; i++){
+				for (int i = 0; i < slide.length; i++) {
 					
-					imageWriter.writeImage(
-							pdfDoc, 
-							imageFormat, 
-							"",
-							i, //이미지 출력 시작페이지
-							i, //이미지 출력 종료페이지
-							filePath + "slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
-							BufferedImage.TYPE_INT_RGB,
-							100 //이미지 품질  300 추천
-					);
+					setTrueTypeFont(slide[i]);
 					
-					WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) , Integer.toString(i));
+					img 		= 	new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
+					graphics 	= 	img.createGraphics();
+					graphics.setTransform(at);
+					graphics.setPaint(Color.white);
+					graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
+					slide[i].draw(graphics);
+					
+					outImg 		= 	new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
+					
+					temp.put(i, "/file/img/slide-"+ tmpName + "_" +  (i + 1) + ".gif");
+					
+					javax.imageio.ImageIO.write(img, "gif", outImg);
+					
+					outImg.close();
+					
+					WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
 				}
 				
-			} catch (IOException ioe) {
-				System.out.println("PDF 이미지저장 실패 : " + ioe.getMessage());
+				FILE_CNT = Integer.toString( slide.length );
+				
+			}else if(".pptx".equals( fileName.substring(fileName.lastIndexOf(".")) )){
+				
+				System.out.println("pptx");
+				
+				XMLSlideShow 		ppt 		= 	new XMLSlideShow(is);
+				double 				zoom 		= 	2; // magnify it by 2
+				AffineTransform 	at 			= 	new AffineTransform();
+				Dimension 			pgsize 		= 	ppt.getPageSize();
+				XSLFSlide[] 		slide 		= 	ppt.getSlides();
+				BufferedImage 		img			= 	null;
+				Graphics2D 			graphics 	=   null;
+				FileOutputStream 	outImg 		=   null;
+				at.setToScale(zoom, zoom);
+				
+				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
+				
+				for (int i = 0; i < slide.length; i++) {
+					
+					setTrueTypeFont(slide[i]);
+					
+					img = new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
+					graphics = img.createGraphics();
+					graphics.setTransform(at);
+					graphics.setPaint(Color.white);
+					graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
+					slide[i].draw(graphics);
+					outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
+					
+					temp.put(i, "/file/img/slide-"+ tmpName + "_" +(i + 1) + ".gif");
+					
+					javax.imageio.ImageIO.write(img, "gif", outImg);
+					outImg.close();
+					
+					WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
+				}
+				
+				FILE_CNT = Integer.toString( slide.length );
+				
+			}else if(".pdf".equals( fileName.substring(fileName.lastIndexOf(".")) )){
+				
+				System.out.println("pdf");
+				
+				String          osName          =   System.getProperty("os.name");
+				String          filePath        =   "";
+				String 			imageFormat 	= 	"gif";				//출력이미지 확장자
+				int 			pdfPageCn 		= 	0;
+				PDDocument 		pdfDoc 			= 	null;
+				PDFImageWriter 	imageWriter 	= 	new PDFImageWriter();
+				
+				try {
+					pdfDoc 		= 	PDDocument.load(item.getInputStream());		//PDF파일 정보 취득
+					pdfPageCn 	= 	pdfDoc.getNumberOfPages();					//PDF파일 총페이지 수 취득
+				} catch (IOException ioe) {
+					System.out.println("PDF 정보취득 실패 : " + ioe.getMessage());
+					throw ioe;
+				}
+				
+				if( osName.indexOf("Win") > -1  ){
+					filePath = getServletContext().getRealPath("") + "\\file\\img\\";
+				}else{
+					filePath = getServletContext().getRealPath("") + "/file/img/";
+				}
+				
+				WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
+				
+				try {
+					
+					for(int i = 1 ; i < pdfPageCn + 1 ; i++){
+						
+						imageWriter.writeImage(
+								pdfDoc, 
+								imageFormat, 
+								"",
+								i, //이미지 출력 시작페이지
+								i, //이미지 출력 종료페이지
+								filePath + "slide-"+ tmpName + "_", //저장파일위치 및 파일명 지정 TEST+페이지 "TEST1.gif" 파일저장 
+								BufferedImage.TYPE_INT_RGB,
+								100 //이미지 품질  300 추천
+						);
+						
+						WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) , Integer.toString(i));
+					}
+					
+				} catch (IOException ioe) {
+					System.out.println("PDF 이미지저장 실패 : " + ioe.getMessage());
+					throw ioe;
+				}
+				
+				FILE_CNT = Integer.toString( pdfPageCn );
+				
 			}
 			
-			FILE_CNT = Integer.toString( pdfPageCn );
+			is.close();
 			
-		}
-		
-		is.close();
-		
-		temp.put("RES_CD"		,	"0000"			);
-		temp.put("SIZE"  		,	FILE_CNT		);
-		temp.put("FILE_NM"  	,	FILE_NM			);
-		temp.put("ORG_FILE_NM"  ,	fileName		);
-		
-		response.setContentType("text/html; charset=utf-8");
-		
-		try {
-			out = 	response.getWriter();
+			temp.put("RES_CD"		,	"0000"			);
+			temp.put("SIZE"  		,	FILE_CNT		);
+			temp.put("FILE_NM"  	,	FILE_NM			);
+			temp.put("ORG_FILE_NM"  ,	fileName		);
+			
 			out.println(temp.toString());
 			out.flush();
 			System.out.println(temp.toString());
-		} catch (Exception e) {}
+			
+		}catch( Exception e){
+			temp.put("RES_CD"		,	"9999"			);
+			out.println(temp.toString());
+			out.flush();
+		}
+		
+		
+		
 	}
 	
 	private static void setTrueTypeFont(Slide slide) {
