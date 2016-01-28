@@ -491,7 +491,8 @@ function imgListLoad( jsonObj ){
 	if($("#chatbox").is(":hidden")){
 		$("#exit"	).css( "right" , "10px" );
 	}else{
-		$("#exit"	).css( "right" , "410px" );
+		var chatDivSize = Number($("#bbchat-panel").width());
+		$("#exit"	).css( "right" , (chatDivSize + 12) + "px" );
 	}
 	
 	$("#filePage"   ).find("span:eq(0)").html("1");
@@ -998,11 +999,12 @@ function subdivideVideos() {
 		if( $("#fileShareArea").is(":hidden")){
 
 			for(var i = 0, len = videos.length; i < len; i++) {
-				var video   = videos[i];
-				var divId   = "div_"+$(video).attr("id");
-				var visible = "";
+				var video   	= videos[i];
+				var divId   	= "div_"+$(video).attr("id");
+				var visible 	= "";
+				var chatDivSize = Number($("#bbchat-panel").width());
 				if( !$("#chatbox").is(":hidden") && chatChk){
-					right   = 410;
+					right   = (chatDivSize + 12);
 					chatChk = false;
 				}
 
@@ -1035,12 +1037,12 @@ function subdivideVideos() {
 			
 		}else{
 			for(var i = 0, len = videos.length; i < len; i++) {
-				var video   = videos[i];
-				var visible = "";
-				var divId   = "div_"+$(video).attr("id");
-				
+				var video   	= videos[i];
+				var visible 	= "";
+				var divId   	= "div_"+$(video).attr("id");
+				var chatDivSize = Number($("#bbchat-panel").width());
 				if( !$("#chatbox").is(":hidden") && chatChk){
-					right   = 410;
+					right   = chatDivSize + 10;
 					chatChk = false;
 				}
 				
@@ -1258,7 +1260,9 @@ function nonVideoSortFn(right,cnt,chatChk)
 	$('#mainArea').find(".non-video").remove();
 	
 	if( !$("#chatbox").is(":hidden") && chatChk){
-		right   = 410;
+		var chatDivSize = Number($("#bbchat-panel").width());
+		
+		right   = (chatDivSize + 12);
 		chatChk = false;
 	}
 	
