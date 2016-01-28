@@ -149,7 +149,7 @@ function callinit(data){
 			<!-- /.panel-body -->
 			<div class="panel-footer" id="bbchat-footer">
 				<div class="input-group">
-					<input id="chatinput" type="text" style="padding:20px;font-size: 16px;" class="form-control input-sm" placeholder="Type your message here..." /> 
+					<input id="chatinput" type="text" style="padding: 8px;font-size: 16px; height: auto;" class="form-control input-sm"  /> 
 					<span class="input-group-btn">
 						<button class="btn btn-warning btn-sm" id="btn-chat" style="padding:11px;background-color:#B04EF0;border-color:#B04EF0;">Send</button>
 					</span>
