@@ -348,22 +348,22 @@ input:focus ~ .highlight {
 }
 
 /* Let's get this party started */
-::-webkit-scrollbar {
+#messages::-webkit-scrollbar {
     width: 12px;
 }
  
 /* Track */
-::-webkit-scrollbar-track {
+#messages::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
 }
  
 /* Handle */
-::-webkit-scrollbar-thumb {
-    background: rgba(213,213,213,0.8); 
+#messages::-webkit-scrollbar-thumb {
+    background: rgba(176,78,240,0.8); 
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
 }
-::-webkit-scrollbar-thumb:window-inactive {
-	background: rgba(213,213,213,0.4); 
+#messages::-webkit-scrollbar-thumb:window-inactive {
+	background: rgba(176,78,240,0.4); 
 }
 
 
