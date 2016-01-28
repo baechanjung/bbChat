@@ -349,7 +349,6 @@ function changeFile(o){
 						$("#div_remoteyou"		).find("img").show();
 						$("#exit"				).show();
 						
-						
 						websocketConvert.send(JSON.stringify({
 							"eventName" : "fileConvertSend",
 							"data" : {
