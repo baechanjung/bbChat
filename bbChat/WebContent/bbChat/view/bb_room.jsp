@@ -313,6 +313,25 @@ function callinit(data){
 		background-color: rgb(131,175,226); 
 		margin-left: 200px;
 	}
+	
+	/* Let's get this party started */
+	::-webkit-scrollbar {
+	    width: 12px;
+	}
+	 
+	/* Track */
+	::-webkit-scrollbar-track {
+	    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+	}
+	 
+	/* Handle */
+	::-webkit-scrollbar-thumb {
+	    background: rgba(213,213,213,0.8); 
+	    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+	}
+	::-webkit-scrollbar-thumb:window-inactive {
+		background: rgba(213,213,213,0.4); 
+	}
 </style>
 	
 </head>
