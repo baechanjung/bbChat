@@ -141,6 +141,7 @@ public class fileconvert extends HttpServlet  {
 		        Matcher                matcher    = null;
 		        int 				   fileIdx    =1;
 				
+		        reFileName = reFileName + "svg";
 		        
 				try{
 					//5%					 
@@ -192,13 +193,14 @@ public class fileconvert extends HttpServlet  {
 			            fileIdx++;
 			            //루핑 남은 50% 찍고
 				    }
-				    reFileCnt = Integer.toString(fileIdx);
+				    reFileCnt = Integer.toString(fileIdx - 1);
 				    
 					//100%
 					WebSocketServer.fileConverPercent(roomNum, "100" ,"100");
 					
 				}catch(Exception e){
 					e.printStackTrace();
+					throw e;
 				}finally{
 					if(fos != null){try {fos.close();} catch (IOException e) {e.printStackTrace();} }
 					if(fis != null){try {fis.close();} catch (IOException e) {e.printStackTrace();} }
