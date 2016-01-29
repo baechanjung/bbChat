@@ -159,7 +159,6 @@ function callinit(data){
 		</div>
 	</div>
 	
-		
 	<div id="fileShareArea" class="file-share">
 		<div id="fileShareUl" class="small-list">
 		</div>
