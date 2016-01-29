@@ -445,16 +445,25 @@ function imgListLoad( jsonObj ){
 		
 		if( i == 1){
 			$("#canvasImg").attr("style" ,"");
-		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".gif");
+			if(jsonObj["FILE_NM"].indexOf("_svg") > -1){
+				$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".svg");
+			}else{
+				$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".gif");
+			}
 		}		
 		
 		if( i == Number(jsonObj["SIZE"])){
 			$(".big-list" ).find("ul").find("li:last").find(".big-list-div").css("padding-bottom","0px");
 		}
 		
-		imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".gif ";
+		if(jsonObj["FILE_NM"].indexOf("_svg") > -1){
+			imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".svg ";
+			$("#slideList").append("<li id='smove"+i+"'><div class='div-area'><div class='div-number' align='left'>"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".svg ' onload='imgLoad2(this);' ></div></li>");
+		}else{
+			imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".gif ";
+			$("#slideList").append("<li id='smove"+i+"'><div class='div-area'><div class='div-number' align='left'>"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".gif ' onload='imgLoad2(this);' ></div></li>");
+		}
 		
-		$("#slideList").append("<li id='smove"+i+"'><div class='div-area'><div class='div-number' align='left'>"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".gif ' onload='imgLoad2(this);' ></div></li>");
 		$("#slideList").find("li:last").data("imgIndex", i );
 		$("#slideList").find("li:last").bind("click",function(){
 			imgIndex 		= $(this).data("imgIndex") - 1;
