@@ -307,7 +307,8 @@ input:focus ~ .highlight {
 }
 
 .div-area > img{
-	width: 150px;height: 100px; cursor: pointer; border:2px solid black;
+	cursor: pointer; 
+	border:2px solid black;
 }
 
 .file-share > .big-list {
