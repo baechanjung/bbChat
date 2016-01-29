@@ -422,30 +422,39 @@ function imgLoad(obj){
 	$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
 }
 
+function imgLoad2(obj){
+	var simg_W = Number($("#canvasImg").css("width" ).replace("px",""));
+	var simg_H = Number($("#canvasImg").css("height").replace("px",""));
+	if( simg_H > simg_W ){
+		$(obj).css("width"  , "130px");
+		$(obj).css("height" , "150px");
+	}else{
+		$(obj).css("width"  , "150px");
+		$(obj).css("height" , "100px");
+	}
+}
+
 
 function imgListLoad( jsonObj ){
-
-	$("#fileShareUl").html("<ul id=\"slideList\"></ul>");
 	imgPath = [];
+
+	$( ".small-list" 	).scrollTop( 0 );
+	$("#fileShareUl"	).html("<ul id=\"slideList\"></ul>");
+	
 	for(var i = 1; i < Number(jsonObj["SIZE"]) + 1 ; i++){
 		
-		$("#slideList").append("<li id='smove"+i+"'><div class='div-area'><div class='div-number' align='left'>"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".gif ' ></div></li>");
+		if( i == 1){
+			$("#canvasImg").attr("style" ,"");
+		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".gif");
+		}		
 		
 		if( i == Number(jsonObj["SIZE"])){
 			$(".big-list" ).find("ul").find("li:last").find(".big-list-div").css("padding-bottom","0px");
 		}
 		
-		
 		imgPath[i - 1] = "/file/img/" + jsonObj["FILE_NM"] +i+".gif ";
 		
-		
-		if( i == 1){
-			$("#canvasImg").attr("style" ,"");
-		   	$("#canvasImg").attr("src"   ,"/file/img/" + jsonObj["FILE_NM"]+ i +".gif");
-		}
-		
-		
-		
+		$("#slideList").append("<li id='smove"+i+"'><div class='div-area'><div class='div-number' align='left'>"+i+"</div><img src='/file/img/"+jsonObj["FILE_NM"] +i+".gif ' onload='imgLoad2(this);' ></div></li>");
 		$("#slideList").find("li:last").data("imgIndex", i );
 		$("#slideList").find("li:last").bind("click",function(){
 			imgIndex 		= $(this).data("imgIndex") - 1;
