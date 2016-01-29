@@ -1,18 +1,19 @@
 package bbchat.com;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -24,18 +25,10 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFImageWriter;
-import org.apache.poi.hslf.model.Slide;
-import org.apache.poi.hslf.model.TextRun;
-import org.apache.poi.hslf.usermodel.RichTextRun;
-import org.apache.poi.hslf.usermodel.SlideShow;
-import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.poi.xslf.usermodel.XSLFGroupShape;
-import org.apache.poi.xslf.usermodel.XSLFShape;
-import org.apache.poi.xslf.usermodel.XSLFSlide;
-import org.apache.poi.xslf.usermodel.XSLFTextParagraph;
-import org.apache.poi.xslf.usermodel.XSLFTextRun;
-import org.apache.poi.xslf.usermodel.XSLFTextShape;
 import org.json.simple.JSONObject;
+
+import com.aspose.slides.Presentation;
+import com.aspose.slides.SaveFormat;
 
 import bbchat.server.WebSocketServer;
 
@@ -105,10 +98,20 @@ public class fileconvert extends HttpServlet  {
 		
 		String 			fileName 	= item.getName(); 						//파일명 얻기
 		String 			tmpName 	= System.currentTimeMillis()+""; 		//파일명 얻기
-		String 			FILE_NM     = "slide-"+ tmpName + "_"; 				//리턴 파일명
-		String 			FILE_CNT    = ""; 									//리턴 파일수
+		String 			reFileName  = "slide-"+ tmpName + "_"; 				//리턴 파일명
+		String 			reFileCnt   = ""; 									//리턴 파일수
+		String          filePath    = "";
+		String          osName      =   System.getProperty("os.name");
 		JSONObject 		temp     	= new JSONObject();
 		FileInputStream is 			= null;
+		
+		
+		if( osName.indexOf("Win") > -1  ){
+			filePath = getServletContext().getRealPath("") + "\\file\\img\\";
+		}else{
+			filePath = getServletContext().getRealPath("") + "/file/img/";
+		}
+		
 		
 		try{
 			
@@ -117,90 +120,98 @@ public class fileconvert extends HttpServlet  {
 			out 		= 	response.getWriter();
 			is 			= 	(FileInputStream)item.getInputStream();
 			
-			if(".ppt".equals( fileName.substring(fileName.lastIndexOf(".")) )){
+			if(".pptx".equals( fileName.substring(fileName.lastIndexOf("."))) || ".ppt".equals( fileName.substring(fileName.lastIndexOf(".")))){
+				//
+				Presentation           pres       = null;
+				//
+				FileOutputStream       fos        = null;
+				//
+		        BufferedReader         br         = null;       
+		        InputStreamReader      isr        = null;   
+		        FileInputStream        fis        = null;       
+		        File                   file       = null;
+		        String                 contTemp   = "";
+				//
+				String                 content    = "";
+				String                 groupStr   = "";
+				String                 patternStr ="<div[^>]*>(.*?)</div>";
+				BufferedWriter		   bw         = null;
+				//
+				Pattern                pattern    = null; 
+		        Matcher                matcher    = null;
+		        int 				   fileIdx    =1;
 				
-				System.out.println("ppt");
+		        
+				try{
+					//5%					 
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"5");
+					
+					pres    = new Presentation(is);
+					
+					//15%
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"15");
+					
+					file = new File(filePath+tmpName+".html");
+					
+					fos  = new FileOutputStream(file);
 
-				double 				zoom 		= 	2; // magnify it by 2
-				AffineTransform 	at 			= 	new AffineTransform();
-				SlideShow 			ppt			= 	new SlideShow(is);
-				Dimension	 		pgsize		=   ppt.getPageSize();
-				Slide[] 			slide		= 	ppt.getSlides();
-				BufferedImage 		img			=   null; 
-				Graphics2D 			graphics	=   null; 
-				FileOutputStream 	outImg		=   null; 
-				at.setToScale(zoom, zoom);
-				
-				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
-				
-				for (int i = 0; i < slide.length; i++) {
+					pres.save(fos, SaveFormat.Html);
+					fos.flush();
+					fos.close();
 					
-					setTrueTypeFont(slide[i]);
+					//30%
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"30");
+
+					fis = new FileInputStream(file);
+		            isr = new InputStreamReader(fis, "UTF-8");
+		            br  = new BufferedReader(isr);
+		            while( (contTemp = br.readLine()) != null) {
+		            	/*라이센스 마크 제거(돈주고 사자...나중에...)*/
+		            	if(contTemp.indexOf("Evaluation only.") > -1 || contTemp.indexOf("Created with Aspose") > -1 || contTemp.indexOf("Aspose Pty Ltd.") > -1){
+		            		continue;
+		            	}
+		                content += contTemp+ "\n";
+		            }
+		            
+					//50%
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"50");
 					
-					img 		= 	new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
-					graphics 	= 	img.createGraphics();
-					graphics.setTransform(at);
-					graphics.setPaint(Color.white);
-					graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
-					slide[i].draw(graphics);
+//					FileOutputStream fileOutputStream = new OutputStreamWriter(new FileOutputStream(filePath+reFileName+ (fileIdx) + ".svg"))
+//					OutputStreamWriter OutputStreamWriter = new OutputStreamWriter(fileOutputStream, "MS949");
+//					BufferedWriter bufferedWriter = new BufferedWriter(OutputStreamWriter);
 					
-					outImg 		= 	new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
+		            pattern = Pattern.compile(patternStr , Pattern.MULTILINE | Pattern.DOTALL| Pattern.CASE_INSENSITIVE);
+				    matcher = pattern.matcher(content);
+				    while (matcher.find()) {
+				    	groupStr = matcher.group(1);
+//				    	bw = new BufferedWriter(new FileWriter(filePath+reFileName+ (fileIdx) + ".svg"));
+				    	bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath+reFileName+ (fileIdx) + ".svg"),"UTF-8"));
+				    	bw.write(groupStr);                          
+				    	bw.flush();
+				    	bw.close();
+			            fileIdx++;
+			            //루핑 남은 50% 찍고
+				    }
+				    reFileCnt = Integer.toString(fileIdx);
+				    
+					//100%
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"100");
 					
-					temp.put(i, "/file/img/slide-"+ tmpName + "_" +  (i + 1) + ".gif");
-					
-					javax.imageio.ImageIO.write(img, "gif", outImg);
-					
-					outImg.close();
-					
-					WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
+				}catch(Exception e){
+					e.printStackTrace();
+				}finally{
+					if(fos != null){try {fos.close();} catch (IOException e) {e.printStackTrace();} }
+					if(fis != null){try {fis.close();} catch (IOException e) {e.printStackTrace();} }
+					if(isr != null){try {isr.close();} catch (IOException e) {e.printStackTrace();} }
+					if(br  != null){try {br.close ();} catch (IOException e) {e.printStackTrace();} }			
+					if(bw  != null){try {bw.close ();} catch (IOException e) {e.printStackTrace();} }
 				}
-				
-				FILE_CNT = Integer.toString( slide.length );
-				
-			}else if(".pptx".equals( fileName.substring(fileName.lastIndexOf(".")) )){
-				
-				System.out.println("pptx");
-				
-				XMLSlideShow 		ppt 		= 	new XMLSlideShow(is);
-				double 				zoom 		= 	2; // magnify it by 2
-				AffineTransform 	at 			= 	new AffineTransform();
-				Dimension 			pgsize 		= 	ppt.getPageSize();
-				XSLFSlide[] 		slide 		= 	ppt.getSlides();
-				BufferedImage 		img			= 	null;
-				Graphics2D 			graphics 	=   null;
-				FileOutputStream 	outImg 		=   null;
-				at.setToScale(zoom, zoom);
-				
-				WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) ,"0");
-				
-				for (int i = 0; i < slide.length; i++) {
-					
-					setTrueTypeFont(slide[i]);
-					
-					img = new BufferedImage((int)Math.ceil(pgsize.width*zoom), (int)Math.ceil(pgsize.height*zoom), BufferedImage.TYPE_INT_RGB);
-					graphics = img.createGraphics();
-					graphics.setTransform(at);
-					graphics.setPaint(Color.white);
-					graphics.fill(new Rectangle2D.Float(0, 0, pgsize.width, pgsize.height));
-					slide[i].draw(graphics);
-					outImg = new FileOutputStream(contextRootPath + "/file/img/slide-"+ tmpName + "_" + (i + 1) + ".gif");
-					
-					temp.put(i, "/file/img/slide-"+ tmpName + "_" +(i + 1) + ".gif");
-					
-					javax.imageio.ImageIO.write(img, "gif", outImg);
-					outImg.close();
-					
-					WebSocketServer.fileConverPercent(roomNum, Integer.toString(slide.length) , Integer.toString(i+1));
-				}
-				
-				FILE_CNT = Integer.toString( slide.length );
-				
+		        
+		        
 			}else if(".pdf".equals( fileName.substring(fileName.lastIndexOf(".")) )){
 				
 				System.out.println("pdf");
 				
-				String          osName          =   System.getProperty("os.name");
-				String          filePath        =   "";
 				String 			imageFormat 	= 	"gif";				//출력이미지 확장자
 				int 			pdfPageCn 		= 	0;
 				PDDocument 		pdfDoc 			= 	null;
@@ -212,12 +223,6 @@ public class fileconvert extends HttpServlet  {
 				} catch (IOException ioe) {
 					System.out.println("PDF 정보취득 실패 : " + ioe.getMessage());
 					throw ioe;
-				}
-				
-				if( osName.indexOf("Win") > -1  ){
-					filePath = getServletContext().getRealPath("") + "\\file\\img\\";
-				}else{
-					filePath = getServletContext().getRealPath("") + "/file/img/";
 				}
 				
 				WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
@@ -245,15 +250,13 @@ public class fileconvert extends HttpServlet  {
 					throw ioe;
 				}
 				
-				FILE_CNT = Integer.toString( pdfPageCn );
+				reFileCnt = Integer.toString( pdfPageCn );
 				
 			}
 			
-			is.close();
-			
 			temp.put("RES_CD"		,	"0000"			);
-			temp.put("SIZE"  		,	FILE_CNT		);
-			temp.put("FILE_NM"  	,	FILE_NM			);
+			temp.put("SIZE"  		,	reFileCnt	    );
+			temp.put("FILE_NM"  	,	reFileName   	);
 			temp.put("ORG_FILE_NM"  ,	fileName		);
 			
 			out.println(temp.toString());
@@ -264,95 +267,12 @@ public class fileconvert extends HttpServlet  {
 			temp.put("RES_CD"		,	"9999"			);
 			out.println(temp.toString());
 			out.flush();
+		}finally{
+			if(is != null){try {is.close();} catch (IOException e) {e.printStackTrace();}}
+			if(out != null){out.close();} 
 		}
 		
 		
 		
-	}
-	
-	private static void setTrueTypeFont(Slide slide) {
-		TextRun    [] truns     = slide.getTextRuns();
-		RichTextRun[] richTexts = null;
-		String        fontName  = "";
-		for (TextRun trun : truns) {
-			richTexts = trun.getRichTextRuns();
-			for (RichTextRun richText : richTexts) {
-				fontName = richText.getFontName();
-				if(fontName != null){
-					if ( isTrueType(fontName) ){
-						richText.setFontName("Dialog.plan");
-					}else{
-						richText.setFontName(fontName     );	
-					}					
-				}
-			}				
-		}		
-	}
-	
-	private static void setTrueTypeFont(XSLFSlide slide) {
-		for(XSLFShape shape : slide){
-			setTrueTypeFont( shape );
-		}
-//		XSLFTextShape 			 txShape 			= null;
-//		List <XSLFTextParagraph> xslfTextParagraphs = null;
-//		List <XSLFTextRun>		 xslfTextRuns       = null;	
-//		String                   fontName           = "";
-//		for(XSLFShape shape : slide){
-//			 if(shape instanceof XSLFTextShape) {
-//				 txShape            = (XSLFTextShape)shape;
-//				 xslfTextParagraphs = txShape.getTextParagraphs();
-//				 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
-//					 xslfTextRuns = xslfTextParagraph.getTextRuns();
-//					 for(XSLFTextRun xslfTextRun : xslfTextRuns){
-//						 fontName = xslfTextRun.getFontFamily();
-//						 if ( isTrueType(fontName) ){                   
-//							 xslfTextRun.setFontFamily("Dialog.plan");  
-//						 }else{                                          
-//							xslfTextRun.setFontFamily(fontName      );
-//						 }
-//					 }
-//				 }
-//			 }
-//		}
-	}	
-	
-	private static void setTrueTypeFont(XSLFShape shape) {
-		XSLFTextShape 			 txShape 			= null;
-		List <XSLFTextParagraph> xslfTextParagraphs = null;
-		List <XSLFTextRun>		 xslfTextRuns       = null;	
-		String                   fontName           = "";
-		 if(shape instanceof XSLFTextShape) {
-			 txShape            = (XSLFTextShape)shape;
-			 xslfTextParagraphs = txShape.getTextParagraphs();
-			 for(XSLFTextParagraph xslfTextParagraph : xslfTextParagraphs){
-				 xslfTextRuns = xslfTextParagraph.getTextRuns();
-				 for(XSLFTextRun xslfTextRun : xslfTextRuns){
-					 fontName = xslfTextRun.getFontFamily();
-					 if(fontName != null){
-						 if ( isTrueType(fontName) ){
-							xslfTextRun.setFontFamily("Dialog.plan");  
-						 }else{                                          
-							xslfTextRun.setFontFamily(fontName      );
-						 }						 
-					 }
-				 }
-			 }
-		 }else if(shape instanceof XSLFGroupShape) {
-			 XSLFGroupShape grpShape = (XSLFGroupShape)shape;
-			 for(XSLFShape grpItemShape : grpShape.getShapes()){
-				 if(grpItemShape instanceof XSLFTextShape) {
-					 setTrueTypeFont(grpItemShape);
-				 }
-			 }
-		 }
-	}
-	
-	private static boolean isTrueType(String fontName){
-		String[] trueType = new String[]{"Tahoma","Times New Roman","Calibri","Arial"};
-		for(String type : trueType){
-			if(type.equals(fontName))
-				return true;
-		}
-		return false;
 	}
 }
