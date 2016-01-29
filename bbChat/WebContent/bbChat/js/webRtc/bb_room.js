@@ -1,5 +1,9 @@
 $(function($){
-	
+	if( $("#roomEx").val() == "false" && $("#joinGb").val() == "J" ){
+		alert("현재 존재하지 않는 회의실 입니다.");
+		location.href="/bizmeet/main";
+		return;
+	}
 	initClipBoard();
 	
 	$("#retroclockbox_xs").flipcountdown({

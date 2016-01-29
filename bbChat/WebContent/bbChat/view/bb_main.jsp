@@ -13,8 +13,6 @@ if(session != null){
 	strUserNm      = StringUtil.null2void((String)session.getAttribute("USER_NM") ,"");
 	strUserImgPath = StringUtil.null2void((String)session.getAttribute("IMG_PATH"),"");
 }
- 
-
 %>
 <!DOCTYPE html>
 <html>
