@@ -307,8 +307,10 @@ input:focus ~ .highlight {
 }
 
 .div-area > img{
-	cursor: pointer; 
+	cursor: pointer;
+	/* 
 	border:2px solid black;
+	*/
 }
 
 .file-share > .big-list {
@@ -331,10 +333,10 @@ input:focus ~ .highlight {
 /*
 	width: 97%;
 	height: 90%;
+	border:2px solid black;
 	*/ 
 	cursor: pointer;
 	margin-left: 20px; 
-	border:2px solid black;
 }
 .file-share > .btn-list {
 	position: absolute;
