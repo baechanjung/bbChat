@@ -975,7 +975,6 @@ function init() {
 			rtc.on('disconnect stream', function(data) {
 				console.log('remove ' + data);
 				removeVideo(data);
-				subdivideVideos();
 			});
 			
 			initChat();        	// 채팅 설정
@@ -1150,6 +1149,8 @@ function removeVideo(socketId) {
 		
 		console.log("remove nonVideos == " + nonVideos.length);
 	}
+	
+	subdivideVideos();
 }
 
 function addToChat(msg, img, id, color, user) {

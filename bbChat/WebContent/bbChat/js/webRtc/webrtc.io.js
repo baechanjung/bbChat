@@ -171,6 +171,16 @@ if(window.mozRTCPeerConnection){
 					}
 					
 				}
+				
+		        	
+				setInterval(function(){
+				console.log("alive_client");
+		    	   rtc._socket.send(JSON.stringify({ 	
+						"eventName": "alive_client"
+					}));
+		        }, 180000);//3분마다 알림
+				
+				
 				console.log("nonVideos.length == " + nonVideos.length);
 				subdivideVideos();
 			});
