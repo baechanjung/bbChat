@@ -18,6 +18,8 @@ import javax.websocket.server.ServerEndpoint;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import bbchat.com.bbLogManager;
+
 @ServerEndpoint(value = "/websocket/bbchat")
 public class WebSocketServer {
 	
@@ -28,10 +30,7 @@ public class WebSocketServer {
 	@OnMessage
 	public void onMessage(String message, Session userSession) throws IOException, InterruptedException {
 		
-		System.out.println( "##############################################" );
-		System.out.println( "########## WebSocketServer onMessage##########" );
-		System.out.println( "##############################################" );
-		System.out.println( "message =========                             " + message );
+		bbLogManager.bbLog("DEBUG", "message =============================" + message.toString() );
 		
 		if( message.length() > 0 ){
 			sendEvent(message, userSession);
@@ -41,9 +40,10 @@ public class WebSocketServer {
 	@OnOpen
 	public void onOpen(Session userSession) {
 		
-		System.out.println( "############################################" );
-		System.out.println( "########## WebSocketServer onOpen ##########" );
-		System.out.println( "############################################" );
+		bbLogManager.bbLog("DEBUG", "############################################" 						);
+		bbLogManager.bbLog("DEBUG", "########## WebSocketServer onOpen ##########" 						);
+		bbLogManager.bbLog("DEBUG", "############################################" 						);
+		bbLogManager.bbLog("DEBUG", "접속 socket Id =============================" + userSession.getId() );
 		
 		sessionUsers.add(userSession);
 	}
@@ -51,9 +51,10 @@ public class WebSocketServer {
 	@OnClose
 	public void onClose(Session userSession){
 		
-		System.out.println( "############################################" );
-		System.out.println( "########## WebSocketServer onClose##########" );
-		System.out.println( "############################################" );
+		bbLogManager.bbLog("DEBUG", "############################################" );
+		bbLogManager.bbLog("DEBUG", "########## WebSocketServer onClose##########" );
+		bbLogManager.bbLog("DEBUG", "############################################" );
+		bbLogManager.bbLog("DEBUG", "종료 소켓 =============================" + userSession.getId() );
 		
 		String		socId           = "";	// 채탕방의 사용자 세션ID 추출
 		Session 	soc				= null; 
@@ -116,11 +117,11 @@ public class WebSocketServer {
 
 					if( newUserList.size() > 0){
 						rooms.put(key.getKey(), newUserList);
-						
-						System.out.println("rooms list ==== " + rooms.toString() );
+						bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 종료 후["+key.getKey()+"] 사용자 정보 =============================" + newUserList.toString() );
 						
 					}else{
 						rooms.remove(key.getKey());
+						bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 종료 후["+key.getKey()+"] room 삭제되었습니다." );
 					}
 					breakYn = true;
 				}
@@ -134,9 +135,10 @@ public class WebSocketServer {
 			
 		}
 		
-		System.out.println( " userSession info ===" + userSession);
 		sessionUsers.remove(userSession);	// 사용자 세션 정보 삭제
-		System.out.println( " sessionUsers ===" + sessionUsers.size());
+		bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 삭제 완료" );
+		bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 삭제 완료 후 세션 수 ===== " + sessionUsers.size());
+		bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 삭제 완료 룸 수 	  ===== " + rooms.size());
 	}
 	
 	// 이벤트 분기처리 함수
@@ -180,6 +182,8 @@ public class WebSocketServer {
 				drawClick  (jData , userSession);
 			}else if( "get_div_user".equals(eventNm) ){
 				getDivUser  (jData , userSession);
+			}else if( "alive_client".equals(eventNm) ){
+				aliveClient  (jData , userSession);
 			}
 			
 		} catch (Exception e) {
@@ -226,9 +230,6 @@ public class WebSocketServer {
 		
 		rooms.put(strRoom, roomUserlist);
 		
-		
-		System.out.println("rooms list ==== " + roomUserlist.toString() );
-		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
 			getUserInfo = (Map)roomUserlist.get(i);
@@ -273,7 +274,11 @@ public class WebSocketServer {
 		
 		sockectSend(socket ,"get_peers", sendData );
 	}
-
+	
+	// 소켓연결유지
+	public void aliveClient( JSONObject data, Session socket ){
+		bbLogManager.bbLog("DEBUG", "aliveClient 소켓 ID =============================" + socket.getId() );
+	}
 	
 	// 채팅방 채팅 메세지 처리 함수
 	public void chatMsg( JSONObject data, Session socket ){
@@ -682,13 +687,14 @@ public class WebSocketServer {
 	}
 	
 	public static void fileConverPercent(String strRoom, String totPage, String curPage){
-		System.out.println("###################################" + totPage);
-		System.out.println("###################################" + curPage );
 		String 		id              = "";
 		Map 		getUserInfo     = null;
 		List   		roomUserlist 	= (List)rooms.get(strRoom);
 		JSONObject 	sendData  		= null;
 		Session		soc				= null;
+		
+		bbLogManager.bbLog("DEBUG", "fileConverPercent totPage =============================" + totPage );
+		bbLogManager.bbLog("DEBUG", "fileConverPercent curPage =============================" + curPage );
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
