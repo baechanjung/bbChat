@@ -143,38 +143,11 @@ $(function($){
 	};
 	
 	function fileAreaResize(){
-		var img_W 		= "";
-		var img_H 		= "";
-		var div_W 		= "";
-		var div_H 		= "";
-		var div_L 		= "";
+		var div_LEFT 		= "";
 		
 		if($("#fileShareArea"  ).is(":visible")){
-			
-			img_W = Number($(".big-list").find("img:eq(0)").css("width" ).replace("px",""));
-			img_H = Number($(".big-list").find("img:eq(0)").css("height").replace("px",""));
-			div_W = Number($(".big-list").css("width" ).replace("px",""));
-			div_H = Number($(".big-list").css("height").replace("px",""));
-			
-			if( img_W > img_H ){
-				div_W = div_W - 50;
-				div_H = div_H - 20;
-				$(".big-list").find("img").css("width" , div_W + "px");
-				if( div_H >  div_W ){
-					$(".big-list").find("img").css("height", "");
-				}else{
-					$(".big-list").find("img").css("height", div_H + "px");
-				}
-				$(".big-list"	 ).css("overflow-y","hidden");
-				$("#canvasDraw"  ).css("left","32px");
-			}else{
-				div_L = Number($("#canvasImg").offset().left) - Number($(".big-list-div").offset().left);
-				
-				$(".big-list"	 ).find("img").css("height", img_H);
-				$(".big-list"	 ).css("overflow-y","auto");
-				$("#canvasDraw"  ).css("left",div_L+"px");
-			}
-			
+			div_LEFT = Number($("#canvasImg").offset().left) - Number($(".big-list-div").offset().left);
+			$("#canvasDraw"  ).css("left",div_LEFT+"px");
 			$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
 			$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
 			
