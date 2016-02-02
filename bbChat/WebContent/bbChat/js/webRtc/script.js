@@ -1039,7 +1039,7 @@ function subdivideVideos() {
 					$("#"+divId ).find("div").show();
 					$(video		).attr("width"  ,"150px;" );
 					$(video		).attr("height" ,"150px;" );
-					$(video		).attr("style"  ,"position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+					$(video		).attr("style"  ,"z-index:10;position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 					$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
 					
 					cnt++;
@@ -1146,8 +1146,9 @@ function removeVideo(socketId) {
 				$('#div_remote' + socketId).remove();
 			}
 		}
-		
-		console.log("remove nonVideos == " + nonVideos.length);
+	}
+	if(mainView == "remote"+socketId){
+		mainView="remoteyou";
 	}
 	
 	subdivideVideos();
