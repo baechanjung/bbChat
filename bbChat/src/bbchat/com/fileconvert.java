@@ -139,7 +139,8 @@ public class fileconvert extends HttpServlet  {
 				//
 				Pattern                pattern    = null; 
 		        Matcher                matcher    = null;
-		        int 				   fileIdx    =1;
+		        int 				   slideCnt   = 0;
+		        int 				   fileIdx    = 0;
 				
 		        reFileName = reFileName + "svg";
 		        
@@ -147,7 +148,8 @@ public class fileconvert extends HttpServlet  {
 					//5%					 
 					WebSocketServer.fileConverPercent(roomNum, "100" ,"5");
 					
-					pres    = new Presentation(is);
+					pres     = new Presentation(is);
+					slideCnt = pres.getSlides().size();
 					
 					//15%
 					WebSocketServer.fileConverPercent(roomNum, "100" ,"15");
@@ -166,6 +168,10 @@ public class fileconvert extends HttpServlet  {
 					fis = new FileInputStream(file);
 		            isr = new InputStreamReader(fis, "UTF-8");
 		            br  = new BufferedReader(isr);
+		            
+					//40%
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"50");
+					
 		            while( (contTemp = br.readLine()) != null) {
 		            	/*라이센스 마크 제거(돈주고 사자...나중에...)*/
 		            	if(contTemp.indexOf("Evaluation only.") > -1 || contTemp.indexOf("Created with Aspose") > -1 || contTemp.indexOf("Aspose Pty Ltd.") > -1){
@@ -190,14 +196,14 @@ public class fileconvert extends HttpServlet  {
 				    	bw.write(groupStr);                          
 				    	bw.flush();
 				    	bw.close();
-			            fileIdx++;
-			            //루핑 남은 50% 찍고
+				    	fileIdx++;
+
+			            //50%~100%
+				    	WebSocketServer.fileConverPercent(roomNum, "100" ,Integer.toString((int)Math.floor(( (double)fileIdx /slideCnt)*50)+50));    
+
 				    }
-				    reFileCnt = Integer.toString(fileIdx - 1);
+				    reFileCnt = Integer.toString(slideCnt);
 				    
-					//100%
-					WebSocketServer.fileConverPercent(roomNum, "100" ,"100");
-					
 				}catch(Exception e){
 					e.printStackTrace();
 					throw e;
@@ -211,8 +217,6 @@ public class fileconvert extends HttpServlet  {
 		        
 		        
 			}else if(".pdf".equals( fileName.substring(fileName.lastIndexOf(".")) )){
-				
-				System.out.println("pdf");
 				
 				String 			imageFormat 	= 	"gif";				//출력이미지 확장자
 				int 			pdfPageCn 		= 	0;
