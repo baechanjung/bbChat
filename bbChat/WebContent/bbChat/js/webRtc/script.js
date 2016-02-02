@@ -897,7 +897,7 @@ function init() {
 		//미디어 스트림 생성
 		rtc.createStream({
 			"video": true,
-			"audio": false
+			"audio": true
 		}, function(stream) {
 			var newDiv 		= document.createElement("div");
 			var nonVideoDiv = document.createElement("div");
