@@ -392,32 +392,10 @@ function changeFile(o){
 
 
 function imgLoad(obj){
-	var img_W = Number($(obj).css("width" ).replace("px",""));
-	var img_H = Number($(obj).css("height").replace("px",""));
-	var div_W = Number($(".big-list").css("width" ).replace("px",""));
-	var div_H = Number($(".big-list").css("height").replace("px",""));
-	var div_L = "";
+	var div_LEFT = Number($("#canvasImg").offset().left) - Number($(".big-list-div").offset().left);
+
 	$("#canvasDraw").show();
-	
-	if( img_W > img_H ){
-		div_W = div_W - 50;
-		div_H = div_H - 20;
-		$(obj).css("width" , div_W + "px");
-		if( div_H >  div_W ){
-			$(obj).css("height", "");
-		}else{
-			$(obj).css("height", div_H + "px");
-		}
-		$(".big-list"	 ).css("overflow-y" ,	"hidden");
-		$("#canvasDraw"  ).css("left"		,	"32px");
-	}else{
-		div_L = Number($("#canvasImg").offset().left) - Number($(".big-list-div").offset().left);
-		
-		$(obj).css("height", img_H);
-		$(".big-list"	 ).css("overflow-y" ,	"auto");
-		$("#canvasDraw"  ).css("left",div_L+"px");
-	}
-	
+	$("#canvasDraw"  ).css("left",div_LEFT+"px");
 	$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
 	$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
 }
