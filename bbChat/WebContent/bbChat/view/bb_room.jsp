@@ -75,7 +75,7 @@ function callinit(data){
 <input type="hidden"	id="userImgPath"	name="userImgPath"	value="<%=StringUtil.null2void( request.getParameter("userImgPath") , ""   )%>" />
 <input type="hidden"	id="joinGb"			name="joinGb"		value="<%=StringUtil.null2void( request.getParameter("joinGb")  	, "J"  )%>" />
 
-	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; z-index:30;">
+	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; z-index:30; min-width: 800px;">
 		<div class="header_inner" style="text-align: center;width: 100%;">
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
