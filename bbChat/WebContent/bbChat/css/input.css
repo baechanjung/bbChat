@@ -460,3 +460,7 @@ input:focus ~ .highlight {
 	    width: 250px;
 	}
 }
+
+video{
+	transform: scale(-1,1);
+}
