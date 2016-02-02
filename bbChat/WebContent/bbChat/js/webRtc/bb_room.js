@@ -47,6 +47,12 @@ $(function($){
 		}
 	});
 	
+	$("body").click("click",function(event){
+		if("notClose" != $(event.target).attr("name")){
+			$(".filearea").hide();
+		}
+	});
+	
 	$("#uploadBtn").click("click",function(){
 		$("#ifile").click();	
 	});
