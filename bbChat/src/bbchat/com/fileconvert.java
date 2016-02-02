@@ -222,14 +222,8 @@ public class fileconvert extends HttpServlet  {
 				try {
 					pdfDoc 		= 	PDDocument.load(item.getInputStream());		//PDF파일 정보 취득
 					pdfPageCn 	= 	pdfDoc.getNumberOfPages();					//PDF파일 총페이지 수 취득
-				} catch (IOException ioe) {
-					System.out.println("PDF 정보취득 실패 : " + ioe.getMessage());
-					throw ioe;
-				}
 				
-				WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
-				
-				try {
+					WebSocketServer.fileConverPercent(roomNum, Integer.toString(pdfPageCn) ,"0");
 					
 					for(int i = 1 ; i < pdfPageCn + 1 ; i++){
 						
@@ -250,6 +244,8 @@ public class fileconvert extends HttpServlet  {
 				} catch (IOException ioe) {
 					System.out.println("PDF 이미지저장 실패 : " + ioe.getMessage());
 					throw ioe;
+				} finally{
+					if(pdfDoc != null){pdfDoc.close();} 
 				}
 				
 				reFileCnt = Integer.toString( pdfPageCn );
