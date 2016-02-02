@@ -194,7 +194,7 @@ function callinit(data){
 				<h2 style="font-size: 30px;">현재 채팅 및 문서공유 기능만 이용 가능 합니다.</h2>
 			</div>
 		</div>
-		<video  id="remoteyou" style="width: 100%; height: 100%; transform: scale(-1,1);" autoplay></video>
+		<video  id="remoteyou" style="width: 100%; height: 100%;" autoplay></video>
 	</div>
 	
 	
