@@ -4,6 +4,12 @@ $(function($){
 		location.href="/bizmeet/main";
 		return;
 	}
+	
+	if( $("#roomUserCnt").val() >= 4 ){
+		alert("회의실의 정원이 초과 하였습니다.\n");
+		location.href="/bizmeet/main";
+		return;
+	}
 	initClipBoard();
 	
 	$("#retroclockbox_xs").flipcountdown({
