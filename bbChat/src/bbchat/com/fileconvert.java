@@ -170,7 +170,7 @@ public class fileconvert extends HttpServlet  {
 		            br  = new BufferedReader(isr);
 		            
 					//40%
-					WebSocketServer.fileConverPercent(roomNum, "100" ,"50");
+					WebSocketServer.fileConverPercent(roomNum, "100" ,"40");
 					
 		            while( (contTemp = br.readLine()) != null) {
 		            	/*라이센스 마크 제거(돈주고 사자...나중에...)*/
