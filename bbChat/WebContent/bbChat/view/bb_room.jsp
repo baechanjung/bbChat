@@ -8,6 +8,7 @@
 
 	boolean 				bMobileCheck	 = 	false;
 	boolean 				roomExist		 = 	false;
+	int                     roomUserCnt      =  0;
 	String 					ua				 =	request.getHeader("User-Agent").toLowerCase();
 	Map<String, Object> 	roomList		 =  WebSocketServer.getRoomList();
 	List 					strUserList 	 =  null;
@@ -33,7 +34,8 @@
 		System.out.println(roomList.get(request.getParameter("roomNm")));
 		
 		if( roomList.get(request.getParameter("roomNm")) != null ){
-			roomExist = true;
+			roomExist   = true;
+			roomUserCnt = ((List)roomList.get(request.getParameter("roomNm"))).size();
 		}
 	}
 	
@@ -70,6 +72,7 @@ function callinit(data){
 	<input type="hidden" id="invite_url" name="invite_url"	value=""/>
 </form>
 <input type="hidden"	id="roomEx"			name="roomEx"		value="<%=roomExist  	%>" />
+<input type="hidden"	id="roomUserCnt"	name="roomUserCnt"	value="<%=roomUserCnt  	%>" />
 <input type="hidden"	id="roomNm"			name="roomNm"		value="<%=StringUtil.null2void( request.getParameter("roomNm")  	, ""   )%>" />
 <input type="hidden"	id="userNm"			name="userNm"		value="<%=StringUtil.null2void( request.getParameter("userNm")  	, ""   )%>" />
 <input type="hidden"	id="userImgPath"	name="userImgPath"	value="<%=StringUtil.null2void( request.getParameter("userImgPath") , ""   )%>" />
