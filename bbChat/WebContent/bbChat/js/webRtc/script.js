@@ -1037,9 +1037,7 @@ function subdivideVideos() {
 						visible = "block;";
 					}
 					$("#"+divId ).find("div").show();
-					$(video		).attr("width"  ,"150px;" );
-					$(video		).attr("height" ,"150px;" );
-					$(video		).attr("style"  ,"z-index:10;position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
+					$(video		).attr("style"  ,"width:150px;height:150px;z-index:10;position:absolute;bottom:-10px;right:"+right+"px;display:"+visible );
 					$("#"+divId	).attr("style"  ,"position:absolute;bottom:9px;right:"+right+"px;display:"+visible+";width:150px;height:112px;border: 1px solid rgba(84, 76, 76, 0.5);z-index:10;" );
 					
 					cnt++;
