@@ -190,13 +190,15 @@ public class fileconvert extends HttpServlet  {
 		            pattern = Pattern.compile(patternStr , Pattern.MULTILINE | Pattern.DOTALL| Pattern.CASE_INSENSITIVE);
 				    matcher = pattern.matcher(content);
 				    while (matcher.find()) {
+				    	
+				    	fileIdx++;
 				    	groupStr = matcher.group(1);
 //				    	bw = new BufferedWriter(new FileWriter(filePath+reFileName+ (fileIdx) + ".svg"));
 				    	bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath+reFileName+ (fileIdx) + ".svg"),"UTF-8"));
 				    	bw.write(groupStr);                          
 				    	bw.flush();
 				    	bw.close();
-				    	fileIdx++;
+				    	
 
 			            //50%~100%
 				    	WebSocketServer.fileConverPercent(roomNum, "100" ,Integer.toString((int)Math.floor(( (double)fileIdx /slideCnt)*50)+50));    
