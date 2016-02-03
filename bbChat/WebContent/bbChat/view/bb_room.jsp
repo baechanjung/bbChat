@@ -63,6 +63,12 @@ function callinit(data){
 <script type="text/javascript" src="/bbChat/js/webRtc/script.js"></script>
 <script type="text/javascript" src="/bbChat/js/webRtc/bb_room.js"></script>
 <script type="text/javascript" src="/bbChat/js/ZeroClipboard.min.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="/bbChat/css/component2.css" />
+<script type="text/javascript" src="/bbChat/js/jquery.lightSlider.js"></script>
+<script src="/bbChat/js/polyfills.js"></script>
+
 </head>
 <body style="margin: 0;overflow: hidden;" onload="init();">
 <form id='shareForm' name="shareForm" enctype='multipart/form-data' method="post">
@@ -78,7 +84,7 @@ function callinit(data){
 <input type="hidden"	id="userImgPath"	name="userImgPath"	value="<%=StringUtil.null2void( request.getParameter("userImgPath") , ""   )%>" />
 <input type="hidden"	id="joinGb"			name="joinGb"		value="<%=StringUtil.null2void( request.getParameter("joinGb")  	, "J"  )%>" />
 
-	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; z-index:30; min-width: 800px;">
+	<div id="header" class="header" style="width: 100%; position: absolute; opacity : 0.8; z-index:300; min-width: 800px;">
 		<div class="header_inner" style="text-align: center;width: 100%;">
 			<div class="join" style="width: 410px;float: none; ">
 				<ul style="margin-top: 8px;">
@@ -86,7 +92,7 @@ function callinit(data){
 					<li id="cuyBtn"    ><img title="대화하기" src="/bbChat/img/icon/icon-messenger1.png"   style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<%} %>
 					<li id="inviteBtn" ><img title="초대하기" src="/bbChat/img/icon/icon-invite1.png" 	  style="width: 45px;height: 45px; cursor: pointer;"> </li>
-					<li id="shareBtn"  ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;" name="notClose"> </li>
+					<li id="shareBtn"  ><img title="문서공유" src="/bbChat/img/icon/icon-doc-storage1.png" style="width: 45px;height: 45px; cursor: pointer;" name="notCloseFile"> </li>
 					<li id="expandBtn" ><img title="확대"     src="/bbChat/img/icon/icon_expand.png"	 	  style="width: 45px;height: 45px; cursor: pointer;"> </li>
 					<!-- 
 					<li id="hideBtn"  ><img title="숨기기"   src="/bbChat/img/icon/icon-pip-hide1.png"	 style="width: 45px;height: 45px; cursor: pointer;"> </li>
@@ -101,6 +107,7 @@ function callinit(data){
 		</div>
 	</div>
 	
+
 
 	<div class="filearea" style="display: none;">
 		<div class="file_box">
@@ -165,6 +172,18 @@ function callinit(data){
 	<div id="fileShareArea" class="file-share">
 		<div id="fileShareUl" class="small-list">
 		</div>
+		
+		<div class="csstransforms" style="display:none;">
+			<a class="cn-button" id="cn-button" name="notCloseMenu"></a>
+			<div class="cn-wrapper" id="cn-wrapper">
+				<ul>
+					<li id="modePen"><a style="cursor: pointer;"><span><img src="/bbChat/img/icon/icon_tool_pen.png"></span></a></li>
+					<li id="modeEraser"><a style="cursor: pointer;"><span><img src="/bbChat/img/icon/icon_tool_eraser.png"></span></a></li>
+					<li id="modeRe"><a style="cursor: pointer;"><span><img src="/bbChat/img/icon/icon_tool_re.png"></span></a></li>
+				 </ul>
+			</div>
+		</div>
+	
 		<div class="btn-list">
 			<div onclick="preBtn()" id="pre" style="display: none;background-image:url('/bbChat/img/controls.png'); background-position: 0 0; left: 0px; width: 32px;height: 32px; margin-top: 15px; margin-left: 250px; position: fixed;cursor: pointer;"></div>
 			<div id="filePage" style="display: none;position: absolute;color: white;margin-top: 20px;margin-left: 95px;font-size: larger; ">
