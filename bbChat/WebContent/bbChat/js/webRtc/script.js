@@ -144,12 +144,13 @@ function initFileConvert(){
 				imgListLoad(obj);
 				
 				fileOwner = true;
-				$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
+				$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 25, auto");
 				$(".filearea"			).hide();
 				$("[name='shareIcon']"	).hide();
 				$("#div_nonvideoyou"	).hide();
 				$("#div_remoteyou"		).find("img").show();
 				$("#exit"				).show();
+				$(".csstransforms"		).show();
 				
 				websocketConvert.send(JSON.stringify({
 					"eventName" : "fileConvertSend",
@@ -173,6 +174,7 @@ function initFileConvert(){
 		$("#div_nonvideoyou"			).hide();
 		$("#div_remote"+data["SHARE_ID"]).find("img").show();
 		$("#exit"						).hide();
+		$(".csstransforms"				).hide();
 	});
 
 	rtc.on("imgChange",function(){
@@ -329,11 +331,12 @@ function changeFile(o){
 					imgListLoad(jsonObj);
 					
 					fileOwner = true;
-					$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
+					$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 25, auto");
 					$("[name='shareIcon']"	).hide();
 					$("#div_nonvideoyou"	).hide();
 					$("#div_remoteyou"		).find("img").show();
 					$("#exit"				).show();
+					$(".csstransforms"		).show();
 					
 					$(".file_box"	).find("ul").append("<li><a>"+jsonObj["ORG_FILE_NM"]+"</a></li>");
 					$(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , jsonObj);
@@ -342,12 +345,13 @@ function changeFile(o){
 						imgListLoad(obj);
 						
 						fileOwner = true;
-						$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 15, auto");
+						$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 25, auto");
 						$(".filearea"			).hide();
 						$("[name='shareIcon']"	).hide();
 						$("#div_nonvideoyou"	).hide();
 						$("#div_remoteyou"		).find("img").show();
 						$("#exit"				).show();
+						$(".csstransforms"		).show();
 						
 						websocketConvert.send(JSON.stringify({
 							"eventName" : "fileConvertSend",
@@ -396,6 +400,8 @@ function imgLoad(obj){
 
 	$("#canvasDraw").show();
 	$("#canvasDraw"  ).css("left",div_LEFT+"px");
+	$("#cn-button"   ).css("left",(window.innerWidth  / 2 + 100)+"px");
+	$("#cn-wrapper"  ).css("left",(window.innerWidth  / 2 + 100)+"px");
 	$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
 	$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
 }
@@ -491,11 +497,12 @@ function imgListLoad( jsonObj ){
 		$("#exit"	).css( "right" , (chatDivSize + 12) + "px" );
 	}
 	
-	$("#filePage"   ).find("span:eq(0)").html("1");
-	$("#filePage"   ).find("span:eq(1)").html(" / " + jsonObj["SIZE"]);
-	$("#next" 		).show();
-	$("#filePage"   ).show();
-	$("#exit" 	    ).show();
+	$("#filePage"   	).find("span:eq(0)").html("1");
+	$("#filePage"   	).find("span:eq(1)").html(" / " + jsonObj["SIZE"]);
+	$("#next" 			).show();
+	$("#filePage"   	).show();
+	$("#exit" 	    	).show();
+	$(".csstransforms" 	).show();
 
 	/*
 	 * 스크롤 페이지 넘김
@@ -659,6 +666,7 @@ function convertLoding (){
 
 // 배열로 변경 후 주석 해제 각각의 소켓에대한 draw 오브젝트를 가지고잇는다
 var eventObject = {
+		mode  : "0",
 		click : false,
 		x     : 0,
 		y     : 0
@@ -722,9 +730,9 @@ function initDraw() {
 		if(fileOwner){
 			eventObject.click = false;
 			
-			picture.canvas  = document.getElementById("canvasDraw");
-			picture.context = picture.canvas.getContext("2d");		
-			picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
+			//picture.canvas  = document.getElementById("canvasDraw");
+			//picture.context = picture.canvas.getContext("2d");		
+			//picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
 			
 			draw.send(JSON.stringify({
 				"eventName": "mouseup",
@@ -745,7 +753,11 @@ function initDraw() {
 				x = e.offsetX;// - offset.left;
 				y = e.offsetY;// - offset.top;
 				
-				drawing(x, y ,color);
+				if( eventObject.mode == "0" ){
+					drawing(x, y ,color);
+				}else{
+					cleardrawing(x, y);
+				}
 				
 				draw.send(JSON.stringify({
 					"eventName": "drawClick",
@@ -753,6 +765,7 @@ function initDraw() {
 						"room" : room,
 						'x'    : x,
 						'y'    : y,
+						'mode' : eventObject.mode,
 						'color': color,
 						'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
 						'sendY': $("#canvasDraw"   ).attr ("height").replace("px","")
@@ -774,7 +787,13 @@ function initDraw() {
 		x = x * ( oX / sX );
 		y = y * ( oY / sY );
 		
-		drawing2(x, y, data.color);
+		
+		if( data.mode == "0" ){
+			drawing(x, y, "red");
+		}else{
+			cleardrawing(x, y);
+		}
+		
 	});
 	
 	rtc.on('mDown', function() {
@@ -796,9 +815,15 @@ function initDraw() {
 		var data = draw.recv.apply(this, arguments);
 		eventObject.click = data.click;
 		
-		picture.canvas  = document.getElementById("canvasDraw");
-		picture.context = picture.canvas.getContext("2d");		
-		picture.context.clearRect(eventObject.x -3 , eventObject.y -3, 20, 20);
+		//picture.canvas  = document.getElementById("canvasDraw");
+		//picture.context = picture.canvas.getContext("2d");		
+		//picture.context.clearRect(eventObject.x -3 , eventObject.y -3, 20, 20);
+		//picture.context.clearRect(eventObject.x , eventObject.y, 15, 15);
+	});
+	
+	rtc.on('clear', function() {
+		$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
+		$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
 	});
 }
 
@@ -808,6 +833,7 @@ function closePT(){
 	$("#next" 			  ).hide();
 	$("#filePage"   	  ).hide();
 	$("#exit" 	    	  ).hide();
+	$(".csstransforms" 	  ).hide();
 	$("#ifile"            ).val("");
 	$("[name='shareIcon']").hide();
 	
@@ -828,14 +854,14 @@ function drawing(x, y, color){
 	picture.canvas  = document.getElementById("canvasDraw");
 	picture.context = picture.canvas.getContext("2d");
 	picture.context.beginPath();
-	//picture.context.moveTo(eventObject.x , eventObject.y );
-	picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
+	picture.context.moveTo(eventObject.x , eventObject.y );
+	//picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
 	eventObject.x = x;
 	eventObject.y = y;
-	picture.context.fillRect(x , y , 15, 15);
-	//picture.context.lineTo(x, y );
+	//picture.context.fillRect(x , y , 15, 15);
+	picture.context.lineTo(x, y );
 	picture.context.strokeStyle = color;
-	picture.context.lineWidth = 1;
+	picture.context.lineWidth = 2;
 	picture.context.globalAlpha = 0.3;
 	picture.context.stroke();
 }
@@ -843,12 +869,14 @@ function drawing2(x, y, color){
 	picture.canvas  = document.getElementById("canvasDraw");
 	picture.context = picture.canvas.getContext("2d");
 	picture.context.beginPath();
-	picture.context.clearRect(eventObject.x -3, eventObject.y -3, 20, 20);
+	//picture.context.clearRect(eventObject.x -3, eventObject.y -3, 20, 20);
+	picture.context.moveTo(eventObject.x , eventObject.y );
 	eventObject.x = x;
 	eventObject.y = y;
-	picture.context.fillRect(x , y, 15, 15);
+	//picture.context.fillRect(x , y, 15, 15);
+	picture.context.lineTo(x, y );
 	picture.context.strokeStyle = color;
-	picture.context.lineWidth = 10;
+	picture.context.lineWidth = 2;
 	picture.context.globalAlpha = 0.3;
 	picture.context.stroke();
 }
@@ -1133,7 +1161,6 @@ function removeVideo(socketId) {
 function addToChat(msg, img, id, color, user) {
 	var messages = document.getElementById('messages');
 	msg = sanitize(msg);
-	// �޼��� �� ������
 	var msgTag = "";
 	if( !(color == "ENTER" || color == "EXIT") ){
 		
