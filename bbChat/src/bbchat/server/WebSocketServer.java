@@ -180,6 +180,8 @@ public class WebSocketServer {
 				mouseup  (jData , userSession);
 			}else if( "drawClick".equals(eventNm) ){
 				drawClick  (jData , userSession);
+			}else if( "canvasClear".equals(eventNm) ){
+				canvasClear  (jData , userSession);
 			}else if( "get_div_user".equals(eventNm) ){
 				getDivUser  (jData , userSession);
 			}else if( "alive_client".equals(eventNm) ){
@@ -560,6 +562,7 @@ public class WebSocketServer {
 		Long 		strY  		 	= (Long)data.get("y");
 		String 		strSendX  	 	= (String)data.get("sendX");
 		String 		strSendY  	 	= (String)data.get("sendY");
+		String 		strMode  	 	= (String)data.get("mode");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
 		List   		roomUserlist  	= (List)rooms.get(strRoom);
@@ -582,7 +585,32 @@ public class WebSocketServer {
 					sendData.put("y"		, strY		);
 					sendData.put("sendX"	, strSendX	);
 					sendData.put("sendY"	, strSendY	);
+					sendData.put("mode"		, strMode	);
 					sockectSend(soc ,"draw", sendData );
+				}
+				
+			}
+		}
+	}
+	
+	public void canvasClear( JSONObject data, Session socket ){
+		String 		strRoom  	 	= (String)data.get("room");
+		String 		id              = ""; 
+		Map 		getUserInfo     = null;
+		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		Session 	soc				= null; 
+		
+		for (int i = 0; i < roomUserlist.size(); i++) {
+			
+			getUserInfo = (Map)roomUserlist.get(i);
+			id			= (String)getUserInfo.get("SOCKET_ID"); 
+			
+			if (id != socket.getId()) {
+				
+				soc = getSocket(id);
+				
+				if(soc != null){
+					sockectSend(soc ,"clear", null );
 				}
 				
 			}
