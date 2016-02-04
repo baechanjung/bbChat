@@ -29,6 +29,8 @@ public class BizGateway extends HttpServlet  {
 			rd = sc.getRequestDispatcher("/bbChat/view/bb_main.jsp");
 		}else if("room".equals(uriPattern) ){
 			rd = sc.getRequestDispatcher("/bbChat/view/bb_room.jsp");
+		}else if("install".equals(uriPattern) ){
+			rd = sc.getRequestDispatcher("/bbChat/view/bb_install.jsp");
 		}else if("".equals(uriPattern) ){
 			rd = sc.getRequestDispatcher("/bbChat/view/bb_main.jsp");
 		}
