@@ -16,6 +16,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 
 import bbchat.com.bbLogManager;
@@ -71,8 +72,8 @@ public class WebSocketServer {
 		// 활성중인 채팅방중 사용자의 채팅방을 찾는다. 
 		for( Map.Entry<String,Object> key : rooms.entrySet() ){
 			
-			tmpUserList = (List)rooms.get(key.getKey());
-			strUserList = (List)rooms.get(key.getKey());
+			tmpUserList = getUserList(key.getKey());
+			strUserList = getUserList(key.getKey());
 			
 			for( int z = 0 ; z < tmpUserList.size(); z ++ ){
 				tmpUserInfo = (Map)tmpUserList.get(z);
@@ -116,7 +117,7 @@ public class WebSocketServer {
 					}
 
 					if( newUserList.size() > 0){
-						rooms.put(key.getKey(), newUserList);
+						setUserList( key.getKey(), newUserList );
 						bbLogManager.bbLog("DEBUG", userSession.getId() +" 소켓 종료 후["+key.getKey()+"] 사용자 정보 =============================" + newUserList.toString() );
 						
 					}else{
@@ -207,6 +208,7 @@ public class WebSocketServer {
 		List   		 connectionsId	= new ArrayList();
 		List   		 notVideosId	= new ArrayList();
 		List   		 videosId		= new ArrayList();
+		Map   		 roomFile		= getFile(strRoom);
 		Map			 setUserInfo    = new HashMap();
 		Map 		 getUserInfo    = null; 
 		JSONObject 	 sendData  		= null;
@@ -214,13 +216,13 @@ public class WebSocketServer {
 		
 		
 		// 기존 회의실 참여시 없는 방일 경우 처리
-		if( "J".equals(strGb) && rooms.get(strRoom) == null ){
+		if( "J".equals(strGb) && getUserList(strRoom) == null ){
 			sockectSend(socket ,"empty_room", sendData );
 			return;
 		}
 		
-		if( rooms.get(strRoom) != null ){
-			roomUserlist = (List)rooms.get(strRoom);
+		if( getUserList(strRoom) != null ){
+			roomUserlist = getUserList(strRoom);
 		}
 		
 		setUserInfo.put("SOCKET_ID"		, socket.getId()	);	// 소켓ID
@@ -230,7 +232,7 @@ public class WebSocketServer {
 		
 		roomUserlist.add(setUserInfo);
 		
-		rooms.put(strRoom, roomUserlist);
+		setUserList(strRoom , roomUserlist);
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
@@ -275,6 +277,31 @@ public class WebSocketServer {
 		sendData.put("stream"		, 	objStream		);
 		
 		sockectSend(socket ,"get_peers", sendData );
+		
+		if( roomFile != null ){
+			List 		fileList = (List)roomFile.get("FILE_LIST");
+			Map  		fileMap  = new HashMap();
+			JSONObject 	fileJson = new JSONObject();
+			JSONArray  	fileArr  = new JSONArray();
+			for(int i = 0 ; i < fileList.size(); i++ ){
+				fileMap  = (Map)fileList.get(i);
+				fileJson = new JSONObject();
+				
+				fileJson.put("FILE_NM"		, fileMap.get("FILE_NM")	);
+				fileJson.put("SIZE"			, fileMap.get("SIZE")		);
+				fileJson.put("ORG_FILE_NM"	, fileMap.get("ORG_FILE_NM"));
+				
+				fileArr.add(fileJson);
+			}
+			sendData = new JSONObject();
+			
+			sendData.put("FILE_LIST"		, 	fileArr								);
+			sendData.put("FILE_SHOW"		, 	roomFile.get("FILE_SHOW")			);
+			sendData.put("FILE_SHARE_ID"	, 	roomFile.get("FILE_SHARE_ID")		);
+			sendData.put("FILE_IDX"			, 	roomFile.get("FILE_IDX")			);
+			
+			sockectSend(socket ,"room_file_append", sendData );
+		}
 	}
 	
 	// 소켓연결유지
@@ -291,7 +318,7 @@ public class WebSocketServer {
 		String 		img             = (String)data.get("img"); 
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
 		Session 	soc				= null;
 		
@@ -325,18 +352,19 @@ public class WebSocketServer {
 		String 		strMode  	 	= (String)data.get("MODE");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
-		Session 	soc				= null; 
+		Session 	soc				= null;
+		
+		
+		System.out.println("roomUserlist =================== " + roomUserlist.size());
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
 			getUserInfo = (Map)roomUserlist.get(i);
-			id			= (String)getUserInfo.get("SOCKET_ID"); 
-
-			if (id != socket.getId()) {
-				
-				soc = getSocket(id);
+			id			= (String)getUserInfo.get("SOCKET_ID");
+			
+			if( i == 0 ){
 				
 				sendData = new JSONObject();
 				sendData.put("FILE_NM"		, strFileNm			);
@@ -344,6 +372,18 @@ public class WebSocketServer {
 				sendData.put("ORG_FILE_NM"	, strOrgFileNm		);
 				sendData.put("MODE"			, strMode			);
 				sendData.put("SHARE_ID"		, socket.getId()	);
+				
+				setFileShare(strRoom , socket.getId());
+				
+				if( "U".equals(strMode) ){
+					setFile(strRoom , sendData);
+				}
+			}
+
+			if (id != socket.getId()) {
+				
+				soc = getSocket(id);
+
 				sockectSend(soc ,"imgList", sendData );
 			}
 		}
@@ -357,9 +397,11 @@ public class WebSocketServer {
 		String 		strIdx	  	 	= (String)data.get("IDX");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
 		Session 	soc				= null; 
+		
+		setFileIdx	( strRoom , strIdx );
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
@@ -383,7 +425,7 @@ public class WebSocketServer {
 	public void showLoding( JSONObject data, Session socket ){
 		String 		strRoom  	 	= (String)data.get("ROOM");
 		String 		strUser  	 	= (String)data.get("USER");
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
 		JSONObject 	sendData  		= null;
@@ -410,7 +452,7 @@ public class WebSocketServer {
 		String 		strRoom  	 	= (String)data.get("ROOM");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
@@ -428,7 +470,7 @@ public class WebSocketServer {
 		String 		strPer  	 	= (String)data.get("PER");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		Session 	soc				= null; 
 		JSONObject 	sendData  		= null;
 
@@ -453,7 +495,7 @@ public class WebSocketServer {
 		String 		strRoom  	 	= (String)data.get("ROOM");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
@@ -472,8 +514,12 @@ public class WebSocketServer {
 		String 		strRoom  	 	= (String)data.get("ROOM");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		Session 	soc				= null; 
+		
+		
+		setFileIdx	( strRoom , "0");
+		setFileShow	( strRoom , "N");
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
 			
@@ -490,6 +536,9 @@ public class WebSocketServer {
 				
 			}
 		}
+		
+
+		
 	}
 	
 	public void mousedown( JSONObject data, Session socket ){
@@ -501,7 +550,7 @@ public class WebSocketServer {
 		String 		id               = ""; 
 		Map 		getUserInfo      = null;
 		boolean 	strClick  	 	 = (boolean)data.get("click");
-		List   		roomUserlist     = (List)rooms.get(strRoom);
+		List   		roomUserlist     = getUserList(strRoom);
 		JSONObject 	sendData  		 = null;
 		Session 	soc				 = null; 
 		
@@ -533,7 +582,7 @@ public class WebSocketServer {
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
 		boolean 	strClick  	 	= (boolean)data.get("click");
-		List  	 	roomUserlist  	= (List)rooms.get(strRoom);
+		List  	 	roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
 		Session 	soc				= null; 
 		
@@ -566,7 +615,7 @@ public class WebSocketServer {
 		String 		strIdx  	 	= (String)data.get("IDX");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
 		Session 	soc				= null; 
 		
@@ -599,7 +648,7 @@ public class WebSocketServer {
 		String 		strRoom  	 	= (String)data.get("room");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		Session 	soc				= null; 
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
@@ -625,7 +674,7 @@ public class WebSocketServer {
 		String 		strRoom  		= (String)data.get("room");
 		String 		id              = "";
 		Map 		getUserInfo     = null;
-		List   		roomUserlist  	= (List)rooms.get(strRoom);
+		List   		roomUserlist  	= getUserList(strRoom);
 		JSONObject 	sendData  		= new JSONObject();
 		
 		for (int i = 0; i < roomUserlist.size(); i++) {
@@ -685,6 +734,172 @@ public class WebSocketServer {
 		}
 	}
 	
+	public static List getUserList(String room){
+		List 	roomUser 	= 	new ArrayList();
+		Map     roomInfo    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("USER_LIST") != null ){
+				roomUser = (List)roomInfo.get("USER_LIST");
+			}else{
+				roomUser =  null;
+			}
+			
+		}else{
+			roomUser =  null;
+		}
+		
+		return roomUser;
+	}
+	
+	public void setUserList(String room , List userList){
+		List 	roomUser 	= 	new ArrayList();
+		Map     roomInfo    =   null;
+		
+		if( rooms.get(room) != null ){
+			roomInfo = (Map)rooms.get(room);
+			roomInfo.put("USER_LIST",userList);
+			rooms.put(room, roomInfo);
+		}else{
+			roomInfo = new HashMap();
+			roomInfo.put("USER_LIST",userList);
+			rooms.put(room, roomInfo);
+		}
+		
+	}
+	
+	public Map getFile(String room){
+		Map     roomInfo    =   null;
+		Map     roomFile    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("FILE") != null ){
+				roomFile = (Map)roomInfo.get("FILE");
+			}else{
+				roomFile =  null;
+			}
+			
+		}else{
+			roomFile =  null;
+		}
+		
+		return roomFile;
+	}
+	
+	public void setFile(String room , JSONObject data){
+		Map     roomInfo    =   null;
+		Map     roomFile    =   null;
+		List    fileList    =   null;
+		Map     fileInfo    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("FILE") != null ){
+				roomFile = (Map)roomInfo.get("FILE");
+				fileList = (List)roomFile.get("FILE_LIST");
+				fileInfo = new HashMap();
+				
+				fileInfo.put("FILE_NM"		, data.get("FILE_NM")	);
+				fileInfo.put("SIZE"			, data.get("SIZE")		);
+				fileInfo.put("ORG_FILE_NM"	, data.get("ORG_FILE_NM"));
+				
+				fileList.add(fileInfo);
+			}else{
+				roomFile =  new HashMap();
+				fileList =  new ArrayList();
+				fileInfo = new HashMap();
+				
+				fileInfo.put("FILE_NM"		, data.get("FILE_NM")	);
+				fileInfo.put("SIZE"			, data.get("SIZE")		);
+				fileInfo.put("ORG_FILE_NM"	, data.get("ORG_FILE_NM"));
+				
+				fileList.add(fileInfo);
+			}
+			
+			roomFile.put("FILE_LIST"		, fileList				);
+			roomFile.put("FILE_IDX"			, "0"					);
+			roomFile.put("FILE_SHOW"		, "Y"					);
+			roomFile.put("FILE_SHARE_ID"	, data.get("SHARE_ID")	);
+			
+			roomInfo.put("FILE", roomFile);
+			
+			rooms.put(room, roomInfo);
+			
+			System.out.println( rooms.toString() );
+		}
+		
+	}
+	
+	public void setFileIdx( String room , String idx ){
+		
+		Map     roomInfo    =   null;
+		Map     roomFile    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("FILE") != null ){
+				roomFile = (Map)roomInfo.get("FILE");
+				roomFile.put("FILE_IDX" , idx 		);
+				roomInfo.put("FILE"		, roomFile	);
+				rooms.put(room,roomInfo);
+			}
+			
+		}
+
+	}
+	
+	public void setFileShow(  String room , String showYn ){
+		
+		Map     roomInfo    =   null;
+		Map     roomFile    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("FILE") != null ){
+				roomFile = (Map)roomInfo.get("FILE");
+				roomFile.put("FILE_SHOW" , showYn 	);
+				roomInfo.put("FILE"		 , roomFile	);
+				rooms.put(room,roomInfo);
+			}
+			
+		}
+
+	}
+	
+	public void setFileShare(  String room , String shareId ){
+		
+		Map     roomInfo    =   null;
+		Map     roomFile    =   null;
+		
+		if( rooms.get(room) != null ){
+			
+			roomInfo = (Map)rooms.get(room);
+			
+			if( roomInfo.get("FILE") != null ){
+				roomFile = (Map)roomInfo.get("FILE");
+				roomFile.put("FILE_SHARE_ID" , shareId 	);
+				roomInfo.put("FILE"		 	 , roomFile	);
+				rooms.put(room,roomInfo);
+			}
+			
+		}
+
+	}
+	
+	
+	
 	
 	public static Session getSocket(String id){
 		Session 		  soc 		= 	null;
@@ -719,7 +934,7 @@ public class WebSocketServer {
 	public static void fileConverPercent(String strRoom, String totPage, String curPage){
 		String 		id              = "";
 		Map 		getUserInfo     = null;
-		List   		roomUserlist 	= (List)rooms.get(strRoom);
+		List   		roomUserlist 	= getUserList(strRoom);
 		JSONObject 	sendData  		= null;
 		Session		soc				= null;
 		
