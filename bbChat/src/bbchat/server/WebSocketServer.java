@@ -563,6 +563,7 @@ public class WebSocketServer {
 		String 		strSendX  	 	= (String)data.get("sendX");
 		String 		strSendY  	 	= (String)data.get("sendY");
 		String 		strMode  	 	= (String)data.get("mode");
+		String 		strIdx  	 	= (String)data.get("IDX");
 		String 		id              = ""; 
 		Map 		getUserInfo     = null;
 		List   		roomUserlist  	= (List)rooms.get(strRoom);
@@ -586,6 +587,7 @@ public class WebSocketServer {
 					sendData.put("sendX"	, strSendX	);
 					sendData.put("sendY"	, strSendY	);
 					sendData.put("mode"		, strMode	);
+					sendData.put("IDX"		, strIdx	);
 					sockectSend(soc ,"draw", sendData );
 				}
 				
