@@ -179,6 +179,7 @@ public class fileconvert extends HttpServlet  {
 		            	}
 		                content += contTemp+ "\n";
 		            }
+		            content = content.replaceAll("<div class=\"slideTitle\">(.*?)</div>", "");
 		            
 					//50%
 					WebSocketServer.fileConverPercent(roomNum, "100" ,"50");
