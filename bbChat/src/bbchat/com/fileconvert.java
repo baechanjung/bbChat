@@ -198,7 +198,6 @@ public class fileconvert extends HttpServlet  {
 				    	bw.write(groupStr);                          
 				    	bw.flush();
 				    	bw.close();
-				    	
 
 			            //50%~100%
 				    	WebSocketServer.fileConverPercent(roomNum, "100" ,Integer.toString((int)Math.floor(( (double)fileIdx /slideCnt)*50)+50));    
