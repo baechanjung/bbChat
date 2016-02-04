@@ -885,7 +885,7 @@ function cleardrawing(x, y){
 	picture.canvas  = document.getElementById("canvasDraw");
 	picture.context = picture.canvas.getContext("2d");
 //	picture.context.beginPath();
-	picture.context.clearRect(eventObject.x , eventObject.y , 15, 15);
+	picture.context.clearRect(eventObject.x , eventObject.y , 30, 30);
 	eventObject.x = x;
 	eventObject.y = y;
 //	picture.context.stroke();
