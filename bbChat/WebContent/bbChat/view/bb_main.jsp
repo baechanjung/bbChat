@@ -33,6 +33,9 @@ if(session != null){
 	/*========================BASE========================*/
 	html, body {
 		height: 100%;
+		margin: 0px;
+		padding: 0px;
+		overflow: hidden;
 	}
 
 	body {
@@ -57,6 +60,7 @@ if(session != null){
 
 
 	.wrap.index {
+		/*
 		background-color: #4e5c66;
 		background-image: url(/bbChat/img/bg/bg_banner.png);
 		background-repeat: no-repeat;
@@ -66,6 +70,7 @@ if(session != null){
 		-moz-background-size: cover;
 		-o-background-size: cover;
 		-ms-background-size: cover;
+		*/
 	}
 
 
@@ -76,11 +81,24 @@ if(session != null){
 	}
 
 	.content_wrap .content_inner {
-		width: 1020px;
+		width: 100%;
 		margin: 0 auto;
 		padding: 40px 0 92px;
 		text-align: center;
+		position:absolute;
+		top:0px;
+		overflow: hidden;
 	}
+	
+	#canvas{
+         width:100%;
+         
+         overflow: hidden;
+         position:absolute;
+         top:0;
+         left:0;
+         background-color: #1a1724;               
+	}	
 	/*========================BASE========================*/
 
 
@@ -157,88 +175,91 @@ if(session != null){
 
 
 <script type="text/javascript">
+var a = [];
+var r = '<%=strRoom%>';
+var supportBrowserCheck = true;
+
+/*html5video Check*/
+var b = function() {
+    a.push({
+        id: "html5video",
+        name: "HTML 5 Video element",
+        description: "Video element support",
+        isSupported: !!document.createElement("video").canPlayType
+    })
+};
+
+/*vp8codec Check*/
+var c = function() {
+    a.push({
+        id: "vp8codec",
+        name: "VP8 Codec",
+        description: "Video en-/decoding",
+        isSupported: "probably" === document.createElement("video").canPlayType('video/webm; codecs="vp8", vorbis')
+    })
+};
+
+/*getusermedia Check*/
+var d = function() {
+    var b;
+    b = navigator.mozGetUserMedia || navigator.webkitGetUserMedia || navigator.oGetUserMedia || navigator.msGetUserMedia || navigator.getUserMedia ? !0 : !1, a.push({
+        id: "getusermedia",
+        name: "getUserMedia()",
+        description: "Web camera access",
+        isSupported: b
+    })
+};
+
+/*RTCPeerConnection Check*/
+var e = function() {
+    var b;
+    b = window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.oRTCPeerConnection || window.msRTCPeerConnection || window.RTCPeerConnection ? !0 : !1, a.push({
+        id: "rtcpeerconnection",
+        name: "RTCPeerConnection",
+        description: "Peer to Peer connection",
+        isSupported: b
+    })
+};
+
+/*ICE Connection Check*/
+var f = function() {
+    var b, c = {
+        iceServers: [{
+            url: "stun:stun.l.google.com:19302"
+        }]
+    };
+    try {
+        window.webkitRTCPeerConnection && (b = new webkitRTCPeerConnection(c)), window.mozRTCPeerConnection && (b = new mozRTCPeerConnection(c)), window.oRTCPeerConnection && (b = new oRTCPeerConnection(c)), window.msRTCPeerConnection && (b = new msRTCPeerConnection(c)), window.RTCPeerConnection && (b = new RTCPeerConnection(c))
+    } catch (d) {}
+    var e = {
+        id: "iceconnection",
+        name: "ICE Connection",
+        description: "NAT traversal"
+    };
+    b && b.iceConnectionState ? e.isSupported = !0 : b && b.iceState ? (e.isSupported = !1, e.message = "Old, unsupported API detected.") : e.isSupported = !1, a.push(e)
+};
+
+b(),c(),d(),e()/*,f()*/;
+
+$.each(a , function(i,v){
+	if(!v.isSupported){
+		supportBrowserCheck = false;
+		return false;
+	}
+});
+
+if(!supportBrowserCheck){
+	location.href="/bizmeet/install";
+}
+
+
+
 $(function(){
-	var a = [];
-	var r = '<%=strRoom%>';
-	/*html5video Check*/
-	var b = function() {
-        a.push({
-            id: "html5video",
-            name: "HTML 5 Video element",
-            description: "Video element support",
-            isSupported: !!document.createElement("video").canPlayType
-        })
-    };
-    
-    /*vp8codec Check*/
-    var c = function() {
-        a.push({
-            id: "vp8codec",
-            name: "VP8 Codec",
-            description: "Video en-/decoding",
-            isSupported: "probably" === document.createElement("video").canPlayType('video/webm; codecs="vp8", vorbis')
-        })
-    };
-    
-    /*getusermedia Check*/
-    var d = function() {
-        var b;
-        b = navigator.mozGetUserMedia || navigator.webkitGetUserMedia || navigator.oGetUserMedia || navigator.msGetUserMedia || navigator.getUserMedia ? !0 : !1, a.push({
-            id: "getusermedia",
-            name: "getUserMedia()",
-            description: "Web camera access",
-            isSupported: b
-        })
-    };
-    
-    /*RTCPeerConnection Check*/
-    var e = function() {
-        var b;
-        b = window.mozRTCPeerConnection || window.webkitRTCPeerConnection || window.oRTCPeerConnection || window.msRTCPeerConnection || window.RTCPeerConnection ? !0 : !1, a.push({
-            id: "rtcpeerconnection",
-            name: "RTCPeerConnection",
-            description: "Peer to Peer connection",
-            isSupported: b
-        })
-    };
-    
-    /*ICE Connection Check*/
-    var f = function() {
-        var b, c = {
-            iceServers: [{
-                url: "stun:stun.l.google.com:19302"
-            }]
-        };
-        try {
-            window.webkitRTCPeerConnection && (b = new webkitRTCPeerConnection(c)), window.mozRTCPeerConnection && (b = new mozRTCPeerConnection(c)), window.oRTCPeerConnection && (b = new oRTCPeerConnection(c)), window.msRTCPeerConnection && (b = new msRTCPeerConnection(c)), window.RTCPeerConnection && (b = new RTCPeerConnection(c))
-        } catch (d) {}
-        var e = {
-            id: "iceconnection",
-            name: "ICE Connection",
-            description: "NAT traversal"
-        };
-        b && b.iceConnectionState ? e.isSupported = !0 : b && b.iceState ? (e.isSupported = !1, e.message = "Old, unsupported API detected.") : e.isSupported = !1, a.push(e)
-    };
-    
-    b(),c(),d(),e()/*,f()*/;
-    
-    var supportBrowserCheck = true;
-	$.each(a , function(i,v){
-		if(!v.isSupported){
-			supportBrowserCheck = false;
-			return false;
-		}
-	});
-	
-	if(supportBrowserCheck){
-		if(r != ""){
-			$('#roomNum').val(r); 
-			fnNext(null , "step4");
-		}else{
-			$("#step1").show();	
-		}
+	if(r != ""){
+		$('#roomNum').val(r); 
+		fnNext(null , "step4");
 	}else{
-		$("#notSupportBrowser").show();
+		$("#step1").show();	
 	}
 });
 
@@ -293,6 +314,10 @@ function rand(){
 		text += possible.charAt(Math.floor(Math.random()* possible.length));
 	return text;
 }
+
+window.onresize = function(event) {
+	$("#canvas").css ("height" , window.innerHeight );
+}
 </script>
 </head>
 <body>
@@ -308,6 +333,11 @@ function rand(){
 		<!-- content -->
 		<div class="content_wrap">
 	
+	
+	        <section class="canvas-wrap">
+	            <div id="canvas" class="gradient"></div>
+	        </section>
+	                
 			<!-- content_inner -->
 			<div class="content_inner">
 
@@ -371,4 +401,19 @@ function rand(){
 </body>
 
 
+<!-- Main library -->
+<script src="/bbChat/js/three.min.js"></script>
+
+<!-- Helpers -->
+<script src="/bbChat/js/projector.js"></script>
+<script src="/bbChat/js/canvas-renderer.js"></script>
+
+<!-- Visualitzation adjustments -->
+<script src="/bbChat/js/3d-lines-animation.js"></script>
+
+<!-- Animated background color -->
+<script src="/bbChat/js/color.js"></script>	
+<script>
+$("#canvas").css ("height" , window.innerHeight );
+</script>
 </html>
