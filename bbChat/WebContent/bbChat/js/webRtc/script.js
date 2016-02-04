@@ -678,31 +678,11 @@ var picture = {
 
 
 function initDraw() {
-	var draw = websocketDraw;
-	//$("#canvasDraw").css("cursor","url(/pen_cursor.png), auto");
-	
-	var room = roomNm;
-	
-//	var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
+	var draw  = websocketDraw;
+	var room  = roomNm;
 	var color = "red";
+//	var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
 
-	
-	/*
-	$("#canvasDraw").bind('contextmenu', function(e) {
-		if( eventObject.mode == "0" ){
-			alert('지우개 모드!!');
-			$("#canvasDraw").css("cursor","url(/Cursor_Eraser.png), auto");
-			eventObject.mode = "1";
-			return false;
-		}else{
-			alert('지우개 해제!!');
-			$("#canvasDraw").css("cursor","url(/bbChat/img/icon/icon_pen.png), auto");
-			eventObject.mode = "0";
-			return false;
-		}
-	});
-	*/
-	
 	$("#canvasDraw").bind('mousedown', function(e) {
 		if(fileOwner){
 			eventObject.click = true;
@@ -767,6 +747,7 @@ function initDraw() {
 						'y'    : y,
 						'mode' : eventObject.mode,
 						'color': color,
+						"IDX"  : String(imgIndex),
 						'sendX': $("#canvasDraw"   ).attr ("width" ).replace("px",""),
 						'sendY': $("#canvasDraw"   ).attr ("height").replace("px","")
 					}
@@ -784,9 +765,22 @@ function initDraw() {
 		var sY    = data.sendY;
 		var oX    = $("#canvasDraw"   ).attr ("width" ).replace("px","");
 		var oY    = $("#canvasDraw"   ).attr ("height").replace("px","");
+		var id,target;
+		
 		x = x * ( oX / sX );
 		y = y * ( oY / sY );
 		
+		// 발표사용자와 다른페이지에 있으면 페이지 변경
+		if( data.IDX != String(imgIndex) ){
+			imgIndex = Number(data.IDX);
+			id 		 = imgIndex + 1;
+			target   = document.getElementById("smove"+id).offsetTop;
+			$('.small-list'	).animate({scrollTop:target}, 0);
+			$("#filePage"   ).find("span:eq(0)").html(imgIndex + 1);
+			$("#canvasImg"	).attr("src"   , imgPath[imgIndex]				 );
+			$("#canvasDraw"	).attr("width" , $("#canvasDraw").attr("width")	 );
+			$( ".big-list" 	).scrollTop( 0 );
+		}
 		
 		if( data.mode == "0" ){
 			drawing(x, y, "red");
