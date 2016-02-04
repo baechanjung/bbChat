@@ -35,7 +35,7 @@
 		
 		if( roomList.get(request.getParameter("roomNm")) != null ){
 			roomExist   = true;
-			roomUserCnt = ((List)roomList.get(request.getParameter("roomNm"))).size();
+			roomUserCnt = ( (List)((Map)roomList.get(request.getParameter("roomNm"))).get("USER_LIST") ).size();
 		}
 	}
 	
