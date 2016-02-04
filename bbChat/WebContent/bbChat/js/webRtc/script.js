@@ -5,7 +5,17 @@ var userNm,roomNm,fileOwner=false,mainView="remoteyou",supportYn="Y";
 var imgSize  = 0;
 var imgIndex = 0;
 var imgPath  = [];
+var fileShareId = ""; // 파일공유 중간에 참여시 한번 사용
 
+var websocketBb = {
+		send: function(message) {
+			rtc._socket.send(message);
+		},
+		recv: function(message) {
+			return message;
+		}
+};
+/*
 var websocketUser = {
 	send: function(message) {
 		rtc._socket.send(message);
@@ -34,6 +44,16 @@ var websocketDraw = {
 	}
 };
 
+var websocketConvert = {
+		send: function(message) {
+			rtc._socket.send(message);
+		},
+		recv: function(message) {
+			return message;
+		}
+};
+*/
+
 var dataChannelChat = {
 	send: function(message) {
 		for(var connection in rtc.dataChannels) {
@@ -47,24 +67,21 @@ var dataChannelChat = {
 	event: 'data stream data'
 };
 
-var websocketConvert = {
-		send: function(message) {
-			rtc._socket.send(message);
-		},
-		recv: function(message) {
-			return message;
-		}
-	};
+
 
 
 function initSocketUser() {
 	
-	var user = websocketUser;
+	var user = websocketBb;
 
 	rtc.on("div_user", function() {
 		var data = user.recv.apply(this, arguments);
 		$("#div_remote" + data.id).html("<div style='padding-left:5px;color:white;'>"+data.user+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'>");
 		//alert(data.user);
+		if ( fileShareId != "" && fileShareId == data.id){
+			$("#div_remote"+fileShareId	).find("img").show();
+			fileShareId = "";
+		}
 	});
 }
 
@@ -76,7 +93,7 @@ function initChat() {
 		chat = dataChannelChat;
 	} else {
 		console.log('initializing websocket chat');
-		chat = websocketChat;
+		chat = websocketBb;
 	}
 
 	var input = document.getElementById("chatinput");
@@ -131,7 +148,7 @@ function initChat() {
 
 function initFileConvert(){
 	
-	var convert = websocketConvert;
+	var convert = websocketBb;
 
 	rtc.on("imgList",function(){
 		var data 	 = convert.recv.apply(this, arguments);
@@ -152,7 +169,7 @@ function initFileConvert(){
 				$("#exit"				).show();
 				$(".csstransforms"		).show();
 				
-				websocketConvert.send(JSON.stringify({
+				websocketBb.send(JSON.stringify({
 					"eventName" : "fileConvertSend",
 					"data" : {
 						"ROOM"       	: roomNm
@@ -269,7 +286,7 @@ function changeFile(o){
 	
 	showLoding(userNm);
 
-	websocketConvert.send(JSON.stringify({
+	websocketBb.send(JSON.stringify({
 		"eventName" : "show_Loding",
 		"data" : {
 			 "ROOM"       : roomNm
@@ -288,7 +305,7 @@ function changeFile(o){
 			var percentage = Math.round((e.loaded / e.total) * 100);
 			
 			
-			websocketConvert.send(JSON.stringify({
+			websocketBb.send(JSON.stringify({
 				"eventName" : "up_percentage",
 				"data" : {
 					 "ROOM"       : roomNm
@@ -301,7 +318,7 @@ function changeFile(o){
             if(percentage == 100){
             	convertLoding();
         		
-        		websocketConvert.send(JSON.stringify({
+            	websocketBb.send(JSON.stringify({
         			"eventName" : "convert_Loding",
         			"data" : {
         				"ROOM"       : roomNm
@@ -353,7 +370,7 @@ function changeFile(o){
 						$("#exit"				).show();
 						$(".csstransforms"		).show();
 						
-						websocketConvert.send(JSON.stringify({
+						websocketBb.send(JSON.stringify({
 							"eventName" : "fileConvertSend",
 							"data" : {
 								"ROOM"       	: roomNm
@@ -367,7 +384,7 @@ function changeFile(o){
 					
 					$("#canvasDraw"	).show();
 					
-					websocketConvert.send(JSON.stringify({
+					websocketBb.send(JSON.stringify({
 						"eventName" : "fileConvertSend",
 						"data" : {
 							"ROOM"       	: roomNm
@@ -381,7 +398,7 @@ function changeFile(o){
 			}else{
 				alert("파일 변환중 문제가 발생하였습니다.\n잠시 후 다시 시도해 주십시오.");
 				
-				websocketConvert.send(JSON.stringify({
+				websocketBb.send(JSON.stringify({
 			   		"eventName" : "hideLoding",
 			   		"data" : {
 			   				"ROOM"       : roomNm
@@ -468,7 +485,7 @@ function imgListLoad( jsonObj ){
 		   	$( ".big-list" 	).scrollTop( 0 );
 		   	
 		   	if(fileOwner){
-			   	websocketConvert.send(JSON.stringify({
+		   		websocketBb.send(JSON.stringify({
 			   		"eventName" : "imgListClick",
 			   		"data" : {
 			   				"ROOM"       : roomNm
@@ -535,7 +552,7 @@ function imgListLoad( jsonObj ){
 			$("#canvasImg"	).attr("src"   , imgPath[imgIndex]	  );
 			$( ".big-list" 	).scrollTop( 0 );
 			if(fileOwner){
-				websocketConvert.send(JSON.stringify({
+				websocketBb.send(JSON.stringify({
 					"eventName" : "imgListClick",
 					"data" : {
 							"ROOM"       : roomNm
@@ -576,7 +593,7 @@ function preBtn() {
 	
     
 	if(fileOwner){
-		websocketConvert.send(JSON.stringify({
+		websocketBb.send(JSON.stringify({
 	   		"eventName" : "imgListClick",
 	   		"data" : {
 	   				"ROOM"       : roomNm
@@ -606,7 +623,7 @@ function nextBtn() {
 	$( ".big-list" 	).scrollTop( 0 );
    	
 	if(fileOwner){
-		websocketConvert.send(JSON.stringify({
+		websocketBb.send(JSON.stringify({
 	   		"eventName" : "imgListClick",
 	   		"data" : {
 	   				"ROOM"       : roomNm
@@ -644,7 +661,7 @@ function convertPercentage(totPage,curPage ){
 	
 	if( curPage == totPage){
 		
-		websocketConvert.send(JSON.stringify({
+		websocketBb.send(JSON.stringify({
 	   		"eventName" : "hideLoding",
 	   		"data" : {
 	   				"ROOM"       : roomNm
@@ -678,7 +695,7 @@ var picture = {
 
 
 function initDraw() {
-	var draw  = websocketDraw;
+	var draw  = websocketBb;
 	var room  = roomNm;
 	var color = "red";
 //	var color = "#" + ((1 << 24) * Math.random() | 0).toString(16);
@@ -962,7 +979,7 @@ function init() {
 				rtc.attachStream(stream, clone.id);  
 				subdivideVideos();
 				
-				websocketUser.send(JSON.stringify({
+				websocketBb.send(JSON.stringify({
 					"eventName": "get_div_user",
 					"data": {
 						"id"    : socketId,
@@ -1091,6 +1108,7 @@ function subdivideVideos() {
 			}
 			
 			nonVideoSortFn(right,cnt,chatChk);
+			
 		}
 	}else{
 		

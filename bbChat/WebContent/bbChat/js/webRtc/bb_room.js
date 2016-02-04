@@ -130,7 +130,7 @@ $(function($){
 	$("#exit").live("click",function(){
 		closePT();
 		
-		websocketConvert.send(JSON.stringify({
+		websocketBb.send(JSON.stringify({
 			"eventName" : "closePT",
 			"data" : {
 				"ROOM"       : roomNm
@@ -168,7 +168,7 @@ $(function($){
 			$("#canvasDraw"  ).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 25, auto");
 			$("#canvasDraw"  ).attr("width" 	,	$("#canvasImg").width() );
 			$("#canvasDraw"  ).attr("height"	,	$("#canvasImg").height());
-			websocketDraw.send(JSON.stringify({
+			websocketBb.send(JSON.stringify({
 				"eventName" : "canvasClear",
 				"data" : {
 					"room"       : roomNm

@@ -128,6 +128,86 @@ if(window.mozRTCPeerConnection){
 				alert("현재 존재하지 않는 회의실 입니다.");
 				location.href="/bizmeet/main";
 			});
+			
+			rtc.on('room_file_append', function(data) {
+				
+				var file;
+				for (var i = 0; i < data.FILE_LIST.length; i++) {
+				    file = data.FILE_LIST[i];
+				    
+			    	if( i == 0 && data.FILE_SHOW == "Y" ){
+						
+						imgListLoad(file);
+						//alert(data.FILE_SHARE_ID);
+						fileOwner = false;
+						$("#canvasDraw"						).css("cursor","");
+						$("[name='shareIcon']"				).hide();
+						$("#div_remoteyou"					).find("img").hide();
+						$("#div_nonvideoyou"				).hide();
+						$("#exit"							).hide();
+						$(".csstransforms"					).hide();
+						
+						fileShareId = data.FILE_SHARE_ID;
+						
+						if( data.FILE_IDX > 0 ){
+							
+							$("#canvasImg" ).attr("src"  ,imgPath[data.FILE_IDX]);
+							
+							imgIndex = Number(data.FILE_IDX);
+							
+							if( imgIndex == imgSize-1){
+								$("#next").hide();
+							}else{
+								$("#next").show();
+							}
+							
+							if( imgIndex == 0 ){
+								$("#pre").hide();
+							}else{
+								$("#pre").show();
+							}
+							
+							var id 		= imgIndex + 1;
+							var target  = document.getElementById("smove"+id).offsetTop;
+							$('.small-list'	).animate({scrollTop:target}, 0);
+							$("#filePage"   ).find("span:eq(0)").html(imgIndex + 1);
+							$( ".big-list" 	).scrollTop( 0 );
+							
+						}
+						
+					}
+				    
+				    $(".file_box"	).find("ul").append("<li><a>"+file.ORG_FILE_NM+"</a></li>");
+				    $(".file_box"	).find("ul").find("li:last").data("FILE_LIST" , file);
+					$(".file_box"	).find("ul").find("li:last").bind("click" ,function(){
+						var obj = $(this).data("FILE_LIST");
+						imgListLoad(obj);
+						
+						fileOwner = true;
+						$("#canvasDraw"			).css("cursor","url(/bbChat/img/icon/icon_pen.png) 0 25, auto");
+						$(".filearea"			).hide();
+						$("[name='shareIcon']"	).hide();
+						$("#div_nonvideoyou"	).hide();
+						$("#div_remoteyou"		).find("img").show();
+						$("#exit"				).show();
+						$(".csstransforms"		).show();
+						
+						websocketBb.send(JSON.stringify({
+							"eventName" : "fileConvertSend",
+							"data" : {
+								"ROOM"       	: roomNm
+							  ,	"SIZE"       	: obj["SIZE"]
+							  ,	"FILE_NM"    	: obj["FILE_NM"]
+							  ,	"ORG_FILE_NM"   : obj["ORG_FILE_NM"]
+							  ,	"MODE"   		: "C" // C : 변경 ,  U : 업로드
+							}
+						}));
+					});
+				}
+				
+				
+				
+			});
 
 			rtc.on('get_peers', function(data) {
 				
@@ -204,6 +284,11 @@ if(window.mozRTCPeerConnection){
 					nonVideos.push("<div id='div_remote"+socId+"' class='non-video'><div style='padding-left:5px;color:white;'>"+userNm+"</div><img src='/bbChat/img/icon/icon_share.png' style='margin-top:-35px;margin-left:120px;display:none;' name='shareIcon'></div>");
 					console.log("nonVideos.length == " + nonVideos.length);
 					subdivideVideos();
+					
+					if ( fileShareId != "" ){
+						$("#div_remote"+fileShareId	).find("img").show();
+						fileShareId = "";
+					}
 				}
 				
 			});
